@@ -6,6 +6,8 @@ import Footer from "@/components/Footer";
 import { Terminal, Shield, RefreshCw } from "lucide-react";
 import confetti from "canvas-confetti";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+
 function SandboxContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -31,35 +33,35 @@ function SandboxContent() {
   const [otpSent, setOtpSent] = useState<boolean>(false);
   const [otpCode, setOtpCode] = useState<string>("");
   const [otpDemoCode, setOtpDemoCode] = useState<string>("");
-  const [otpStatus, setOtpStatus] = useState<string>("Awaiting input");
+  const [otpStatus, setOtpStatus] = useState<string>("");
   const [otpSuccess, setOtpSuccess] = useState<boolean | null>(null);
 
   // Module 2: Trust Graph State
-  const [trustPhone, setTrustPhone] = useState<string>("9876543210");
-  const [trustAddress, setTrustAddress] = useState<string>("Koramangala, Bengaluru");
-  const [trustScore, setTrustScore] = useState<number>(0);
+  const [trustPhone, setTrustPhone] = useState<string>("9998887776");
+  const [trustAddress, setTrustAddress] = useState<string>("342, Saki Naka Main Road, Mumbai");
   const [trustResult, setTrustResult] = useState<any>(null);
+  const [trustScore, setTrustScore] = useState<number>(0);
 
   // Module 3: Pincode State
-  const [pincodeVal, setPincodeVal] = useState<string>("560034");
+  const [pincodeVal, setPincodeVal] = useState<string>("400072");
   const [pincodeResult, setPincodeResult] = useState<any>(null);
 
-  // Module 4: Fraud State
+  // Module 4: Fraud History State
   const [fraudPhone, setFraudPhone] = useState<string>("9123456780");
   const [fraudResult, setFraudResult] = useState<any>(null);
 
   // Module 5: Risk Engine State
-  const [riskValue, setRiskValue] = useState<number>(4500);
-  const [riskPincode, setRiskPincode] = useState<string>("560034");
-  const [riskPhone, setRiskPhone] = useState<string>("9876543210");
+  const [riskPhone, setRiskPhone] = useState<string>("9123456780");
+  const [riskPincode, setRiskPincode] = useState<string>("110044");
+  const [riskValue, setRiskValue] = useState<number>(3890);
   const [riskResult, setRiskResult] = useState<any>(null);
 
-  // Module 6: Merchant State
-  const [claimRatio, setClaimRatio] = useState<number>(4.0);
+  // Module 6: Merchant Ratio State
+  const [claimRatio, setClaimRatio] = useState<number>(4.2);
   const [merchantResult, setMerchantResult] = useState<any>(null);
 
   // Module 7: Claim State
-  const [claimOrderId, setClaimOrderId] = useState<string>("8a7c-9b88f-1249c");
+  const [claimOrderId, setClaimOrderId] = useState<string>("ord_live_8f0a312");
   const [claimSteps, setClaimSteps] = useState<any[]>([]);
 
   useEffect(() => {
@@ -70,7 +72,7 @@ function SandboxContent() {
     setLoading(true);
     setOtpSuccess(null);
     try {
-      const res = await fetch("/api/otp/send", {
+      const res = await fetch(`${BACKEND_URL}/api/otp/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: otpPhone }),
@@ -94,7 +96,7 @@ function SandboxContent() {
   const handleVerifyOtp = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/otp/verify", {
+      const res = await fetch(`${BACKEND_URL}/api/otp/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: otpPhone, code: otpCode }),
@@ -119,7 +121,7 @@ function SandboxContent() {
   const handleAnalyzeTrust = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/sandbox/trust-graph", {
+      const res = await fetch(`${BACKEND_URL}/api/sandbox/trust-graph`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: trustPhone, address: trustAddress }),
@@ -140,7 +142,7 @@ function SandboxContent() {
   const handleCheckPincode = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/sandbox/pincode", {
+      const res = await fetch(`${BACKEND_URL}/api/sandbox/pincode`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ pincode: pincodeVal }),
@@ -160,7 +162,7 @@ function SandboxContent() {
   const handleSearchFraud = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/sandbox/fraud-history", {
+      const res = await fetch(`${BACKEND_URL}/api/sandbox/fraud-history`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: fraudPhone }),
@@ -180,7 +182,7 @@ function SandboxContent() {
   const handleCalculateRisk = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/sandbox/risk-engine", {
+      const res = await fetch(`${BACKEND_URL}/api/sandbox/risk-engine`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone: riskPhone, pincode: riskPincode, value: riskValue }),
@@ -200,7 +202,7 @@ function SandboxContent() {
   const handleMerchantSlider = async (val: number) => {
     setClaimRatio(val);
     try {
-      const res = await fetch("/api/sandbox/merchant-ratio", {
+      const res = await fetch(`${BACKEND_URL}/api/sandbox/merchant-ratio`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ratio: val }),
@@ -225,7 +227,7 @@ function SandboxContent() {
     setLoading(true);
     setClaimSteps([]);
     try {
-      const res = await fetch("/api/sandbox/claim", {
+      const res = await fetch(`${BACKEND_URL}/api/sandbox/claim`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId: claimOrderId }),

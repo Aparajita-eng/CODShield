@@ -1,15 +1,15 @@
-import { NextResponse } from "next/server";
-import { otpStore } from "@/lib/otpStore";
+import { Request, Response } from "express";
+import { otpStore } from "../lib/otpStore";
 
-export async function POST(request: Request) {
+export async function sendOtp(req: Request, res: Response): Promise<any> {
   try {
-    const { phone } = await request.json();
+    const { phone } = req.body;
 
     if (!phone || phone.trim().length < 10) {
-      return NextResponse.json(
-        { success: false, message: "Valid 10-digit phone number is required" },
-        { status: 400 }
-      );
+      return res.status(400).json({
+        success: false,
+        message: "Valid 10-digit phone number is required"
+      });
     }
 
     const rawCode = Math.floor(1000 + Math.random() * 9000).toString();
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
           { method: "GET" }
         );
 
-        const twoFactorData = await twoFactorRes.json();
+        const twoFactorData = (await twoFactorRes.json()) as any;
         if (twoFactorRes.ok && twoFactorData.Status === "Success") {
           realSmsSent = true;
         } else {
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
           }
         );
 
-        const twilioData = await twilioRes.json();
+        const twilioData = (await twilioRes.json()) as any;
         if (twilioRes.ok) {
           realSmsSent = true;
         } else {
@@ -91,20 +91,71 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({
+    return res.json({
       success: true,
       message: realSmsSent
         ? `Real OTP dispatched to ${formattedPhone} via ${providerName}.`
-        : `Simulated OTP sent to ${phone} via SMS/WhatsApp (SMS keys not configured).`,
+        : `Simulated OTP sent to ${phone} via SMS and WhatsApp (SMS keys not configured).`,
       code: realSmsSent ? undefined : rawCode, // Hide verification code from JSON payload when real SMS is active
       simulated: !realSmsSent,
       error: smsError || undefined,
     });
   } catch (error) {
     console.error("Error sending OTP:", error);
-    return NextResponse.json(
-      { success: false, message: "Failed to send OTP" },
-      { status: 500 }
-    );
+    return res.status(500).json({
+      success: false,
+      message: "Failed to send OTP"
+    });
+  }
+}
+
+export async function verifyOtp(req: Request, res: Response): Promise<any> {
+  try {
+    const { phone, code } = req.body;
+
+    if (!phone || !code) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone number and verification code are required"
+      });
+    }
+
+    const record = otpStore.get(phone.trim());
+
+    if (!record) {
+      return res.status(400).json({
+        success: false,
+        message: "No verification request found for this phone number"
+      });
+    }
+
+    if (Date.now() > record.expiresAt) {
+      otpStore.delete(phone.trim());
+      return res.status(400).json({
+        success: false,
+        message: "Verification code has expired. Please request a new one."
+      });
+    }
+
+    if (record.code !== code.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid verification code"
+      });
+    }
+
+    // Success - clean store
+    otpStore.delete(phone.trim());
+
+    return res.json({
+      success: true,
+      message: "Phone number verified. Buyer intent confirmed."
+    });
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to verify OTP"
+    });
   }
 }

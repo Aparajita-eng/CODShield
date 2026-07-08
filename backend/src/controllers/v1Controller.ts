@@ -1,16 +1,16 @@
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { calculateRisk } from "@/lib/risk";
+import { Request, Response } from "express";
+import { prisma } from "../lib/db";
+import { calculateRisk } from "../lib/risk";
 
-export async function POST(request: Request) {
+export async function checkOrderRisk(req: Request, res: Response): Promise<any> {
   try {
     // 1. Authenticate Merchant via API Key
-    const apiKey = request.headers.get("x-api-key");
+    const apiKey = req.headers["x-api-key"] as string | undefined;
     if (!apiKey) {
-      return NextResponse.json(
-        { success: false, message: "Authentication required. Provide x-api-key header." },
-        { status: 401 }
-      );
+      return res.status(401).json({
+        success: false,
+        message: "Authentication required. Provide x-api-key header."
+      });
     }
 
     const merchant = await prisma.merchant.findUnique({
@@ -18,29 +18,28 @@ export async function POST(request: Request) {
     });
 
     if (!merchant) {
-      return NextResponse.json(
-        { success: false, message: "Invalid API key provided" },
-        { status: 401 }
-      );
+      return res.status(401).json({
+        success: false,
+        message: "Invalid API key provided"
+      });
     }
 
     // 2. Parse Request Body
-    const body = await request.json().catch(() => ({}));
-    const { phone, pincode, value } = body;
+    const { phone, pincode, value } = req.body;
 
     if (!phone || !pincode || value === undefined) {
-      return NextResponse.json(
-        { success: false, message: "Required fields missing: phone, pincode, and value are required" },
-        { status: 400 }
-      );
+      return res.status(400).json({
+        success: false,
+        message: "Required fields missing: phone, pincode, and value are required"
+      });
     }
 
     const orderValue = parseFloat(value);
     if (isNaN(orderValue) || orderValue < 0) {
-      return NextResponse.json(
-        { success: false, message: "Valid numeric order value is required" },
-        { status: 400 }
-      );
+      return res.status(400).json({
+        success: false,
+        message: "Valid numeric order value is required"
+      });
     }
 
     // 3. Compute Risk Assessment
@@ -74,7 +73,7 @@ export async function POST(request: Request) {
     });
 
     // 5. Send response
-    return NextResponse.json({
+    return res.json({
       success: true,
       orderId: order.id,
       riskAssessment: {
@@ -86,9 +85,9 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Public API risk-check error:", error);
-    return NextResponse.json(
-      { success: false, message: "Internal server error occurred" },
-      { status: 500 }
-    );
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error occurred"
+    });
   }
 }

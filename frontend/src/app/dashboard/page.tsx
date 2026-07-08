@@ -5,6 +5,8 @@ import Footer from "@/components/Footer";
 import { Copy, Eye, EyeOff, Clock, PlusCircle } from "lucide-react";
 import confetti from "canvas-confetti";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+
 export default function Dashboard() {
   const [merchants, setMerchants] = useState<any[]>([]);
   const [selectedMerchantId, setSelectedMerchantId] = useState<string>("");
@@ -29,7 +31,7 @@ export default function Dashboard() {
   const fetchDashboardData = async (merchantId: string = "") => {
     setLoading(true);
     try {
-      const url = merchantId ? `/api/dashboard/data?merchantId=${merchantId}` : "/api/dashboard/data";
+      const url = merchantId ? `${BACKEND_URL}/api/dashboard/data?merchantId=${merchantId}` : `${BACKEND_URL}/api/dashboard/data`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
@@ -70,7 +72,7 @@ export default function Dashboard() {
     setSimLoading(true);
     setSimFeedback("");
     try {
-      const res = await fetch("/api/v1/orders/risk-check", {
+      const res = await fetch(`${BACKEND_URL}/api/v1/orders/risk-check`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -99,7 +101,7 @@ export default function Dashboard() {
 
   const handleSubmitClaim = async (orderId: string) => {
     try {
-      const res = await fetch("/api/dashboard/claim-submit", {
+      const res = await fetch(`${BACKEND_URL}/api/dashboard/claim-submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId }),
