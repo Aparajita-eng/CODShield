@@ -104,7 +104,7 @@ function SandboxContent() {
       if (data.success) {
         setOtpSuccess(true);
         setOtpStatus("Verification successful. Identity authenticated.");
-        confetti({ particleCount: 50, spread: 30, colors: ["#0055D4", "#15803D"] });
+        confetti({ particleCount: 50, spread: 30, colors: ["#C99A4B", "#B5563C"] });
       } else {
         setOtpSuccess(false);
         setOtpStatus(data.message || "Verification code failed mismatch check.");
@@ -239,7 +239,7 @@ function SandboxContent() {
           await new Promise((resolve) => setTimeout(resolve, 600));
           setClaimSteps(steps.slice(0, i));
           if (i === steps.length) {
-            confetti({ particleCount: 30, spread: 20, colors: ["#0055D4"] });
+            confetti({ particleCount: 30, spread: 20, colors: ["#C99A4B"] });
           }
         }
       }
@@ -253,19 +253,19 @@ function SandboxContent() {
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full px-6 lg:px-8 pt-24 pb-16">
       <div className="space-y-3">
-        <span className="text-[10px] font-mono tracking-wider text-[#64748B] uppercase">
+        <span className="text-[10px] font-mono tracking-wider text-ink-tertiary uppercase">
           Interactive Sandbox
         </span>
-        <h1 className="font-serif font-bold text-3xl text-[#0A2540]">
+        <h1 className="font-serif font-bold text-3xl text-ink-primary">
           Run every trust module yourself.
         </h1>
-        <p className="text-[#64748B] text-xs sm:text-sm max-w-2xl leading-relaxed font-sans">
+        <p className="text-ink-secondary text-xs sm:text-sm max-w-2xl leading-relaxed font-sans">
           Test checkout verification components against seed databases without deploying code. Select a module below to begin evaluation.
         </p>
       </div>
 
       {/* TAB BUTTONS */}
-      <div className="flex gap-2 overflow-x-auto pb-3 pt-6 border-b border-[#E2E8F0]">
+      <div className="flex gap-2 overflow-x-auto pb-3 pt-6 border-b border-border-subtle">
         {[
           { id: "otp", name: "01 · OTP Engine" },
           { id: "trust", name: "02 · Trust Graph" },
@@ -278,10 +278,10 @@ function SandboxContent() {
           <button
             key={tab.id}
             onClick={() => selectTab(tab.id)}
-            className={`shrink-0 font-sans text-xs rounded border transition-all px-3.5 py-1.5 ${
+            className={`shrink-0 font-sans text-xs rounded border transition-all px-3.5 py-1.5 cursor-pointer ${
               activeTab === tab.id
-                ? "bg-[#0055D4] text-white border-[#0055D4] font-semibold"
-                : "border-[#E2E8F0] bg-[#F1F3F7]/40 text-[#64748B] hover:text-[#0A2540] hover:border-slate-400"
+                ? "bg-accent text-bg-base border-accent font-semibold"
+                : "border-border-default bg-bg-raised/40 text-ink-secondary hover:text-ink-primary hover:border-accent/40"
             }`}
           >
             {tab.name}
@@ -291,22 +291,22 @@ function SandboxContent() {
 
       <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-8 mt-8 items-start">
         {/* INTERACTIVE WORKSPACE CARD */}
-        <div className="border border-[#E2E8F0] bg-[#F1F3F7]/30 rounded-lg p-6 sm:p-8 min-h-[420px] flex flex-col justify-between">
+        <div className="border border-border-default bg-bg-raised rounded-lg p-6 sm:p-8 min-h-[420px] flex flex-col justify-between">
           <div>
             {/* PANEL 1: OTP ENGINE */}
             {activeTab === "otp" && (
               <div className="space-y-6">
                 <div className="space-y-1">
-                  <span className="text-[10px] font-mono text-[#64748B] uppercase font-semibold">Verification Module</span>
-                  <h3 className="font-serif font-bold text-[#0A2540] text-base">Verify customer intent</h3>
-                  <p className="text-xs text-[#64748B] leading-relaxed font-sans">
+                  <span className="text-[10px] font-mono text-ink-tertiary uppercase font-semibold">Verification Module</span>
+                  <h3 className="font-serif font-bold text-ink-primary text-base">Verify customer intent</h3>
+                  <p className="text-xs text-ink-secondary leading-relaxed font-sans">
                     Generates a simulated verification dispatch. Enter a 10-digit number to trigger the fallback pipeline.
                   </p>
                 </div>
 
                 <div className="space-y-4 max-w-sm">
                   <div>
-                    <label className="block text-[10px] font-mono text-[#64748B] mb-1.5 uppercase">
+                    <label className="block text-[10px] font-mono text-ink-secondary mb-1.5 uppercase">
                       Phone number
                     </label>
                     <input
@@ -315,23 +315,23 @@ function SandboxContent() {
                       value={otpPhone}
                       onChange={(e) => setOtpPhone(e.target.value.replace(/\D/g, ""))}
                       placeholder="9876543210"
-                      className="w-full bg-white border border-[#E2E8F0] rounded px-3 py-2 text-xs font-mono text-[#0A2540] focus:border-[#0055D4] outline-none"
+                      className="w-full bg-bg-base border border-border-default rounded px-3 py-2 text-xs font-mono text-ink-primary focus:border-accent outline-none"
                     />
                   </div>
 
                   <button
                     onClick={handleSendOtp}
                     disabled={loading || otpPhone.length !== 10}
-                    className="w-full bg-[#0055D4] hover:bg-[#0044B3] text-white font-semibold text-xs py-2 rounded transition-colors disabled:opacity-50 font-sans"
+                    className="w-full bg-accent hover:bg-accent/80 text-bg-base font-semibold text-xs py-2 rounded transition-colors disabled:opacity-50 font-sans cursor-pointer"
                   >
                     {loading ? "SENDING..." : "SEND VERIFICATION OTP"}
                   </button>
 
                   {otpSent && (
-                    <div className="space-y-3 pt-2 border-t border-[#E2E8F0]">
-                      <div className="flex justify-between items-center text-[9px] font-mono text-[#64748B]">
+                    <div className="space-y-3 pt-2 border-t border-border-subtle">
+                      <div className="flex justify-between items-center text-[9px] font-mono text-ink-secondary">
                         <span>Verification Code Input</span>
-                        <span className="text-[#0055D4] font-semibold">(Demo code: {otpDemoCode})</span>
+                        <span className="text-accent font-semibold">(Demo code: {otpDemoCode})</span>
                       </div>
                       <input
                         type="text"
@@ -339,12 +339,12 @@ function SandboxContent() {
                         value={otpCode}
                         onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
                         placeholder="0000"
-                        className="w-full bg-white border border-[#E2E8F0] rounded px-3 py-2 text-center text-xs font-mono tracking-widest text-[#0A2540] focus:border-[#0055D4] outline-none"
+                        className="w-full bg-bg-base border border-border-default rounded px-3 py-2 text-center text-xs font-mono tracking-widest text-ink-primary focus:border-accent outline-none"
                       />
                       <button
                         onClick={handleVerifyOtp}
                         disabled={loading || otpCode.length !== 4}
-                        className="w-full border border-[#E2E8F0] hover:bg-[#F1F3F7] text-[#0A2540] font-semibold text-xs py-2 rounded transition-colors font-sans"
+                        className="w-full border border-border-default hover:bg-bg-base/60 text-ink-primary font-semibold text-xs py-2 rounded transition-colors font-sans cursor-pointer"
                       >
                         VERIFY CODE
                       </button>
@@ -358,16 +358,16 @@ function SandboxContent() {
             {activeTab === "trust" && (
               <div className="space-y-6">
                 <div className="space-y-1">
-                  <span className="text-[9px] font-mono text-[#64748B] uppercase font-semibold">Graph Module</span>
-                  <h3 className="font-serif font-bold text-[#0A2540] text-base">Analyze network coordinates</h3>
-                  <p className="text-xs text-[#64748B] leading-relaxed font-sans">
+                  <span className="text-[9px] font-mono text-ink-tertiary uppercase font-semibold">Graph Module</span>
+                  <h3 className="font-serif font-bold text-ink-primary text-base">Analyze network coordinates</h3>
+                  <p className="text-xs text-ink-secondary leading-relaxed font-sans">
                     Maps phone numbers and addresses across merchants to analyze shared cluster integrity scores.
                   </p>
                 </div>
 
                 <div className="space-y-4 max-w-sm">
                   <div>
-                    <label className="block text-[10px] font-mono text-[#64748B] mb-1.5 uppercase">
+                    <label className="block text-[10px] font-mono text-ink-secondary mb-1.5 uppercase">
                       Phone number
                     </label>
                     <input
@@ -375,26 +375,26 @@ function SandboxContent() {
                       maxLength={10}
                       value={trustPhone}
                       onChange={(e) => setTrustPhone(e.target.value.replace(/\D/g, ""))}
-                      className="w-full bg-white border border-[#E2E8F0] rounded px-3 py-2 text-xs font-mono text-[#0A2540] focus:border-[#0055D4] outline-none"
+                      className="w-full bg-bg-base border border-border-default rounded px-3 py-2 text-xs font-mono text-ink-primary focus:border-accent outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono text-[#64748B] mb-1.5 uppercase">
+                    <label className="block text-[10px] font-mono text-ink-secondary mb-1.5 uppercase">
                       Delivery address
                     </label>
                     <input
                       type="text"
                       value={trustAddress}
                       onChange={(e) => setTrustAddress(e.target.value)}
-                      className="w-full bg-white border border-[#E2E8F0] rounded px-3 py-2 text-xs text-[#0A2540] focus:border-[#0055D4] outline-none"
+                      className="w-full bg-bg-base border border-border-default rounded px-3 py-2 text-xs text-ink-primary focus:border-accent outline-none"
                     />
                   </div>
 
                   <button
                     onClick={handleAnalyzeTrust}
                     disabled={loading || !trustAddress.trim() || trustPhone.length !== 10}
-                    className="w-full bg-[#0055D4] hover:bg-[#0044B3] text-white font-semibold text-xs py-2 rounded transition-colors disabled:opacity-50 font-sans"
+                    className="w-full bg-accent hover:bg-accent/80 text-bg-base font-semibold text-xs py-2 rounded transition-colors disabled:opacity-50 font-sans cursor-pointer"
                   >
                     {loading ? "ANALYZING..." : "EVALUATE GRAPH NETWORK"}
                   </button>
@@ -406,16 +406,16 @@ function SandboxContent() {
             {activeTab === "pincode" && (
               <div className="space-y-6">
                 <div className="space-y-1">
-                  <span className="text-[9px] font-mono text-[#64748B] uppercase font-semibold">Geo Module</span>
-                  <h3 className="font-serif font-bold text-[#0A2540] text-base">Check regional RTO density</h3>
-                  <p className="text-xs text-[#64748B] leading-relaxed font-sans">
+                  <span className="text-[9px] font-mono text-ink-tertiary uppercase font-semibold">Geo Module</span>
+                  <h3 className="font-serif font-bold text-ink-primary text-base">Check regional RTO density</h3>
+                  <p className="text-xs text-ink-secondary leading-relaxed font-sans">
                     Queries postal risk indices. Sample codes: 560034 (Low risk), 110044 (Medium risk), 400072 (High risk).
                   </p>
                 </div>
 
                 <div className="space-y-4 max-w-sm">
                   <div>
-                    <label className="block text-[10px] font-mono text-[#64748B] mb-1.5 uppercase">
+                    <label className="block text-[10px] font-mono text-ink-secondary mb-1.5 uppercase">
                       Postal Pincode (6 digits)
                     </label>
                     <input
@@ -423,14 +423,14 @@ function SandboxContent() {
                       maxLength={6}
                       value={pincodeVal}
                       onChange={(e) => setPincodeVal(e.target.value.replace(/\D/g, ""))}
-                      className="w-full bg-white border border-[#E2E8F0] rounded px-3 py-2 text-xs font-mono text-[#0A2540] focus:border-[#0055D4] outline-none"
+                      className="w-full bg-bg-base border border-border-default rounded px-3 py-2 text-xs font-mono text-ink-primary focus:border-accent outline-none"
                     />
                   </div>
 
                   <button
                     onClick={handleCheckPincode}
                     disabled={loading || pincodeVal.length !== 6}
-                    className="w-full bg-[#0055D4] hover:bg-[#0044B3] text-white font-semibold text-xs py-2 rounded transition-colors disabled:opacity-50 font-sans"
+                    className="w-full bg-accent hover:bg-accent/80 text-bg-base font-semibold text-xs py-2 rounded transition-colors disabled:opacity-50 font-sans cursor-pointer"
                   >
                     {loading ? "QUERYING..." : "EVALUATE POSTAL CODE"}
                   </button>
@@ -442,16 +442,16 @@ function SandboxContent() {
             {activeTab === "fraud" && (
               <div className="space-y-6">
                 <div className="space-y-1">
-                  <span className="text-[9px] font-mono text-[#64748B] uppercase font-semibold">Abuse Database</span>
-                  <h3 className="font-serif font-bold text-[#0A2540] text-base">Search blacklist database</h3>
-                  <p className="text-xs text-[#64748B] leading-relaxed font-sans">
+                  <span className="text-[9px] font-mono text-ink-tertiary uppercase font-semibold">Abuse Database</span>
+                  <h3 className="font-serif font-bold text-ink-primary text-base">Search blacklist database</h3>
+                  <p className="text-xs text-ink-secondary leading-relaxed font-sans">
                     Matches phone history against delivery refusal databases. Sample flagged: 9123456780.
                   </p>
                 </div>
 
                 <div className="space-y-4 max-w-sm">
                   <div>
-                    <label className="block text-[10px] font-mono text-[#64748B] mb-1.5 uppercase">
+                    <label className="block text-[10px] font-mono text-ink-secondary mb-1.5 uppercase">
                       Phone number
                     </label>
                     <input
@@ -459,14 +459,14 @@ function SandboxContent() {
                       maxLength={10}
                       value={fraudPhone}
                       onChange={(e) => setFraudPhone(e.target.value.replace(/\D/g, ""))}
-                      className="w-full bg-white border border-[#E2E8F0] rounded px-3 py-2 text-xs font-mono text-[#0A2540] focus:border-[#0055D4] outline-none"
+                      className="w-full bg-bg-base border border-border-default rounded px-3 py-2 text-xs font-mono text-ink-primary focus:border-accent outline-none"
                     />
                   </div>
 
                   <button
                     onClick={handleSearchFraud}
                     disabled={loading || fraudPhone.length !== 10}
-                    className="w-full bg-[#0055D4] hover:bg-[#0044B3] text-white font-semibold text-xs py-2 rounded transition-colors disabled:opacity-50 font-sans"
+                    className="w-full bg-accent hover:bg-accent/80 text-bg-base font-semibold text-xs py-2 rounded transition-colors disabled:opacity-50 font-sans cursor-pointer"
                   >
                     {loading ? "SEARCHING..." : "CHECK ABUSE HISTORY"}
                   </button>
@@ -478,9 +478,9 @@ function SandboxContent() {
             {activeTab === "risk" && (
               <div className="space-y-6">
                 <div className="space-y-1">
-                  <span className="text-[9px] font-mono text-[#64748B] uppercase font-semibold">Assessment Model</span>
-                  <h3 className="font-serif font-bold text-[#0A2540] text-base">Compute mathematical risk score</h3>
-                  <p className="text-xs text-[#64748B] leading-relaxed font-sans">
+                  <span className="text-[9px] font-mono text-ink-tertiary uppercase font-semibold">Assessment Model</span>
+                  <h3 className="font-serif font-bold text-ink-primary text-base">Compute mathematical risk score</h3>
+                  <p className="text-xs text-ink-secondary leading-relaxed font-sans">
                     Orchestrates multiple weights to output a transactional risk assessment and shipping action.
                   </p>
                 </div>
@@ -488,18 +488,18 @@ function SandboxContent() {
                 <div className="space-y-4 max-w-md">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[9px] font-mono text-[#64748B] mb-1 uppercase">
+                      <label className="block text-[9px] font-mono text-ink-secondary mb-1 uppercase">
                         Order Value (INR)
                       </label>
                       <input
                         type="number"
                         value={riskValue}
                         onChange={(e) => setRiskValue(parseInt(e.target.value) || 0)}
-                        className="w-full bg-white border border-[#E2E8F0] rounded px-2.5 py-1.5 text-xs font-mono text-[#0A2540] focus:border-[#0055D4] outline-none"
+                        className="w-full bg-bg-base border border-border-default rounded px-2.5 py-1.5 text-xs font-mono text-ink-primary focus:border-accent outline-none"
                       />
                     </div>
                     <div>
-                      <label className="block text-[9px] font-mono text-[#64748B] mb-1 uppercase">
+                      <label className="block text-[9px] font-mono text-ink-secondary mb-1 uppercase">
                         Pincode
                       </label>
                       <input
@@ -507,13 +507,13 @@ function SandboxContent() {
                         maxLength={6}
                         value={riskPincode}
                         onChange={(e) => setRiskPincode(e.target.value.replace(/\D/g, ""))}
-                        className="w-full bg-white border border-[#E2E8F0] rounded px-2.5 py-1.5 text-xs font-mono text-[#0A2540] focus:border-[#0055D4] outline-none"
+                        className="w-full bg-bg-base border border-border-default rounded px-2.5 py-1.5 text-xs font-mono text-ink-primary focus:border-accent outline-none"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono text-[#64748B] mb-1.5 uppercase">
+                    <label className="block text-[10px] font-mono text-ink-secondary mb-1.5 uppercase">
                       Phone number
                     </label>
                     <input
@@ -521,14 +521,14 @@ function SandboxContent() {
                       maxLength={10}
                       value={riskPhone}
                       onChange={(e) => setRiskPhone(e.target.value.replace(/\D/g, ""))}
-                      className="w-full bg-white border border-[#E2E8F0] rounded px-3 py-2 text-xs font-mono text-[#0A2540] focus:border-[#0055D4] outline-none"
+                      className="w-full bg-bg-base border border-border-default rounded px-3 py-2 text-xs font-mono text-ink-primary focus:border-accent outline-none"
                     />
                   </div>
 
                   <button
                     onClick={handleCalculateRisk}
                     disabled={loading || riskPhone.length !== 10 || riskPincode.length !== 6}
-                    className="w-full bg-[#0055D4] hover:bg-[#0044B3] text-white font-semibold text-xs py-2 rounded transition-colors disabled:opacity-50 font-sans font-mono"
+                    className="w-full bg-accent hover:bg-accent/80 text-bg-base font-semibold text-xs py-2 rounded transition-colors disabled:opacity-50 font-sans font-mono cursor-pointer"
                   >
                     {loading ? "COMPUTING..." : "CALCULATE ORDER RISK"}
                   </button>
@@ -540,18 +540,18 @@ function SandboxContent() {
             {activeTab === "merchant" && (
               <div className="space-y-6">
                 <div className="space-y-1">
-                  <span className="text-[9px] font-mono text-[#64748B] uppercase font-semibold">Compliance Module</span>
-                  <h3 className="font-serif font-bold text-[#0A2540] text-base">Evaluate merchant profile tier</h3>
-                  <p className="text-xs text-[#64748B] leading-relaxed font-sans">
+                  <span className="text-[9px] font-mono text-ink-tertiary uppercase font-semibold">Compliance Module</span>
+                  <h3 className="font-serif font-bold text-ink-primary text-base">Evaluate merchant profile tier</h3>
+                  <p className="text-xs text-ink-secondary leading-relaxed font-sans">
                     Simulates how merchant claim rates change authorization tiers dynamically.
                   </p>
                 </div>
 
                 <div className="space-y-6 max-w-sm">
                   <div>
-                    <div className="flex justify-between items-center text-xs font-mono text-[#64748B] mb-2 font-semibold">
+                    <div className="flex justify-between items-center text-xs font-mono text-ink-secondary mb-2 font-semibold">
                       <span>Simulated Claim Ratio</span>
-                      <span className="text-[#0A2540] font-semibold">{claimRatio.toFixed(1)}%</span>
+                      <span className="text-ink-primary font-semibold">{claimRatio.toFixed(1)}%</span>
                     </div>
                     <input
                       type="range"
@@ -560,7 +560,7 @@ function SandboxContent() {
                       step={0.5}
                       value={claimRatio}
                       onChange={(e) => handleMerchantSlider(parseFloat(e.target.value))}
-                      className="accent-[#0055D4]"
+                      className="accent-accent"
                     />
                   </div>
                 </div>
@@ -571,30 +571,30 @@ function SandboxContent() {
             {activeTab === "claim" && (
               <div className="space-y-6">
                 <div className="space-y-1">
-                  <span className="text-[9px] font-mono text-[#64748B] uppercase font-semibold">Guarantees</span>
-                  <h3 className="font-serif font-bold text-[#0A2540] text-base">Simulate payout pipeline</h3>
-                  <p className="text-xs text-[#64748B] leading-relaxed font-sans">
+                  <span className="text-[9px] font-mono text-ink-tertiary uppercase font-semibold">Guarantees</span>
+                  <h3 className="font-serif font-bold text-ink-primary text-base">Simulate payout pipeline</h3>
+                  <p className="text-xs text-ink-secondary leading-relaxed font-sans">
                     Runs the automated 4-stage insurance reimbursement algorithm for protected orders that failed delivery.
                   </p>
                 </div>
 
                 <div className="space-y-4 max-w-sm">
                   <div>
-                    <label className="block text-[10px] font-mono text-[#64748B] mb-1.5 uppercase">
+                    <label className="block text-[10px] font-mono text-ink-secondary mb-1.5 uppercase">
                       Order log reference ID
                     </label>
                     <input
                       type="text"
                       value={claimOrderId}
                       onChange={(e) => setClaimOrderId(e.target.value)}
-                      className="w-full bg-white border border-[#E2E8F0] rounded px-3 py-2 text-xs font-mono text-[#0A2540] focus:border-[#0055D4] outline-none"
+                      className="w-full bg-bg-base border border-border-default rounded px-3 py-2 text-xs font-mono text-ink-primary focus:border-accent outline-none"
                     />
                   </div>
 
                   <button
                     onClick={handleSimulateClaim}
                     disabled={loading || !claimOrderId.trim()}
-                    className="w-full bg-[#0055D4] hover:bg-[#0044B3] text-white font-semibold text-xs py-2 rounded transition-colors disabled:opacity-50 font-sans"
+                    className="w-full bg-accent hover:bg-accent/80 text-bg-base font-semibold text-xs py-2 rounded transition-colors disabled:opacity-50 font-sans cursor-pointer"
                   >
                     {loading ? "RUNNING PIPELINE..." : "INITIALIZE CLAIM VERIFICATION"}
                   </button>
@@ -604,19 +604,19 @@ function SandboxContent() {
           </div>
 
           {/* INTERACTIVE MODULE OUTPUT VIEWS */}
-          <div className="mt-8 border-t border-[#E2E8F0] pt-6">
-            <span className="text-[9px] font-mono text-[#64748B] uppercase block mb-3 font-semibold">MODULE OUTPUT LOG</span>
+          <div className="mt-8 border-t border-border-subtle pt-6">
+            <span className="text-[9px] font-mono text-ink-tertiary uppercase block mb-3 font-semibold">MODULE OUTPUT LOG</span>
 
             {/* OTP OUTPUT */}
             {activeTab === "otp" && (
-              <div className="border border-[#E2E8F0] bg-white p-4 rounded flex items-center justify-between">
+              <div className="border border-border-default bg-bg-base/40 p-4 rounded flex items-center justify-between">
                 <div className="space-y-0.5 font-sans">
-                  <span className="text-[9px] font-mono text-[#64748B] block">Verification Status</span>
-                  <div className="text-xs text-[#0A2540] font-semibold">{otpStatus}</div>
+                  <span className="text-[9px] font-mono text-ink-tertiary block">Verification Status</span>
+                  <div className="text-xs text-ink-primary font-semibold">{otpStatus}</div>
                 </div>
-                {otpSuccess === true && <span className="text-xs font-mono font-bold text-[#15803D]">Success</span>}
-                {otpSuccess === false && <span className="text-xs font-mono font-bold text-[#B91C1C]">Failed</span>}
-                {otpSuccess === null && otpSent && <RefreshCw className="w-3.5 h-3.5 text-slate-500 animate-spin shrink-0" />}
+                {otpSuccess === true && <span className="text-xs font-mono font-bold text-accent">Success</span>}
+                {otpSuccess === false && <span className="text-xs font-mono font-bold text-negative">Failed</span>}
+                {otpSuccess === null && otpSent && <RefreshCw className="w-3.5 h-3.5 text-ink-tertiary animate-spin shrink-0" />}
               </div>
             )}
 
@@ -624,29 +624,29 @@ function SandboxContent() {
             {activeTab === "trust" && (
               <div className="space-y-4">
                 {trustResult ? (
-                  <div className="grid sm:grid-cols-2 gap-4 border border-[#E2E8F0] bg-white p-4 rounded">
+                  <div className="grid sm:grid-cols-2 gap-4 border border-border-default bg-bg-base/40 p-4 rounded">
                     <div className="space-y-1 font-sans">
-                      <span className="text-[9px] font-mono text-[#64748B] block">Network Connections</span>
-                      <div className="text-xs font-semibold text-[#0A2540]">
+                      <span className="text-[9px] font-mono text-ink-tertiary block">Network Connections</span>
+                      <div className="text-xs font-semibold text-ink-primary">
                         Found {trustResult.connections} matching nodes
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <span className="text-[9px] font-mono text-[#64748B]">Trust score</span>
+                      <span className="text-[9px] font-mono text-ink-tertiary">Trust score</span>
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs font-mono font-bold ${trustResult.color}`}>{trustResult.score}/100</span>
-                        <span className="text-[10px] text-[#64748B]">({trustResult.verdict})</span>
+                        <span className="text-xs font-mono font-bold text-accent">{trustResult.score}/100</span>
+                        <span className="text-[10px] text-ink-secondary">({trustResult.verdict})</span>
                       </div>
-                      <div className="w-full bg-[#E2E8F0] h-1 rounded overflow-hidden mt-1">
+                      <div className="w-full bg-border-subtle h-1 rounded overflow-hidden mt-1">
                         <div
-                          className="h-full rounded transition-all duration-700 bg-[#0055D4]"
+                          className="h-full rounded transition-all duration-700 bg-accent"
                           style={{ width: `${trustScore}%` }}
                         ></div>
                       </div>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-[10px] text-[#64748B] font-mono text-center py-4 border border-[#E2E8F0] bg-white rounded">Awaiting evaluation triggers...</div>
+                  <div className="text-[10px] text-ink-secondary font-mono text-center py-4 border border-border-default bg-bg-base/40 rounded">Awaiting evaluation triggers...</div>
                 )}
               </div>
             )}
@@ -655,22 +655,22 @@ function SandboxContent() {
             {activeTab === "pincode" && (
               <div className="space-y-4">
                 {pincodeResult ? (
-                  <div className="grid sm:grid-cols-3 gap-4 border border-[#E2E8F0] bg-white p-4 rounded font-mono text-xs text-[#0A2540]">
+                  <div className="grid sm:grid-cols-3 gap-4 border border-border-default bg-bg-base/40 p-4 rounded font-mono text-xs text-ink-primary">
                     <div className="space-y-0.5">
-                      <span className="text-[9px] font-mono text-[#64748B]">Regional Weight</span>
+                      <span className="text-[9px] font-mono text-ink-tertiary">Regional Weight</span>
                       <div className="font-semibold">{(pincodeResult.weight * 100).toFixed(0)}%</div>
                     </div>
                     <div className="space-y-0.5">
-                      <span className="text-[9px] font-mono text-[#64748B]">Predicted RTO</span>
-                      <div className="text-[#B91C1C] font-semibold">{pincodeResult.rto}%</div>
+                      <span className="text-[9px] font-mono text-ink-tertiary">Predicted RTO</span>
+                      <div className="text-negative font-semibold">{pincodeResult.rto}%</div>
                     </div>
                     <div className="space-y-0.5">
-                      <span className="text-[9px] font-mono text-[#64748B]">Accept Ratio</span>
-                      <div className="text-[#15803D] font-semibold">{pincodeResult.accept}%</div>
+                      <span className="text-[9px] font-mono text-ink-tertiary">Accept Ratio</span>
+                      <div className="text-accent font-semibold">{pincodeResult.accept}%</div>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-[10px] text-[#64748B] font-mono text-center py-4 border border-[#E2E8F0] bg-white rounded">Awaiting postal code entry...</div>
+                  <div className="text-[10px] text-ink-secondary font-mono text-center py-4 border border-border-default bg-bg-base/40 rounded">Awaiting postal code entry...</div>
                 )}
               </div>
             )}
@@ -679,25 +679,25 @@ function SandboxContent() {
             {activeTab === "fraud" && (
               <div className="space-y-4">
                 {fraudResult ? (
-                  <div className="border border-[#E2E8F0] bg-white p-4 rounded space-y-3 font-mono text-xs text-[#0A2540]">
-                    <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-2">
-                      <span className="text-[9px] font-mono text-[#64748B]">Match Status</span>
+                  <div className="border border-border-default bg-bg-base/40 p-4 rounded space-y-3 font-mono text-xs text-ink-primary">
+                    <div className="flex items-center justify-between border-b border-border-subtle pb-2">
+                      <span className="text-[9px] font-mono text-ink-tertiary">Match Status</span>
                       <span
                         className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                          fraudResult.flagged ? "bg-[#B91C1C]/10 text-[#B91C1C] border border-[#B91C1C]/30" : "bg-[#15803D]/10 text-[#15803D] border border-[#15803D]/30"
+                          fraudResult.flagged ? "bg-negative/10 text-negative border border-negative/30" : "bg-accent/10 text-accent border border-accent/30"
                         }`}
                       >
                         {fraudResult.flagged ? "Flagged profile" : "Clear profile"}
                       </span>
                     </div>
-                    <p className="text-slate-700 font-sans">{fraudResult.message}</p>
+                    <p className="text-ink-secondary font-sans">{fraudResult.message}</p>
                     {fraudResult.flags.length > 0 && (
-                      <div className="space-y-1.5 pt-2 border-t border-[#E2E8F0]">
-                        <span className="text-[9px] font-mono text-[#64748B] block uppercase font-semibold">Identified matches</span>
-                        <ul className="text-[10px] text-slate-500 space-y-1 font-sans">
+                      <div className="space-y-1.5 pt-2 border-t border-border-subtle">
+                        <span className="text-[9px] font-mono text-ink-tertiary block uppercase font-semibold">Identified matches</span>
+                        <ul className="text-[10px] text-ink-secondary space-y-1 font-sans">
                           {fraudResult.flags.map((flag: string, index: number) => (
                             <li key={index} className="flex gap-2">
-                              <span className="text-[#B91C1C] font-bold">-</span>
+                              <span className="text-negative font-bold">-</span>
                               {flag}
                             </li>
                           ))}
@@ -706,7 +706,7 @@ function SandboxContent() {
                     )}
                   </div>
                 ) : (
-                  <div className="text-[10px] text-[#64748B] font-mono text-center py-4 border border-[#E2E8F0] bg-white rounded">Awaiting phone entry search...</div>
+                  <div className="text-[10px] text-ink-secondary font-mono text-center py-4 border border-border-default bg-bg-base/40 rounded">Awaiting phone entry search...</div>
                 )}
               </div>
             )}
@@ -715,24 +715,24 @@ function SandboxContent() {
             {activeTab === "risk" && (
               <div className="space-y-4">
                 {riskResult ? (
-                  <div className="border border-[#E2E8F0] bg-white p-5 rounded space-y-4">
-                    <div className="flex items-center justify-between gap-4 flex-wrap border-b border-[#E2E8F0] pb-3">
+                  <div className="border border-border-default bg-bg-base/40 p-5 rounded space-y-4">
+                    <div className="flex items-center justify-between gap-4 flex-wrap border-b border-border-subtle pb-3">
                       <div className="space-y-0.5">
-                        <span className="text-[9px] font-mono text-[#64748B]">Calculated Score</span>
+                        <span className="text-[9px] font-mono text-ink-tertiary">Calculated Score</span>
                         <div className="flex items-baseline gap-2">
-                          <span className="text-xl font-bold font-mono text-[#0A2540]">{riskResult.score}</span>
-                          <span className="text-[10px] text-[#64748B]">/ 100</span>
+                          <span className="text-xl font-bold font-mono text-ink-primary">{riskResult.score}</span>
+                          <span className="text-[10px] text-ink-secondary">/ 100</span>
                         </div>
                       </div>
                       <div className="space-y-0.5 text-right">
-                        <span className="text-[9px] font-mono text-[#64748B] font-semibold block">Decision Verdict</span>
+                        <span className="text-[9px] font-mono text-ink-tertiary font-semibold block">Decision Verdict</span>
                         <span
                           className={`text-[9px] font-bold px-2 py-0.5 rounded font-mono uppercase inline-block border ${
                             riskResult.verdict === "LOW"
-                              ? "bg-[#15803D]/10 text-[#15803D] border-[#15803D]/35"
+                              ? "bg-accent/15 text-accent border-accent/30"
                               : riskResult.verdict === "MEDIUM"
-                              ? "bg-[#B45309]/10 text-[#B45309] border-[#B45309]/35"
-                              : "bg-[#B91C1C]/10 text-[#B91C1C] border-[#B91C1C]/35"
+                              ? "bg-accent/10 text-accent/80 border-accent/25"
+                              : "bg-negative/15 text-negative border-negative/30"
                           }`}
                         >
                           {riskResult.verdict} Risk · {riskResult.action.replace("_", " ")}
@@ -741,26 +741,26 @@ function SandboxContent() {
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 py-1 text-center font-mono text-xs">
-                      <div className="bg-[#F1F3F7]/40 border border-[#E2E8F0] rounded py-2">
-                        <div className="text-[9px] font-mono text-[#64748B]">Pincode Risk</div>
-                        <div className="font-semibold text-[#0A2540] mt-0.5">{riskResult.pincodeRisk}</div>
+                      <div className="bg-bg-base/60 border border-border-subtle rounded py-2">
+                        <div className="text-[9px] font-mono text-ink-secondary">Pincode Risk</div>
+                        <div className="font-semibold text-ink-primary mt-0.5">{riskResult.pincodeRisk}</div>
                       </div>
-                      <div className="bg-[#F1F3F7]/40 border border-[#E2E8F0] rounded py-2">
-                        <div className="text-[9px] font-mono text-[#64748B]">Value Risk</div>
-                        <div className="font-semibold text-[#0A2540] mt-0.5">{riskResult.valueRisk}</div>
+                      <div className="bg-bg-base/60 border border-border-subtle rounded py-2">
+                        <div className="text-[9px] font-mono text-ink-secondary">Value Risk</div>
+                        <div className="font-semibold text-ink-primary mt-0.5">{riskResult.valueRisk}</div>
                       </div>
-                      <div className="bg-[#F1F3F7]/40 border border-[#E2E8F0] rounded py-2">
-                        <div className="text-[9px] font-mono text-[#64748B]">Refusal Risk</div>
-                        <div className="font-semibold text-[#0A2540] mt-0.5">{riskResult.phoneRisk}</div>
+                      <div className="bg-bg-base/60 border border-border-subtle rounded py-2">
+                        <div className="text-[9px] font-mono text-ink-secondary">Refusal Risk</div>
+                        <div className="font-semibold text-ink-primary mt-0.5">{riskResult.phoneRisk}</div>
                       </div>
                     </div>
 
                     <div className="space-y-1 font-sans text-xs">
-                      <span className="text-[9px] font-mono text-[#64748B] uppercase block">Assessment Rationale</span>
-                      <ul className="text-[11px] text-slate-600 space-y-1">
+                      <span className="text-[9px] font-mono text-ink-tertiary uppercase block">Assessment Rationale</span>
+                      <ul className="text-[11px] text-ink-secondary space-y-1">
                         {riskResult.reasons.map((reason: string, i: number) => (
                           <li key={i} className="flex gap-2">
-                            <span className="text-[#0055D4] font-bold">-</span>
+                            <span className="text-accent font-bold">-</span>
                             {reason}
                           </li>
                         ))}
@@ -768,7 +768,7 @@ function SandboxContent() {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-[10px] text-[#64748B] font-mono text-center py-4 border border-[#E2E8F0] bg-white rounded font-mono">Awaiting risk math indicators...</div>
+                  <div className="text-[10px] text-ink-secondary font-mono text-center py-4 border border-border-default bg-bg-base/40 rounded font-mono">Awaiting risk math indicators...</div>
                 )}
               </div>
             )}
@@ -777,23 +777,23 @@ function SandboxContent() {
             {activeTab === "merchant" && (
               <div className="space-y-4">
                 {merchantResult ? (
-                  <div className="border border-[#E2E8F0] bg-white p-4 rounded space-y-3 font-mono text-xs">
-                    <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-2">
+                  <div className="border border-border-default bg-bg-base/40 p-4 rounded space-y-3 font-mono text-xs">
+                    <div className="flex items-center justify-between border-b border-border-subtle pb-2">
                       <div className="space-y-0.5">
-                        <span className="text-[9px] font-mono text-[#64748B]">Compliance score</span>
-                        <div className="font-bold text-[#0A2540]">{merchantResult.score}/100</div>
+                        <span className="text-[9px] font-mono text-ink-tertiary">Compliance score</span>
+                        <div className="font-bold text-ink-primary">{merchantResult.score}/100</div>
                       </div>
                       <div className="flex items-center gap-1.5">
-                        <span className={`w-1.5 h-1.5 rounded-full ${merchantResult.dotClass}`}></span>
-                        <span className={`text-[10px] font-bold uppercase ${merchantResult.color}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${merchantResult.dotClass === "bg-[#15803D]" ? "bg-accent" : "bg-negative"}`}></span>
+                        <span className={`text-[10px] font-bold uppercase ${merchantResult.color === "text-[#15803D]" ? "text-accent" : "text-negative"}`}>
                           {merchantResult.tier}
                         </span>
                       </div>
                     </div>
-                    <p className="text-slate-655 font-sans text-xs">{merchantResult.description}</p>
+                    <p className="text-ink-secondary font-sans text-xs">{merchantResult.description}</p>
                   </div>
                 ) : (
-                  <div className="text-[10px] text-[#64748B] font-mono text-center py-4 border border-[#E2E8F0] bg-white rounded font-mono">Evaluating claim parameters...</div>
+                  <div className="text-[10px] text-ink-secondary font-mono text-center py-4 border border-border-default bg-bg-base/40 rounded font-mono">Evaluating claim parameters...</div>
                 )}
               </div>
             )}
@@ -801,22 +801,22 @@ function SandboxContent() {
             {/* CLAIM protection SIMULATOR OUTPUT */}
             {activeTab === "claim" && (
               <div className="space-y-4">
-                <div className="border border-[#E2E8F0] bg-white p-4 rounded font-mono text-xs">
-                  <span className="text-[9px] font-mono text-[#64748B] block mb-3 uppercase font-semibold">Verification timeline</span>
+                <div className="border border-border-default bg-bg-base/40 p-4 rounded font-mono text-xs">
+                  <span className="text-[9px] font-mono text-ink-tertiary block mb-3 uppercase font-semibold">Verification timeline</span>
                   {claimSteps.length > 0 ? (
                     <div className="space-y-3">
                       {claimSteps.map((step: any, i: number) => (
                         <div key={i} className="flex items-start gap-3">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#15803D] mt-1 shrink-0"></span>
+                          <span className="w-1.5 h-1.5 rounded-full bg-accent mt-1 shrink-0"></span>
                           <div className="space-y-0.5 font-sans">
-                            <div className="font-semibold text-[#0A2540]">{step.name}</div>
-                            <div className="text-[10px] text-slate-500 leading-none">{step.message}</div>
+                            <div className="font-semibold text-ink-primary">{step.name}</div>
+                            <div className="text-[10px] text-ink-secondary leading-none">{step.message}</div>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-[10px] text-slate-500 text-center py-2 font-mono">
+                    <div className="text-[10px] text-ink-secondary text-center py-2 font-mono">
                       Submit request to launch verification check simulation.
                     </div>
                   )}
@@ -827,25 +827,25 @@ function SandboxContent() {
         </div>
 
         {/* CODE OUTPUT PANEL (TERMINAL VIEWER) */}
-        <div className="border border-slate-800 bg-[#0A2540] rounded-lg p-6 h-full flex flex-col justify-between">
+        <div className="border border-border-default bg-bg-raised rounded-lg p-6 h-full flex flex-col justify-between">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-[#0055D4]" />
-                <span className="text-xs font-mono font-bold text-[#F1F3F7]">RAW API RESPONSE PAYLOAD</span>
+                <Terminal className="w-4 h-4 text-accent" />
+                <span className="text-xs font-mono font-bold text-ink-primary">RAW API RESPONSE PAYLOAD</span>
               </div>
-              <span className="text-[8px] font-mono border border-slate-800 px-2 py-0.5 text-[#64748B] rounded">
+              <span className="text-[8px] font-mono border border-border-subtle px-2 py-0.5 text-ink-tertiary rounded">
                 HTTP/1.1 200 OK
               </span>
             </div>
 
-            <pre className="text-[#F1F3F7]/90 font-mono text-xs overflow-x-auto p-4 bg-[#07192A] border border-slate-800 rounded-lg leading-relaxed whitespace-pre-wrap max-h-[380px]">
+            <pre className="text-ink-primary/90 font-mono text-xs overflow-x-auto p-4 bg-bg-base border border-border-subtle rounded-lg leading-relaxed whitespace-pre-wrap max-h-[380px]">
               <code>{rawPayload}</code>
             </pre>
           </div>
 
-          <div className="border-t border-slate-800 pt-6 mt-6 flex items-center justify-between text-[9px] font-mono text-[#64748B]">
-            <span className="flex items-center gap-1.5 text-[#15803D]">
+          <div className="border-t border-border-subtle pt-6 mt-6 flex items-center justify-between text-[9px] font-mono text-ink-tertiary">
+            <span className="flex items-center gap-1.5 text-accent">
               <Shield className="w-3.5 h-3.5" />
               TLS 1.3 Encryption Active
             </span>
@@ -859,17 +859,23 @@ function SandboxContent() {
 
 export default function Sandbox() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex-1 bg-[#F8F9FC] flex items-center justify-center text-[#64748B] font-mono text-xs">
-          <div className="flex items-center gap-3">
-            <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#0055D4]" />
-            Initializing sandbox...
-          </div>
-        </div>
-      }
-    >
-      <SandboxContent />
-    </Suspense>
+    <>
+      <Navigation />
+      <main className="flex-grow bg-bg-base text-ink-primary">
+        <Suspense
+          fallback={
+            <div className="flex-1 bg-bg-base flex items-center justify-center text-ink-secondary font-mono text-xs h-screen">
+              <div className="flex items-center gap-3">
+                <RefreshCw className="w-3.5 h-3.5 animate-spin text-accent" />
+                Initializing sandbox...
+              </div>
+            </div>
+          }
+        >
+          <SandboxContent />
+        </Suspense>
+      </main>
+      <Footer />
+    </>
   );
 }

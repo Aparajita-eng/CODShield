@@ -37,7 +37,28 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${lora.variable} ${jetbrainsMono.variable} scroll-smooth h-full`}
     >
-      <body className="font-sans antialiased bg-[#F7F5F1] text-[#1C1B19] min-h-full flex flex-col selection:bg-[#B5563C] selection:text-white">
+      <body className="font-sans antialiased bg-bg-base text-ink-primary min-h-full flex flex-col selection:bg-accent selection:text-bg-base relative">
+        {/* SVG Fractal Noise Grain Texture Overlay */}
+        <div 
+          className="fixed inset-0 pointer-events-none z-10"
+          style={{
+            mixBlendMode: "overlay",
+            opacity: 0.035,
+          }}
+        >
+          <svg width="100%" height="100%" className="w-full h-full">
+            <filter id="grain">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.9"
+                numOctaves="2"
+                stitchTiles="stitch"
+              />
+            </filter>
+            <rect width="100%" height="100%" filter="url(#grain)" />
+          </svg>
+        </div>
+
         {children}
       </body>
     </html>
