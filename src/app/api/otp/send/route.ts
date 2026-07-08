@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
     otpStore.set(phone.trim(), { code: rawCode, expiresAt });
 
-    // Format phone number to E.164 standard for Twilio
+    // Format phone number to E.164 standard (+91...)
     let formattedPhone = phone.trim();
     if (!formattedPhone.startsWith("+")) {
       if (formattedPhone.length === 10) {
@@ -27,14 +27,39 @@ export async function POST(request: Request) {
       }
     }
 
+    // Supported SMS Gateway API Keys
+    const twoFactorApiKey = process.env.TWOFACTOR_API_KEY;
     const accountSid = process.env.TWILIO_ACCOUNT_SID;
     const authToken = process.env.TWILIO_AUTH_TOKEN;
     const fromNumber = process.env.TWILIO_PHONE_NUMBER;
 
     let realSmsSent = false;
     let smsError = "";
+    let providerName = "";
 
-    if (accountSid && authToken && fromNumber) {
+    // 1. Prioritize 2Factor.in integration (Recommended for India)
+    if (twoFactorApiKey) {
+      providerName = "2Factor";
+      try {
+        const cleanPhone = formattedPhone.replace("+", ""); // e.g. 919579926020
+        const twoFactorRes = await fetch(
+          `https://2factor.in/API/V1/${twoFactorApiKey}/SMS/${cleanPhone}/${rawCode}`,
+          { method: "GET" }
+        );
+
+        const twoFactorData = await twoFactorRes.json();
+        if (twoFactorRes.ok && twoFactorData.Status === "Success") {
+          realSmsSent = true;
+        } else {
+          smsError = twoFactorData.Details || "2Factor returned an error";
+        }
+      } catch (err: any) {
+        smsError = err.message || "2Factor network connection error";
+      }
+    }
+    // 2. Fallback to Twilio integration
+    else if (accountSid && authToken && fromNumber) {
+      providerName = "Twilio";
       try {
         const bodyParams = new URLSearchParams();
         bodyParams.append("To", formattedPhone);
@@ -69,8 +94,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       message: realSmsSent
-        ? `Real OTP dispatched to ${formattedPhone} via Twilio.`
-        : `Simulated OTP sent to ${phone} via SMS and WhatsApp (Twilio not configured).`,
+        ? `Real OTP dispatched to ${formattedPhone} via ${providerName}.`
+        : `Simulated OTP sent to ${phone} via SMS/WhatsApp (SMS keys not configured).`,
       code: realSmsSent ? undefined : rawCode, // Hide verification code from JSON payload when real SMS is active
       simulated: !realSmsSent,
       error: smsError || undefined,
