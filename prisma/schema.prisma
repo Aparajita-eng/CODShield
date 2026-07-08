@@ -1,0 +1,54 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Merchant {
+  id         String   @id @default(uuid())
+  name       String
+  apiKey     String   @unique
+  tier       String   // Starter, Growth, Enterprise
+  claimRatio Float    @default(0.0)
+  orders     Order[]
+  createdAt  DateTime @default(now())
+}
+
+model Order {
+  id               String   @id @default(uuid())
+  merchantId       String
+  merchant         Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  phone            String
+  pincode          String
+  value            Float
+  riskScore        Int
+  protectionStatus String   // Protected, Held, Failed
+  statusReason     String
+  createdAt        DateTime @default(now())
+  claims           Claim[]
+}
+
+model PincodeRisk {
+  pincode    String @id
+  riskWeight Float  // 0.0 to 1.0
+}
+
+model Blacklist {
+  phone        String   @id
+  refusalCount Int
+  reason       String
+  createdAt    DateTime @default(now())
+}
+
+model Claim {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  proofUrl  String
+  status    String   // Pending, Approved, Rejected
+  step      Int      // 1: Upload, 2: Courier, 3: AI Check, 4: Payout
+  createdAt DateTime @default(now())
+}

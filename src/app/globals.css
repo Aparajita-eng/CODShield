@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+:root {
+  --background: #F8F9FC;
+  --foreground: #0A2540;
+  --card: #F1F3F7;
+  --border: #E2E8F0;
+  --accent: #0055D4; /* Brand Royal Blue (desaturated for corporate fintech aesthetic) */
+  --risklow: #15803D; /* Muted Green */
+  --riskmid: #B45309; /* Muted Ochre/Gold */
+  --riskhigh: #B91C1C; /* Muted Crimson */
+  --grey: #64748B; /* Cool Gray with subtle blue undertone */
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar styling matching cool paper theme */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(10, 37, 64, 0.15) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(10, 37, 64, 0.15);
+  border-radius: 9999px;
+}
+
+::selection {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+/* Flat, functional layouts */
+.mesh-bg {
+  background: #F8F9FC;
+}
+
+.noise-line {
+  background-image: 
+    linear-gradient(rgba(10, 37, 64, 0.02) 1px, transparent 1px), 
+    linear-gradient(90deg, rgba(10, 37, 64, 0.02) 1px, transparent 1px);
+  background-size: 40px 40px;
+  -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 10%, black 40%, transparent 80%);
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 10%, black 40%, transparent 80%);
+}
+
+.glass {
+  background: rgba(248, 249, 252, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.card-hover {
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.card-hover:hover {
+  border-color: var(--accent);
+  background-color: #F1F3F7;
+}
+
+.gradient-text {
+  color: var(--foreground);
+}
+
+.step-line {
+  background: linear-gradient(90deg, rgba(10, 37, 64, 0) 0%, rgba(10, 37, 64, 0.15) 15%, rgba(10, 37, 64, 0.15) 85%, rgba(10, 37, 64, 0) 100%);
+}
+
+/* Flat form components */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 2px;
+  border-radius: 1px;
+  background: rgba(10, 37, 64, 0.08);
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 0 0 1px rgba(10, 37, 64, 0.08);
+}
