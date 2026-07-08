@@ -331,7 +331,11 @@ function SandboxContent() {
                     <div className="space-y-3 pt-2 border-t border-border-subtle">
                       <div className="flex justify-between items-center text-[9px] font-mono text-ink-secondary">
                         <span>Verification Code Input</span>
-                        <span className="text-accent font-semibold">(Demo code: {otpDemoCode})</span>
+                        {otpDemoCode ? (
+                          <span className="text-accent font-semibold">(Demo code: {otpDemoCode})</span>
+                        ) : (
+                          <span className="text-accent font-semibold">(Real SMS Dispatched to Phone)</span>
+                        )}
                       </div>
                       <input
                         type="text"
