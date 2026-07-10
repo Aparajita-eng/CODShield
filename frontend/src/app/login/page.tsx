@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Eye, EyeOff, ChevronRight, Mail, Phone, Lock, CheckCircle2, AlertCircle } from "lucide-react";
 
@@ -13,6 +14,7 @@ interface FormErrors {
 }
 
 export default function LoginPage() {
+  const router = useRouter();
   const [loginType, setLoginType] = useState<"password" | "otp">("password");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -22,7 +24,6 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [otp, setOtp] = useState("");
 
   const validatePasswordForm = () => {
     const newErrors: FormErrors = {};
@@ -36,25 +37,44 @@ export default function LoginPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const validateOtpForm = () => {
+  const validatePhoneForm = () => {
     const newErrors: FormErrors = {};
     if (!phone.trim()) newErrors.phone = "Phone number is required";
     else if (!/^\+?[1-9]\d{1,14}$/.test(phone.replace(/\s/g, "")))
       newErrors.phone = "Invalid phone number";
 
-    if (!otp) newErrors.otp = "OTP is required";
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loginType === "password" && !validatePasswordForm()) return;
-    if (loginType === "otp" && !validateOtpForm()) return;
+    if (loginType === "otp" && !validatePhoneForm()) return;
 
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000);
+
+    if (loginType === "otp") {
+      try {
+        const res = await fetch("/api/otp/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          router.push(`/verify-otp?phone=${encodeURIComponent(phone)}`);
+        } else {
+          setErrors({ phone: data.message || "Failed to send OTP" });
+        }
+      } catch {
+        setErrors({ phone: "Network error, please try again" });
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setTimeout(() => setIsLoading(false), 1000);
+    }
   };
 
   return (
@@ -204,40 +224,16 @@ export default function LoginPage() {
                     </p>
                   ) : null}
                 </div>
-
-                {/* OTP Field */}
-                <div className="space-y-1.5">
-                  <label htmlFor="otp" className="block text-xs font-semibold text-ink-primary">
-                    OTP
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="otp"
-                      type="text"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      className={`w-full px-4 py-2.5 rounded-lg border ${errors.otp ? "border-[var(--negative)] bg-[var(--negative)]/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
-                      placeholder="Enter 6-digit OTP"
-                      maxLength={6}
-                    />
-                  </div>
-                  {errors.otp ? (
-                    <p className="text-xs text-[var(--negative)] flex items-center gap-1">
-                      <AlertCircle className="w-3.5 h-3.5" />
-                      {errors.otp}
-                    </p>
-                  ) : null}
-                </div>
               </>
             )}
 
-            {/* Primary Log In Button */}
+            {/* Primary Button */}
             <button
               type="submit"
               disabled={isLoading}
               className="w-full bg-accent hover:bg-accent/90 disabled:opacity-50 text-ink-inverse font-semibold text-sm py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
-              {isLoading ? "Logging in..." : "Log In"}
+              {isLoading ? (loginType === "otp" ? "Sending OTP..." : "Logging in...") : (loginType === "otp" ? "Send OTP" : "Log In")}
               {!isLoading && <ChevronRight className="w-4 h-4" />}
             </button>
           </form>
