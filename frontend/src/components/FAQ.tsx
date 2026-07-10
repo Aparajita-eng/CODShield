@@ -158,7 +158,7 @@ export default function FAQ() {
             Frequently Asked Questions
           </h2>
           <p className="mt-4 text-base text-ink-secondary leading-relaxed">
-            Answers to common questions about CODShield's fraud prevention, OTP verification, and RTO recovery features.
+            Answers to common questions about CODShield&apos;s fraud prevention, OTP verification, and RTO recovery features.
           </p>
         </div>
 
