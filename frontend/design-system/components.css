@@ -134,12 +134,9 @@
     letter-spacing: 0.08em;
   }
 
-  /* Gradient text – Navy only, no neon */
-  .text-gradient-navy {
-    background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  /* Flat Navy text */
+  .text-flat-navy {
+    @apply text-navy-900;
   }
 
 
@@ -706,15 +703,7 @@
 
   /* Skeleton loader */
   .skeleton {
-    @apply rounded-lg bg-surface-subtle;
-    background: linear-gradient(
-      90deg,
-      #F1F3F7 25%,
-      #F8F9FB 50%,
-      #F1F3F7 75%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 1.8s linear infinite;
+    @apply rounded-lg bg-surface-muted animate-pulse-soft;
   }
 
   .skeleton-text  { @apply skeleton h-4 w-full; }

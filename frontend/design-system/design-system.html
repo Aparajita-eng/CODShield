@@ -487,7 +487,7 @@
     <div style="margin-bottom:40px;">
       <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#059669;margin-bottom:8px;">Components</p>
       <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.015em;color:#111827;margin:0 0 10px;">Buttons</h2>
-      <p style="font-size:15px;color:#4B5563;max-width:56ch;margin:0;">Minimal, rounded, no gradients. Clear hierarchy through weight and color.</p>
+      <p style="font-size:15px;color:#4B5563;max-width:56ch;margin:0;">Minimal, rounded, solid color fills. Clear hierarchy through weight and color.</p>
     </div>
 
     <!-- Variants -->
@@ -936,11 +936,11 @@
 
     <!-- Skeleton -->
     <div style="display:flex;flex-direction:column;gap:10px;max-width:400px;">
-      <div style="height:24px;border-radius:8px;background:linear-gradient(90deg,#F1F3F7 25%,#F8F9FB 50%,#F1F3F7 75%);background-size:200% 100%;animation:shimmer 1.8s linear infinite;"></div>
-      <div style="height:14px;border-radius:6px;background:linear-gradient(90deg,#F1F3F7 25%,#F8F9FB 50%,#F1F3F7 75%);background-size:200% 100%;animation:shimmer 1.8s linear infinite;width:75%;"></div>
-      <div style="height:14px;border-radius:6px;background:linear-gradient(90deg,#F1F3F7 25%,#F8F9FB 50%,#F1F3F7 75%);background-size:200% 100%;animation:shimmer 1.8s linear infinite;width:55%;"></div>
+      <div style="height:24px;border-radius:8px;background:#F1F3F7;animation:pulse-soft 2s ease-in-out infinite;"></div>
+      <div style="height:14px;border-radius:6px;background:#F1F3F7;animation:pulse-soft 2s ease-in-out infinite;width:75%;"></div>
+      <div style="height:14px;border-radius:6px;background:#F1F3F7;animation:pulse-soft 2s ease-in-out infinite;width:55%;"></div>
     </div>
-    <style>@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}</style>
+    <style>@keyframes pulse-soft{0%,100%{opacity:1}50%{opacity:0.6}}</style>
   </section>
 
 
