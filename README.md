@@ -26,8 +26,7 @@ CODShield/
 ```bash
 git clone https://github.com/Aparajita-eng/CODShield.git
 cd CODShield
-npm install          # installs concurrently at root
-npm run install:all  # installs deps in both backend/ and frontend/
+npm install          # installs all dependencies for all workspaces (backend + frontend)
 ```
 
 ### 2. Configure environment variables
