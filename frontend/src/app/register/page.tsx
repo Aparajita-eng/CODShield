@@ -143,11 +143,11 @@ export default function RegisterPage() {
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className={`w-full px-4 py-2.5 rounded-lg border ${errors.fullName ? "border-[var(--negative)] bg-[var(--negative)]/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
+                className={`w-full px-4 py-2.5 rounded-lg border ${errors.fullName ? "border-negative bg-negative/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
                 placeholder="John Doe"
               />
               {errors.fullName ? (
-                <p className="text-xs text-[var(--negative)] flex items-center gap-1">
+                <p className="text-xs text-negative flex items-center gap-1">
                   <AlertCircle className="w-3.5 h-3.5" />
                   {errors.fullName}
                 </p>
@@ -164,11 +164,11 @@ export default function RegisterPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={`w-full px-4 py-2.5 rounded-lg border ${errors.email ? "border-[var(--negative)] bg-[var(--negative)]/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
+                className={`w-full px-4 py-2.5 rounded-lg border ${errors.email ? "border-negative bg-negative/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
                 placeholder="you@company.com"
               />
               {errors.email ? (
-                <p className="text-xs text-[var(--negative)] flex items-center gap-1">
+                <p className="text-xs text-negative flex items-center gap-1">
                   <AlertCircle className="w-3.5 h-3.5" />
                   {errors.email}
                 </p>
@@ -185,11 +185,11 @@ export default function RegisterPage() {
                 type="text"
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
-                className={`w-full px-4 py-2.5 rounded-lg border ${errors.companyName ? "border-[var(--negative)] bg-[var(--negative)]/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
+                className={`w-full px-4 py-2.5 rounded-lg border ${errors.companyName ? "border-negative bg-negative/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
                 placeholder="Your Company"
               />
               {errors.companyName ? (
-                <p className="text-xs text-[var(--negative)] flex items-center gap-1">
+                <p className="text-xs text-negative flex items-center gap-1">
                   <AlertCircle className="w-3.5 h-3.5" />
                   {errors.companyName}
                 </p>
@@ -207,7 +207,7 @@ export default function RegisterPage() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`w-full px-4 py-2.5 pr-10 rounded-lg border ${errors.password ? "border-[var(--negative)] bg-[var(--negative)]/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
+                  className={`w-full px-4 py-2.5 pr-10 rounded-lg border ${errors.password ? "border-negative bg-negative/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
                   placeholder="Create a password"
                 />
                 <button
@@ -235,7 +235,7 @@ export default function RegisterPage() {
                 </div>
               ) : null}
               {errors.password ? (
-                <p className="text-xs text-[var(--negative)] flex items-center gap-1">
+                <p className="text-xs text-negative flex items-center gap-1">
                   <AlertCircle className="w-3.5 h-3.5" />
                   {errors.password}
                 </p>
@@ -253,7 +253,7 @@ export default function RegisterPage() {
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={`w-full px-4 py-2.5 pr-10 rounded-lg border ${errors.confirmPassword ? "border-[var(--negative)] bg-[var(--negative)]/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
+                  className={`w-full px-4 py-2.5 pr-10 rounded-lg border ${errors.confirmPassword ? "border-negative bg-negative/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
                   placeholder="Confirm your password"
                 />
                 <button
@@ -265,7 +265,7 @@ export default function RegisterPage() {
                 </button>
               </div>
               {errors.confirmPassword ? (
-                <p className="text-xs text-[var(--negative)] flex items-center gap-1">
+                <p className="text-xs text-negative flex items-center gap-1">
                   <AlertCircle className="w-3.5 h-3.5" />
                   {errors.confirmPassword}
                 </p>
@@ -293,7 +293,7 @@ export default function RegisterPage() {
                 </span>
               </label>
               {errors.terms ? (
-                <p className="text-xs text-[var(--negative)] flex items-center gap-1">
+                <p className="text-xs text-negative flex items-center gap-1">
                   <AlertCircle className="w-3.5 h-3.5" />
                   {errors.terms}
                 </p>

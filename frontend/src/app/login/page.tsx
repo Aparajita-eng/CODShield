@@ -136,15 +136,15 @@ export default function LoginPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className={`w-full px-4 py-2.5 rounded-lg border ${errors.email ? "border-[var(--negative)] bg-[var(--negative)]/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
+                      className={`w-full px-4 py-2.5 rounded-lg border ${errors.email ? "border-negative bg-negative/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
                       placeholder="you@example.com"
                     />
                     {errors.email ? (
-                      <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--negative)]" />
+                      <AlertCircle className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-negative" />
                     ) : null}
                   </div>
                   {errors.email ? (
-                    <p className="text-xs text-[var(--negative)] flex items-center gap-1">
+                    <p className="text-xs text-negative flex items-center gap-1">
                       <AlertCircle className="w-3.5 h-3.5" />
                       {errors.email}
                     </p>
@@ -167,7 +167,7 @@ export default function LoginPage() {
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className={`w-full px-4 py-2.5 pr-10 rounded-lg border ${errors.password ? "border-[var(--negative)] bg-[var(--negative)]/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
+                      className={`w-full px-4 py-2.5 pr-10 rounded-lg border ${errors.password ? "border-negative bg-negative/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
                       placeholder="Enter your password"
                     />
                     <button
@@ -179,7 +179,7 @@ export default function LoginPage() {
                     </button>
                   </div>
                   {errors.password ? (
-                    <p className="text-xs text-[var(--negative)] flex items-center gap-1">
+                    <p className="text-xs text-negative flex items-center gap-1">
                       <AlertCircle className="w-3.5 h-3.5" />
                       {errors.password}
                     </p>
@@ -213,12 +213,12 @@ export default function LoginPage() {
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className={`w-full pl-10 pr-4 py-2.5 rounded-lg border ${errors.phone ? "border-[var(--negative)] bg-[var(--negative)]/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
+                      className={`w-full pl-10 pr-4 py-2.5 rounded-lg border ${errors.phone ? "border-negative bg-negative/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
                       placeholder="+91 98765 43210"
                     />
                   </div>
                   {errors.phone ? (
-                    <p className="text-xs text-[var(--negative)] flex items-center gap-1">
+                    <p className="text-xs text-negative flex items-center gap-1">
                       <AlertCircle className="w-3.5 h-3.5" />
                       {errors.phone}
                     </p>

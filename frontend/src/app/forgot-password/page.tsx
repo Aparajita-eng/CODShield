@@ -115,11 +115,11 @@ export default function ForgotPasswordPage() {
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className={`w-full px-4 py-2.5 rounded-lg border ${errors.email ? "border-[var(--negative)] bg-[var(--negative)]/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
+                      className={`w-full px-4 py-2.5 rounded-lg border ${errors.email ? "border-negative bg-negative/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
                       placeholder="you@company.com"
                     />
                     {errors.email ? (
-                      <p className="text-xs text-[var(--negative)] flex items-center gap-1">
+                      <p className="text-xs text-negative flex items-center gap-1">
                         <AlertCircle className="w-3.5 h-3.5" />
                         {errors.email}
                       </p>
@@ -155,8 +155,8 @@ export default function ForgotPasswordPage() {
               >
                 {/* Success Icon */}
                 <div className="mb-6 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-[var(--positive)]/10 border border-[var(--positive)]/20 flex items-center justify-center">
-                    <CheckCircle2 className="w-8 h-8 text-[var(--positive)]" />
+                  <div className="w-16 h-16 rounded-full bg-positive/10 border border-positive/20 flex items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8 text-positive" />
                   </div>
                 </div>
                 <h1 className="font-sans font-bold text-2xl text-ink-primary mb-1">

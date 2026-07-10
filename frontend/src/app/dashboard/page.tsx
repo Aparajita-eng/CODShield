@@ -230,7 +230,7 @@ export default function Dashboard() {
           </div>
           <div className="border border-border-default bg-bg-raised/40 p-5 rounded">
             <span className="text-[9px] font-mono text-ink-secondary block uppercase tracking-wider font-semibold">Failed (Prepaid Only)</span>
-            <div className="text-2xl font-bold font-mono text-[var(--negative)] mt-1">{metrics.failedOrders}</div>
+            <div className="text-2xl font-bold font-mono text-negative mt-1">{metrics.failedOrders}</div>
             <div className="text-[10px] text-ink-tertiary mt-1 font-sans">{metrics.claimRatio}% claim RTO ratio</div>
           </div>
         </div>
@@ -278,7 +278,7 @@ export default function Dashboard() {
                             <span
                               className={
                                 o.riskScore > 70
-                                  ? "text-[var(--negative)]"
+                                  ? "text-negative"
                                   : o.riskScore > 35
                                   ? "text-accent/80"
                                   : "text-accent"
@@ -294,7 +294,7 @@ export default function Dashboard() {
                                   ? "bg-accent/15 text-accent border-accent/35"
                                   : o.protectionStatus === "Held"
                                   ? "bg-accent/10 text-accent/80 border-accent/25"
-                                  : "bg-[var(--negative)]/15 text-[var(--negative)] border-[var(--negative)]/35"
+                                  : "bg-negative/15 text-negative border-negative/35"
                               }`}
                             >
                               {o.protectionStatus}
@@ -461,7 +461,7 @@ export default function Dashboard() {
                             ? "bg-accent"
                             : c.status === "Pending"
                             ? "bg-accent/80"
-                            : "bg-[var(--negative)]"
+                            : "bg-negative"
                         }`}
                       ></span>
                       <span className="font-semibold text-ink-primary">Claim {c.status}</span>

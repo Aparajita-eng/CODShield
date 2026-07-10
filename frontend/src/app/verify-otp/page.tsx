@@ -171,8 +171,8 @@ function VerifyOtpContent() {
                 className="text-center"
               >
                 <div className="mb-6 flex items-center justify-center">
-                  <div className="w-16 h-16 rounded-full bg-[var(--positive)]/10 border border-[var(--positive)]/20 flex items-center justify-center">
-                    <CheckCircle2 className="w-8 h-8 text-[var(--positive)]" />
+                  <div className="w-16 h-16 rounded-full bg-positive/10 border border-positive/20 flex items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8 text-positive" />
                   </div>
                 </div>
                 <h1 className="font-sans font-bold text-2xl text-ink-primary mb-1">
@@ -217,13 +217,13 @@ function VerifyOtpContent() {
                           onChange={(e) => handleOtpChange(index, e.target.value)}
                           onKeyDown={(e) => handleKeyDown(index, e)}
                           className={`w-12 h-14 text-center text-lg font-bold rounded-lg border ${
-                            showError ? "border-[var(--negative)] bg-[var(--negative)]/5" : "border-border-default bg-bg-raised"
+                            showError ? "border-negative bg-negative/5" : "border-border-default bg-bg-raised"
                           } text-ink-primary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all`}
                         />
                       ))}
                     </motion.div>
                     {showError ? (
-                      <p className="text-xs text-[var(--negative)] flex items-center gap-1">
+                      <p className="text-xs text-negative flex items-center gap-1">
                         <AlertCircle className="w-3.5 h-3.5" />
                         {errorMessage}
                       </p>
