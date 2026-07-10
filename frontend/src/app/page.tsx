@@ -3,7 +3,7 @@ import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, TrendingDown, PackageX, PhoneOff, BarChart2, AlertTriangle, CheckCircle, Info, Smartphone, Key, Shield, Network, Database, MapPin, FileCheck, BarChart3, Bell } from "lucide-react";
+import { ArrowRight, TrendingDown, PackageX, PhoneOff, BarChart2, AlertTriangle, CheckCircle, Info, Smartphone, MessageSquare, Gauge, Network, History, MapPin, FileCheck, Bell } from "lucide-react";
 import { EASE, fadeUp, clipReveal, staggerContainer, staggerItem } from "@/lib/motion";
 
 interface MockOrder {
@@ -455,81 +455,81 @@ export default function Home() {
         </div>
       </section>
 
-      {/* FEATURES SECTION (CODSHIELD ENGINES) */}
+      {/* THE CODSHIELD ENGINE */}
       <section className="bg-bg-base border-t border-border-default">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-24">
-          
-          {/* Section Header */}
+
+          {/* Section Header - Static / No entrance animations */}
           <div className="max-w-xl mb-16">
             <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold tracking-widest text-accent uppercase mb-3">
               <span className="w-3 h-px bg-accent inline-block"></span>
               Core Technology
             </span>
             <h2 className="font-sans font-bold text-3xl sm:text-4xl text-ink-primary tracking-tight leading-[1.15]">
-              The CODShield Engines
+              The CODShield Engine
             </h2>
             <p className="mt-4 text-base text-ink-secondary leading-relaxed">
-              Eight specialized engines working in synchrony to identify, score, verify, and resolve order risk automatically before fulfillment.
+              Eight specialized risk and automation components working in sync to secure checkout, verify intent, and minimize RTO overhead.
             </p>
           </div>
 
-          {/* Features Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Feature Cards Grid - Static / No entrance animations, hover only */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
               {
-                icon: Key,
-                title: "OTP Engine",
-                description: "Automated, multi-channel OTP verification via WhatsApp, SMS, and IVR. Prompts verification immediately on suspicious checkouts.",
+                icon: MessageSquare,
+                name: "OTP Engine",
+                description: "Sends and verifies one-time passwords via SMS before a COD order is confirmed, catching fake or unreachable phone numbers before dispatch."
               },
               {
-                icon: Shield,
-                title: "Risk Engine",
-                description: "Evaluates 100+ telemetry points including customer purchase history, device risk, and email validation in under 200ms.",
+                icon: Gauge,
+                name: "Risk Engine",
+                description: "Scores every order in real time using signals like device, order history, and delivery zone, before it reaches the fulfillment queue."
               },
               {
                 icon: Network,
-                title: "Trust Graph Engine",
-                description: "Cross-references addresses, phone numbers, and identity hashes to map user relationships and block coordinated fraud groups.",
+                name: "Trust Graph Engine",
+                description: "Cross-references customer identity across orders, phone numbers, and addresses to catch repeat offenders hiding behind new accounts."
               },
               {
-                icon: Database,
-                title: "Fraud History",
-                description: "Access our centralized pool of shared intelligence cataloging millions of repeat RTO offenders and verified fraudsters.",
+                icon: History,
+                name: "Fraud History",
+                description: "Keeps a running record of refusals and RTOs per customer, so repeat fraud doesn't slip through a second time."
               },
               {
                 icon: MapPin,
-                title: "Pincode Intelligence",
-                description: "Leverages zone-specific delivery success rates, serviceability indices, and high-risk area flagging across India.",
+                name: "Pincode Intelligence",
+                description: "Classifies delivery pincodes into risk zones based on historical RTO rates across India."
               },
               {
                 icon: FileCheck,
-                title: "Claims Engine",
-                description: "Automates the verification, approval, and payout workflow of shipping and RTO insurance claims directly within the dashboard.",
+                name: "Claims Engine",
+                description: "Automates courier claim filing and dispute resolution when RTO losses occur, cutting manual ops work."
               },
               {
-                icon: BarChart3,
-                title: "Analytics Dashboard",
-                description: "Tracks active fraud trends, RTO cost reductions, checkout conversion metrics, and automated decision precision in real time.",
+                icon: BarChart2,
+                name: "Analytics",
+                description: "A live dashboard of fraud trends, RTO rates, and verification pass rates by region."
               },
               {
                 icon: Bell,
-                title: "Notification Engine",
-                description: "Triggers immediate alerts via Webhooks, Slack, and email to coordinate operations when critical risk thresholds are crossed.",
-              },
-            ].map((feature, i) => (
+                name: "Notification Engine",
+                description: "Alerts the ops team in real time when a high-risk order is placed, before it ships."
+              }
+            ].map((feature, idx) => (
               <div
-                key={i}
-                className="group relative bg-bg-raised border border-border-default rounded-xl p-6 flex flex-col gap-4 hover:border-accent hover:-translate-y-1 transition-all duration-300 ease-out"
+                key={idx}
+                className="group relative bg-white border border-border-default rounded-xl p-6 flex flex-col gap-4 hover:border-accent hover:shadow-md transition-all duration-200"
               >
-                {/* Icon */}
-                <div className="w-10 h-10 rounded-lg border border-border-default bg-bg-base text-ink-secondary group-hover:text-accent group-hover:border-accent flex items-center justify-center shrink-0 transition-colors duration-300">
-                  <feature.icon className="w-5 h-5" strokeWidth={1.75} />
+                {/* Icon Badge */}
+                <div className="w-10 h-10 rounded-lg border border-accent/20 bg-accent-muted flex items-center justify-center shrink-0">
+                  <feature.icon className="w-5 h-5 text-accent" strokeWidth={1.75} />
                 </div>
-                
-                {/* Title & Description */}
-                <div className="flex flex-col gap-2">
-                  <h3 className="font-sans font-bold text-base text-ink-primary">
-                    {feature.title}
+
+                {/* Engine details */}
+                <div className="flex flex-col gap-1.5">
+                  <h3 className="font-sans font-semibold text-[14px] text-ink-primary leading-snug">
+                    {feature.name}
                   </h3>
                   <p className="text-[13px] text-ink-secondary leading-relaxed">
                     {feature.description}
