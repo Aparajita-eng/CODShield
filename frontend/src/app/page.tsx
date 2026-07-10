@@ -3,7 +3,7 @@ import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, TrendingDown, PackageX, PhoneOff, BarChart2, AlertTriangle, CheckCircle, Info, Smartphone } from "lucide-react";
+import { ArrowRight, TrendingDown, PackageX, PhoneOff, BarChart2, AlertTriangle, CheckCircle, Info, Smartphone, Key, Shield, Network, Database, MapPin, FileCheck, BarChart3, Bell } from "lucide-react";
 import { EASE, fadeUp, clipReveal, staggerContainer, staggerItem } from "@/lib/motion";
 
 interface MockOrder {
@@ -451,6 +451,93 @@ export default function Home() {
               </motion.div>
             ))}
           </motion.div>
+
+        </div>
+      </section>
+
+      {/* FEATURES SECTION (CODSHIELD ENGINES) */}
+      <section className="bg-bg-base border-t border-border-default">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-24">
+          
+          {/* Section Header */}
+          <div className="max-w-xl mb-16">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold tracking-widest text-accent uppercase mb-3">
+              <span className="w-3 h-px bg-accent inline-block"></span>
+              Core Technology
+            </span>
+            <h2 className="font-sans font-bold text-3xl sm:text-4xl text-ink-primary tracking-tight leading-[1.15]">
+              The CODShield Engines
+            </h2>
+            <p className="mt-4 text-base text-ink-secondary leading-relaxed">
+              Eight specialized engines working in synchrony to identify, score, verify, and resolve order risk automatically before fulfillment.
+            </p>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                icon: Key,
+                title: "OTP Engine",
+                description: "Automated, multi-channel OTP verification via WhatsApp, SMS, and IVR. Prompts verification immediately on suspicious checkouts.",
+              },
+              {
+                icon: Shield,
+                title: "Risk Engine",
+                description: "Evaluates 100+ telemetry points including customer purchase history, device risk, and email validation in under 200ms.",
+              },
+              {
+                icon: Network,
+                title: "Trust Graph Engine",
+                description: "Cross-references addresses, phone numbers, and identity hashes to map user relationships and block coordinated fraud groups.",
+              },
+              {
+                icon: Database,
+                title: "Fraud History",
+                description: "Access our centralized pool of shared intelligence cataloging millions of repeat RTO offenders and verified fraudsters.",
+              },
+              {
+                icon: MapPin,
+                title: "Pincode Intelligence",
+                description: "Leverages zone-specific delivery success rates, serviceability indices, and high-risk area flagging across India.",
+              },
+              {
+                icon: FileCheck,
+                title: "Claims Engine",
+                description: "Automates the verification, approval, and payout workflow of shipping and RTO insurance claims directly within the dashboard.",
+              },
+              {
+                icon: BarChart3,
+                title: "Analytics Dashboard",
+                description: "Tracks active fraud trends, RTO cost reductions, checkout conversion metrics, and automated decision precision in real time.",
+              },
+              {
+                icon: Bell,
+                title: "Notification Engine",
+                description: "Triggers immediate alerts via Webhooks, Slack, and email to coordinate operations when critical risk thresholds are crossed.",
+              },
+            ].map((feature, i) => (
+              <div
+                key={i}
+                className="group relative bg-bg-raised border border-border-default rounded-xl p-6 flex flex-col gap-4 hover:border-accent hover:-translate-y-1 transition-all duration-300 ease-out"
+              >
+                {/* Icon */}
+                <div className="w-10 h-10 rounded-lg border border-border-default bg-bg-base text-ink-secondary group-hover:text-accent group-hover:border-accent flex items-center justify-center shrink-0 transition-colors duration-300">
+                  <feature.icon className="w-5 h-5" strokeWidth={1.75} />
+                </div>
+                
+                {/* Title & Description */}
+                <div className="flex flex-col gap-2">
+                  <h3 className="font-sans font-bold text-base text-ink-primary">
+                    {feature.title}
+                  </h3>
+                  <p className="text-[13px] text-ink-secondary leading-relaxed">
+                    {feature.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
 
         </div>
       </section>
