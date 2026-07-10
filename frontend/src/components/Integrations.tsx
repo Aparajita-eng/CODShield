@@ -87,7 +87,7 @@ export default function Integrations() {
                     <div
                       key={itemIdx}
                       aria-label={`${item.name} Integration`}
-                      className="h-11 px-5 bg-white border border-border-default rounded-full flex items-center justify-center gap-2.5 transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-sm hover:border-accent/40 group shrink-0"
+                      className="h-11 px-5 bg-bg-base border border-border-default rounded-full flex items-center justify-center gap-2.5 transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-sm hover:border-accent/40 group shrink-0"
                     >
                       {Icon ? (
                         <>

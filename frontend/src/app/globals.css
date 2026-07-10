@@ -12,6 +12,7 @@
   --color-accent-muted: var(--accent-muted);
   --color-border-subtle: var(--border-subtle);
   --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
   --color-negative: var(--negative);
   --color-positive: var(--positive);
   --color-warning: var(--warning);
@@ -29,6 +30,7 @@
   --accent-muted: rgba(5, 150, 105, 0.08);
   --border-subtle: #F1F3F7;
   --border-default: #E5E7EB;
+  --border-strong: #D1D5DB;
   --negative: #DC2626;
   --positive: #16A34A;
   --warning: #F59E0B;

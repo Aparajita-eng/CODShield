@@ -112,7 +112,7 @@ export default function DashboardShowcase() {
           initial={animationsDisabled ? "visible" : "hidden"}
           whileInView="visible"
           viewport={{ once: true, margin: "-60px" }}
-          className="w-full bg-white border border-border-default rounded-xl shadow-lg overflow-hidden flex flex-col font-sans"
+          className="w-full bg-bg-base border border-border-default rounded-xl shadow-lg overflow-hidden flex flex-col font-sans"
         >
           {/* Browser Top Bar */}
           <div className="bg-bg-sunken border-b border-border-default px-4 py-3 flex items-center justify-between">
@@ -124,7 +124,7 @@ export default function DashboardShowcase() {
             </div>
             
             {/* Address Bar */}
-            <div className="bg-white border border-border-default rounded px-6 py-1 text-[11px] font-mono text-ink-secondary flex items-center gap-2 select-none w-1/3 min-w-[200px] justify-center">
+            <div className="bg-bg-base border border-border-default rounded px-6 py-1 text-[11px] font-mono text-ink-secondary flex items-center gap-2 select-none w-1/3 min-w-[200px] justify-center">
               <span className="text-accent opacity-50 font-bold">https://</span>
               <span>dashboard.codshield.com</span>
             </div>
@@ -141,7 +141,7 @@ export default function DashboardShowcase() {
               <div className="space-y-6">
                 {/* Product Title */}
                 <div className="px-2 py-1 flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-md bg-accent flex items-center justify-center text-white text-[10px] font-bold">
+                  <div className="w-5 h-5 rounded-md bg-accent flex items-center justify-center text-ink-inverse text-[10px] font-bold">
                     C
                   </div>
                   <span className="text-xs font-bold text-ink-primary tracking-tight">CODShield Console</span>
@@ -190,7 +190,7 @@ export default function DashboardShowcase() {
             </aside>
 
             {/* Main Console Workspace */}
-            <main className="flex-1 bg-white flex flex-col min-w-0">
+            <main className="flex-1 bg-bg-base flex flex-col min-w-0">
               
               {/* Internal Dashboard Header / Top Nav */}
               <header className="border-b border-border-default px-6 py-4 flex items-center justify-between gap-4">
@@ -314,7 +314,7 @@ export default function DashboardShowcase() {
                 <div className="grid lg:grid-cols-3 gap-6">
                   
                   {/* Left Column: Orders Table component */}
-                  <div className="border border-border-default rounded-xl bg-white overflow-hidden lg:col-span-2 flex flex-col">
+                  <div className="border border-border-default rounded-xl bg-bg-base overflow-hidden lg:col-span-2 flex flex-col">
                     <div className="px-5 py-4 border-b border-border-default flex items-center justify-between">
                       <span className="text-xs font-mono font-bold text-ink-primary tracking-tight">TRANSACTION MONITOR</span>
                       <span className="text-[9px] font-mono text-ink-tertiary uppercase">Updated real-time</span>
@@ -353,7 +353,7 @@ export default function DashboardShowcase() {
                   </div>
 
                   {/* Right Column: Fraud Alerts component */}
-                  <div className="border border-border-default rounded-xl bg-white flex flex-col">
+                  <div className="border border-border-default rounded-xl bg-bg-base flex flex-col">
                     <div className="px-5 py-4 border-b border-border-default">
                       <span className="text-xs font-mono font-bold text-ink-primary tracking-tight">SYSTEM RISK ALERTS</span>
                     </div>

@@ -7,14 +7,59 @@ import confetti from "canvas-confetti";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
 
+/** Matches the Prisma Merchant model returned by GET /api/dashboard/data */
+interface Merchant {
+  id: string;
+  name: string;
+  apiKey: string;
+  tier: string;
+  claimRatio: number;
+  createdAt: string;
+}
+
+/** Matches the Prisma Order model returned by GET /api/dashboard/data */
+interface Order {
+  id: string;
+  merchantId: string;
+  phone: string;
+  pincode: string;
+  value: number;
+  riskScore: number;
+  protectionStatus: string;
+  statusReason: string;
+  createdAt: string;
+}
+
+/** Matches the Prisma Claim model (with nested order) returned by GET /api/dashboard/data */
+interface Claim {
+  id: string;
+  orderId: string;
+  order: Order;
+  proofUrl: string;
+  status: string;
+  step: number;
+  createdAt: string;
+}
+
+/** Aggregated metrics returned by GET /api/dashboard/data */
+interface DashboardMetrics {
+  totalOrders: number;
+  protectedOrders: number;
+  heldOrders: number;
+  failedOrders: number;
+  holdRatio: number;
+  protectionRatio: number;
+  claimRatio: number;
+}
+
 export default function Dashboard() {
-  const [merchants, setMerchants] = useState<any[]>([]);
+  const [merchants, setMerchants] = useState<Merchant[]>([]);
   const [selectedMerchantId, setSelectedMerchantId] = useState<string>("");
-  const [selectedMerchant, setSelectedMerchant] = useState<any>(null);
+  const [selectedMerchant, setSelectedMerchant] = useState<Merchant | null>(null);
   
-  const [orders, setOrders] = useState<any[]>([]);
-  const [claims, setClaims] = useState<any[]>([]);
-  const [metrics, setMetrics] = useState<any>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [claims, setClaims] = useState<Claim[]>([]);
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   // Simulated Order Form State
@@ -42,13 +87,16 @@ export default function Dashboard() {
         setClaims(data.claims);
         setMetrics(data.metrics);
       }
-    } catch (e) {
+    } catch (_e) {
       console.error("Failed to load dashboard data");
     } finally {
       setLoading(false);
     }
   };
 
+  // Initial data load on mount. fetchDashboardData sets state internally;
+  // this is a standard client-component data-fetch pattern, not a render cascade.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -92,7 +140,7 @@ export default function Dashboard() {
       } else {
         setSimFeedback(`Order check failed: ${data.message}`);
       }
-    } catch (err) {
+    } catch (_err) {
       setSimFeedback("Network error running API simulation");
     } finally {
       setSimLoading(false);
@@ -113,7 +161,7 @@ export default function Dashboard() {
       } else {
         alert(data.message || "Failed to submit claim");
       }
-    } catch (e) {
+    } catch (_e) {
       console.error("Claim request error");
     }
   };

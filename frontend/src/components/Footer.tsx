@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export default function Footer() {
@@ -62,40 +63,40 @@ export default function Footer() {
             </span>
             <ul className="space-y-2 text-xs text-ink-secondary font-medium font-sans">
               <li>
-                <a
+                <Link
                   href="/#modules"
                   onClick={(e) => handleScroll(e, "modules")}
                   className="hover:text-accent transition-colors"
                 >
                   Verification Engine
-                </a>
+                </Link>
               </li>
               <li>
-                <a
+                <Link
                   href="/#modules"
                   onClick={(e) => handleScroll(e, "modules")}
                   className="hover:text-accent transition-colors"
                 >
                   Trust Graph
-                </a>
+                </Link>
               </li>
               <li>
-                <a
+                <Link
                   href="/#modules"
                   onClick={(e) => handleScroll(e, "modules")}
                   className="hover:text-accent transition-colors"
                 >
                   Risk Engine
-                </a>
+                </Link>
               </li>
               <li>
-                <a
+                <Link
                   href="/#modules"
                   onClick={(e) => handleScroll(e, "modules")}
                   className="hover:text-accent transition-colors"
                 >
                   Claim Coverage
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -106,36 +107,36 @@ export default function Footer() {
             </span>
             <ul className="space-y-2 text-xs text-ink-secondary font-medium font-sans">
               <li>
-                <a href="/sandbox" className="hover:text-accent transition-colors">
+                <Link href="/sandbox" className="hover:text-accent transition-colors">
                   Sandbox Console
-                </a>
+                </Link>
               </li>
               <li>
-                <a
+                <Link
                   href="/#integrations"
                   onClick={(e) => handleScroll(e, "integrations")}
                   className="hover:text-accent transition-colors"
                 >
                   API Credentials
-                </a>
+                </Link>
               </li>
               <li>
-                <a
+                <Link
                   href="/#integrations"
                   onClick={(e) => handleScroll(e, "integrations")}
                   className="hover:text-accent transition-colors"
                 >
                   Shopify Plugin
-                </a>
+                </Link>
               </li>
               <li>
-                <a
+                <Link
                   href="/#integrations"
                   onClick={(e) => handleScroll(e, "integrations")}
                   className="hover:text-accent transition-colors"
                 >
                   Webhooks
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -146,24 +147,25 @@ export default function Footer() {
             </span>
             <ul className="space-y-2 text-xs text-ink-secondary font-medium font-sans">
               <li>
-                <a href="#" className="hover:text-accent transition-colors">
+                {/* Placeholder — no real page yet; using button to avoid no-html-link-for-pages */}
+                <button type="button" className="hover:text-accent transition-colors cursor-pointer">
                   Merchant Policy
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="hover:text-accent transition-colors">
+                <button type="button" className="hover:text-accent transition-colors cursor-pointer">
                   RTO Protection Terms
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="hover:text-accent transition-colors">
+                <button type="button" className="hover:text-accent transition-colors cursor-pointer">
                   Fraud Detection Policy
-                </a>
+                </button>
               </li>
               <li>
-                <a href="#" className="hover:text-accent transition-colors">
+                <button type="button" className="hover:text-accent transition-colors cursor-pointer">
                   Claim Process SLA
-                </a>
+                </button>
               </li>
             </ul>
           </div>

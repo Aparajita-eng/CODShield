@@ -4,6 +4,8 @@ import Navigation from "@/components/Navigation";
 import DashboardShowcase from "@/components/DashboardShowcase";
 import Integrations from "@/components/Integrations";
 import Pricing from "@/components/Pricing";
+import FAQ from "@/components/FAQ";
+import Footer from "@/components/Footer";
 import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, TrendingDown, PackageX, PhoneOff, BarChart2, AlertTriangle, CheckCircle, Info, Smartphone, MessageSquare, Gauge, Network, History, MapPin, FileCheck, Bell, LineChart } from "lucide-react";
@@ -82,6 +84,9 @@ export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
+  // Standard SSR hydration guard: setIsMounted gates client-only rendering.
+  // setState here is intentional — not a cascade. Suppressed per React docs pattern.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -94,7 +99,6 @@ export default function Home() {
   const circumference = 2 * Math.PI * radius; // ~251.3
   const strokeDashoffset = circumference - (circumference * currentOrder.riskScore) / 100;
 
-  // Semantic color selectors
   const getRiskColor = (score: number) => {
     if (score < 30) return "text-emerald-600 stroke-emerald-600 bg-emerald-50 border-emerald-100";
     if (score < 60) return "text-amber-500 stroke-amber-500 bg-amber-50 border-amber-100";
@@ -157,7 +161,7 @@ export default function Home() {
               >
                 <a
                   href="mailto:demo@codshield.com?subject=Book%20Demo"
-                  className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-white font-semibold text-xs px-5 py-3.5 rounded-lg transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-ink-inverse font-semibold text-xs px-5 py-3.5 rounded-lg transition-colors cursor-pointer"
                 >
                   Book Demo
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -178,7 +182,7 @@ export default function Home() {
               animate="visible"
               className="w-full relative"
             >
-              <div className="w-full bg-white rounded-xl border border-border-default shadow-lg overflow-hidden flex flex-col md:flex-row h-[480px]">
+              <div className="w-full bg-bg-base rounded-xl border border-border-default shadow-lg overflow-hidden flex flex-col md:flex-row h-[480px]">
                 
                 {/* Orders Sidebar List */}
                 <div className="w-full md:w-[170px] border-b md:border-b-0 md:border-r border-border-default bg-bg-raised flex flex-row md:flex-col overflow-x-auto md:overflow-x-visible md:overflow-y-auto shrink-0 scrollbar-none">
@@ -193,7 +197,7 @@ export default function Home() {
                         onClick={() => setSelectedOrderIdx(idx)}
                         className={`flex flex-col gap-1.5 p-3 text-left w-auto md:w-full shrink-0 md:shrink-0 transition-colors border-b border-border-default last:border-b-0 ${
                           isActive
-                            ? "bg-white border-l-2 border-l-accent"
+                            ? "bg-bg-base border-l-2 border-l-accent"
                             : "hover:bg-bg-sunken border-l-2 border-l-transparent"
                         }`}
                       >
@@ -216,7 +220,7 @@ export default function Home() {
                 </div>
 
                 {/* Dashboard Detail Pane */}
-                <div className="flex-1 p-5 flex flex-col justify-between overflow-y-auto bg-white">
+                <div className="flex-1 p-5 flex flex-col justify-between overflow-y-auto bg-bg-base">
                   
                   {/* Top Stats: Risk Score & Order Info */}
                   <div className="flex items-start justify-between gap-4 border-b border-border-subtle pb-4">
@@ -291,7 +295,7 @@ export default function Home() {
                     <div className="flex flex-col gap-3">
                       {/* Pincode card */}
                       <div className="border border-border-default rounded-lg p-3 bg-bg-raised/30 flex items-center gap-3">
-                        <div className="p-2 bg-white border border-border-default rounded shrink-0">
+                        <div className="p-2 bg-bg-base border border-border-default rounded shrink-0">
                           <span className="font-mono text-xs font-bold text-accent">{currentOrder.pincode}</span>
                         </div>
                         <div>
@@ -303,7 +307,7 @@ export default function Home() {
 
                       {/* OTP Verification status */}
                       <div className="border border-border-default rounded-lg p-3 bg-bg-raised/30 flex items-center gap-3">
-                        <div className="p-2 bg-white border border-border-default rounded shrink-0">
+                        <div className="p-2 bg-bg-base border border-border-default rounded shrink-0">
                           <Smartphone className={`w-4 h-4 ${
                             currentOrder.otpIcon === "verified" ? "text-emerald-600" :
                             currentOrder.otpIcon === "pending" ? "text-amber-500" : "text-red-500"
@@ -423,7 +427,7 @@ export default function Home() {
               <motion.div
                 key={i}
                 variants={animationsDisabled ? {} : staggerItem}
-                className="group relative bg-white border border-border-default rounded-xl p-6 flex flex-col gap-5 hover:border-border-strong hover:shadow-md transition-all duration-200"
+                className="group relative bg-bg-base border border-border-default rounded-xl p-6 flex flex-col gap-5 hover:border-border-strong hover:shadow-md transition-all duration-200"
               >
                 {/* Icon — always --negative (#DC2626) */}
                 <div className="w-10 h-10 rounded-lg border border-negative/20 bg-negative/8 flex items-center justify-center shrink-0">
@@ -523,7 +527,7 @@ export default function Home() {
             ].map((feature, idx) => (
               <div
                 key={idx}
-                className="group relative bg-white border border-border-default rounded-xl p-6 flex flex-col gap-4 hover:border-accent hover:shadow-md transition-all duration-200"
+                className="group relative bg-bg-base border border-border-default rounded-xl p-6 flex flex-col gap-4 hover:border-accent hover:shadow-md transition-all duration-200"
               >
                 {/* Icon Badge */}
                 <div className="w-10 h-10 rounded-lg border border-accent/20 bg-accent-muted flex items-center justify-center shrink-0">
@@ -549,6 +553,8 @@ export default function Home() {
       <DashboardShowcase />
       <Integrations />
       <Pricing />
+      <FAQ />
+      <Footer />
     </>
   );
 }
