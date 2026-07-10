@@ -27,8 +27,7 @@
 ## Setup
 
 ```bash
-# 1. Install dependencies
-cd backend
+# 1. Install dependencies (from the repo root)
 npm install
 
 # 2. Configure environment

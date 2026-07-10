@@ -29,8 +29,7 @@ The merchant-facing web application for CODShield — includes the marketing lan
 ## Setup
 
 ```bash
-# 1. Install dependencies
-cd frontend
+# 1. Install dependencies (from the repo root)
 npm install
 
 # 2. Configure environment
