@@ -1,6 +1,12 @@
 import { Router } from "express";
 import { sendOtp, verifyOtp } from "../controllers/otpController";
-import { loginWithPassword, createOtpSession } from "../controllers/authController";
+import { loginWithPassword, createOtpSession, registerAccount, forgotPassword } from "../controllers/authController";
+import { listOrders, getOrderById, bulkUpdateOrders } from "../controllers/ordersController";
+import {
+  listCustomers,
+  searchCustomers,
+  getCustomerProfile,
+} from "../controllers/customersController";
 import {
   evaluateTrustGraph,
   checkRiskEngine,
@@ -10,6 +16,8 @@ import {
   processSimulatedClaim
 } from "../controllers/sandboxController";
 import { getDashboardData, submitClaim } from "../controllers/dashboardController";
+import { getFraudTrustGraph } from "../controllers/trustGraphController";
+import { requireSession } from "../middleware/requireSession";
 import { checkOrderRisk } from "../controllers/v1Controller";
 
 const router = Router();
@@ -20,7 +28,22 @@ router.post("/otp/verify", verifyOtp);
 
 // Auth session endpoints
 router.post("/auth/login", loginWithPassword);
+router.post("/auth/register", registerAccount);
+router.post("/auth/forgot-password", forgotPassword);
 router.post("/auth/otp-session", createOtpSession);
+
+// Orders endpoints
+router.get("/orders", listOrders);
+router.get("/orders/:orderId", getOrderById);
+router.patch("/orders/bulk", bulkUpdateOrders);
+
+// Customer intelligence endpoints
+router.get("/customers", listCustomers);
+router.get("/customers/search", searchCustomers);
+router.get("/customers/profile", getCustomerProfile);
+
+// Fraud / trust graph (session required)
+router.get("/fraud/trust-graph", requireSession, getFraudTrustGraph);
 
 // Sandbox simulation endpoints
 router.post("/sandbox/trust-graph", evaluateTrustGraph);

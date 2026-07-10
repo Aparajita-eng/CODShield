@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   useReactTable,
   getCoreRowModel,
@@ -21,7 +22,6 @@ import {
   CheckSquare,
   Square,
   X,
-  MoreHorizontal,
   Eye,
   Check,
   AlertTriangle,
@@ -33,14 +33,14 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  sampleOrders,
+  fetchOrders,
+  bulkUpdateOrders,
   type Order,
   type OrderStatus,
   type RiskLevel,
   getRiskLevelFromScore,
-} from "@/lib/orders-data";
-
-// --- Helper Functions ---
+} from "@/lib/orders-api";
+import { useDebouncedValue } from "@/lib/hooks";
 
 const getRiskLevel = getRiskLevelFromScore;
 
@@ -91,27 +91,59 @@ const formatCurrency = (amount: number) => {
 
 // --- Main Component ---
 
-export default function OrdersPage() {
-  // --- State ---
-  const [data] = useState<Order[]>(sampleOrders);
+function OrdersPageContent() {
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
+
+  const [data, setData] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [bulkLoading, setBulkLoading] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [globalFilter, setGlobalFilter] = useState(initialSearch);
+  const debouncedFilter = useDebouncedValue(globalFilter, 300);
   const [statusFilters, setStatusFilters] = useState<OrderStatus[]>([]);
   const [riskFilters, setRiskFilters] = useState<RiskLevel[]>([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const result = await fetchOrders();
+        if (!active) return;
+        if (result.success) {
+          setData(result.orders);
+        } else {
+          setLoadError(result.message || "Failed to load orders");
+        }
+      } catch {
+        if (active) setLoadError("Failed to load orders");
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (initialSearch) setGlobalFilter(initialSearch);
+  }, [initialSearch]);
+
   // --- Filter Logic ---
   const filteredData = useMemo(() => {
     return data.filter((order) => {
       // Global search
       const matchesSearch =
-        globalFilter === "" ||
-        order.id.toLowerCase().includes(globalFilter.toLowerCase()) ||
-        order.customerName.toLowerCase().includes(globalFilter.toLowerCase()) ||
-        order.phone.toLowerCase().includes(globalFilter.toLowerCase());
+        debouncedFilter === "" ||
+        order.id.toLowerCase().includes(debouncedFilter.toLowerCase()) ||
+        order.customerName.toLowerCase().includes(debouncedFilter.toLowerCase()) ||
+        order.phone.toLowerCase().includes(debouncedFilter.toLowerCase());
 
       // Status filter
       const matchesStatus =
@@ -141,7 +173,7 @@ export default function OrdersPage() {
 
       return matchesSearch && matchesStatus && matchesRisk && matchesDate;
     });
-  }, [data, globalFilter, statusFilters, riskFilters, startDate, endDate]);
+  }, [data, debouncedFilter, statusFilters, riskFilters, startDate, endDate]);
 
   // --- Columns ---
   const columns = useMemo<ColumnDef<Order>[]>(
@@ -367,6 +399,28 @@ export default function OrdersPage() {
     onRowSelectionChange: setRowSelection,
   });
 
+  const handleBulkAction = async (action: "verify" | "flag_fraud", orderIds?: string[]) => {
+    const selectedIds = orderIds ?? table.getSelectedRowModel().rows.map((row) => row.original.id);
+    if (!selectedIds.length) return;
+    setBulkLoading(true);
+    try {
+      const result = await bulkUpdateOrders(selectedIds, action);
+      if (result.success && result.orders) {
+        setData((prev) => {
+          const updated = new Map(result.orders!.map((o) => [o.id, o]));
+          return prev.map((o) => updated.get(o.id) ?? o);
+        });
+        if (selectedOrder && selectedIds.includes(selectedOrder.id)) {
+          const updatedOrder = result.orders.find((o) => o.id === selectedOrder.id);
+          if (updatedOrder) setSelectedOrder(updatedOrder);
+        }
+        if (!orderIds) setRowSelection({});
+      }
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
   // --- Export CSV ---
   const handleExportCSV = () => {
     const headers = [
@@ -473,10 +527,14 @@ export default function OrdersPage() {
           <p className="text-sm text-ink-secondary mt-1">
             Manage and monitor all your COD orders
           </p>
+          {loadError ? <p className="text-xs text-negative mt-2">{loadError}</p> : null}
         </div>
       </div>
 
-      {/* Search and Filters */}
+      {loading ? (
+        <div className="flex items-center justify-center py-16 text-sm text-ink-secondary">Loading orders...</div>
+      ) : (
+      <>
       <div className="space-y-4">
         {/* Search + Export */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -635,11 +693,21 @@ export default function OrdersPage() {
               {Object.keys(rowSelection).length} orders selected
             </span>
             <div className="flex items-center gap-3">
-              <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-default bg-bg-base hover:bg-bg-sunken text-xs font-semibold text-ink-primary transition-colors">
+              <button
+                type="button"
+                disabled={bulkLoading}
+                onClick={() => handleBulkAction("verify")}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-default bg-bg-base hover:bg-bg-sunken text-xs font-semibold text-ink-primary transition-colors disabled:opacity-50"
+              >
                 <Check className="w-3.5 h-3.5" />
                 Mark as Verified
               </button>
-              <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-default bg-bg-base hover:bg-bg-sunken text-xs font-semibold text-ink-primary transition-colors">
+              <button
+                type="button"
+                disabled={bulkLoading}
+                onClick={() => handleBulkAction("flag_fraud")}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border-default bg-bg-base hover:bg-bg-sunken text-xs font-semibold text-ink-primary transition-colors disabled:opacity-50"
+              >
                 <AlertTriangle className="w-3.5 h-3.5" />
                 Flag as Fraud
               </button>
@@ -915,10 +983,20 @@ export default function OrdersPage() {
                 >
                   View Full Details
                 </Link>
-                <button className="flex-1 px-4 py-2.5 rounded-lg border border-border-default bg-bg-base hover:bg-bg-raised text-sm font-semibold text-ink-primary transition-colors">
+                <button
+                  type="button"
+                  disabled={bulkLoading}
+                  onClick={() => handleBulkAction("flag_fraud", [selectedOrder.id])}
+                  className="flex-1 px-4 py-2.5 rounded-lg border border-border-default bg-bg-base hover:bg-bg-raised text-sm font-semibold text-ink-primary transition-colors disabled:opacity-50"
+                >
                   Flag as Fraud
                 </button>
-                <button className="flex-1 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent/90 text-sm font-semibold text-ink-inverse transition-colors">
+                <button
+                  type="button"
+                  disabled={bulkLoading}
+                  onClick={() => handleBulkAction("verify", [selectedOrder.id])}
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-accent hover:bg-accent/90 text-sm font-semibold text-ink-inverse transition-colors disabled:opacity-50"
+                >
                   Approve Order
                 </button>
               </div>
@@ -926,6 +1004,18 @@ export default function OrdersPage() {
           </>
         )}
       </AnimatePresence>
+      </>
+      )}
     </div>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center py-16 text-sm text-ink-secondary">Loading orders...</div>
+    }>
+      <OrdersPageContent />
+    </Suspense>
   );
 }

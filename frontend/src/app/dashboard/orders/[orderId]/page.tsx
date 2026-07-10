@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import {
   Eye,
   EyeOff,
@@ -12,60 +11,17 @@ import {
   XCircle,
   ShieldAlert,
 } from "lucide-react";
+import ActivityTimeline from "@/components/ActivityTimeline";
 import {
-  getOrderDetailById,
+  formatCurrency,
+  formatDate,
+  getRiskColor,
+  getStatusColor,
+} from "@/lib/dashboard-ui";
+import {
+  fetchOrderById,
   type OrderDetail,
-  type OrderStatus,
-  type RiskLevel,
-} from "@/lib/orders-data";
-
-// --- Helper Functions ---
-const getStatusColor = (status: OrderStatus) => {
-  switch (status) {
-    case "Verified":
-    case "Delivered":
-      return "var(--positive)";
-    case "Pending":
-    case "Shipped":
-      return "var(--warning)";
-    case "RTO":
-    case "Cancelled":
-      return "var(--negative)";
-    default:
-      return "var(--ink-secondary)";
-  }
-};
-
-const getRiskColor = (level: RiskLevel) => {
-  switch (level) {
-    case "Low":
-      return "var(--positive)";
-    case "Medium":
-      return "var(--warning)";
-    case "High":
-      return "var(--negative)";
-    default:
-      return "var(--ink-secondary)";
-  }
-};
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    minimumFractionDigits: 0,
-  }).format(amount);
-};
+} from "@/lib/orders-api";
 
 // --- Badge Component ---
 const StatusBadge = ({ status, color }: { status: string, color: string }) => (
@@ -86,9 +42,16 @@ export default function OrderDetailPage() {
   const [showPhone, setShowPhone] = useState(false);
 
   useEffect(() => {
-    const data = getOrderDetailById(orderId);
-    setOrder(data ?? null);
-    setLoading(false);
+    let active = true;
+    (async () => {
+      const result = await fetchOrderById(orderId);
+      if (!active) return;
+      setOrder(result.success && result.order ? result.order : null);
+      setLoading(false);
+    })();
+    return () => {
+      active = false;
+    };
   }, [orderId]);
 
   if (loading) {
@@ -299,29 +262,7 @@ export default function OrderDetailPage() {
           {/* 6. Timeline */}
           <section className="bg-bg-raised border border-border-default rounded-lg p-5">
             <h2 className="text-sm font-semibold text-ink-primary uppercase tracking-wider mb-4">Timeline</h2>
-            <div className="space-y-4">
-              {order.timeline.map((event, i) => (
-                <motion.div
-                  key={event.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="flex gap-3"
-                >
-                  <div className="flex flex-col items-center">
-                    <div className="w-2.5 h-2.5 rounded-full bg-accent" />
-                    {i < order.timeline.length - 1 && <div className="w-0.5 flex-1 bg-border-default" />}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold text-ink-primary">{event.title}</p>
-                      <span className="text-xs text-ink-tertiary font-mono">{formatDate(event.timestamp)}</span>
-                    </div>
-                    <p className="text-xs text-ink-secondary mt-1">{event.description}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+            <ActivityTimeline events={order.timeline} />
           </section>
         </div>
 

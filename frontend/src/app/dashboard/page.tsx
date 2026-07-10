@@ -71,9 +71,10 @@ export default function Dashboard() {
   // API Key Visibility
   const [showApiKey, setShowApiKey] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
+  const [claimError, setClaimError] = useState<string>("");
 
-  const fetchDashboardData = async (merchantId: string = "") => {
-    setLoading(true);
+  const loadDashboardData = async (merchantId: string = "", showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
       const url = merchantId ? `${BACKEND_URL}/api/dashboard/data?merchantId=${merchantId}` : `${BACKEND_URL}/api/dashboard/data`;
       const res = await fetch(url);
@@ -86,23 +87,42 @@ export default function Dashboard() {
         setClaims(data.claims);
         setMetrics(data.metrics);
       }
-    } catch (_e) {
+    } catch {
       console.error("Failed to load dashboard data");
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
-  // Initial data load on mount. fetchDashboardData sets state internally;
-  // this is a standard client-component data-fetch pattern, not a render cascade.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
-    fetchDashboardData();
+    let active = true;
+    (async () => {
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/dashboard/data`);
+        const data = await res.json();
+        if (!active) return;
+        if (data.success) {
+          setMerchants(data.merchants);
+          setSelectedMerchantId(data.selectedMerchant.id);
+          setSelectedMerchant(data.selectedMerchant);
+          setOrders(data.orders);
+          setClaims(data.claims);
+          setMetrics(data.metrics);
+        }
+      } catch {
+        console.error("Failed to load dashboard data");
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleMerchantChange = (id: string) => {
     setSelectedMerchantId(id);
-    fetchDashboardData(id);
+    void loadDashboardData(id);
   };
 
   const handleCopyKey = () => {
@@ -134,7 +154,7 @@ export default function Dashboard() {
       const data = await res.json();
       if (data.success) {
         setSimFeedback(`Authorized. Score: ${data.riskAssessment.score} Action: ${data.riskAssessment.action}`);
-        fetchDashboardData(selectedMerchantId);
+        void loadDashboardData(selectedMerchantId, false);
         confetti({ particleCount: 30, spread: 20, colors: ["#059669", "#DC2626"] });
       } else {
         setSimFeedback(`Order check failed: ${data.message}`);
@@ -147,6 +167,7 @@ export default function Dashboard() {
   };
 
   const handleSubmitClaim = async (orderId: string) => {
+    setClaimError("");
     try {
       const res = await fetch(`${BACKEND_URL}/api/dashboard/claim-submit`, {
         method: "POST",
@@ -155,13 +176,13 @@ export default function Dashboard() {
       });
       const data = await res.json();
       if (data.success) {
-        fetchDashboardData(selectedMerchantId);
+        void loadDashboardData(selectedMerchantId, false);
         confetti({ particleCount: 30, spread: 20, colors: ["#059669"] });
       } else {
-        alert(data.message || "Failed to submit claim");
+        setClaimError(data.message || "Failed to submit claim");
       }
-    } catch (_e) {
-      console.error("Claim request error");
+    } catch {
+      setClaimError("Network error submitting claim");
     }
   };
 
@@ -440,6 +461,9 @@ export default function Dashboard() {
             <span className="text-xs font-mono font-bold text-ink-primary block p-6 pb-2 border-b border-border-subtle font-semibold">
               ACTIVE PROTECTION CLAIMS
             </span>
+            {claimError ? (
+              <p className="px-6 pt-3 text-xs text-negative">{claimError}</p>
+            ) : null}
 
             <div className="p-6 pt-4 space-y-4">
               {claims.length === 0 ? (

@@ -2,7 +2,8 @@ import { scryptSync, randomBytes, timingSafeEqual } from "crypto";
 import { SignJWT, jwtVerify } from "jose";
 
 export const SESSION_COOKIE_NAME = "codshield_session";
-const SESSION_TTL = "7d";
+export const SESSION_TTL_SHORT = "1d";
+export const SESSION_TTL_LONG = "30d";
 
 function getSecret(): Uint8Array {
   const secret = process.env.SESSION_SECRET || "codshield-dev-session-secret";
@@ -34,11 +35,14 @@ export interface SessionPayload {
   authType: "password" | "otp";
 }
 
-export async function signSessionToken(payload: SessionPayload): Promise<string> {
+export async function signSessionToken(
+  payload: SessionPayload,
+  ttl: string = SESSION_TTL_LONG
+): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime(SESSION_TTL)
+    .setExpirationTime(ttl)
     .sign(getSecret());
 }
 

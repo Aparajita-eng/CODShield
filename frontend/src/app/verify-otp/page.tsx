@@ -193,7 +193,7 @@ function VerifyOtpContent() {
                   Verify your number
                 </h1>
                 <p className="text-sm text-ink-secondary mb-6">
-                  We've sent a 6-digit code to <span className="font-semibold text-ink-primary">{maskedPhone(phoneFromQuery)}</span>.
+                  We&apos;ve sent a 6-digit code to <span className="font-semibold text-ink-primary">{maskedPhone(phoneFromQuery)}</span>.
                 </p>
 
                 <form onSubmit={handleVerify} className="space-y-4">

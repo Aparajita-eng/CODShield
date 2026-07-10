@@ -1,10 +1,14 @@
 "use client";
 
-export default function Claims() {
+import DashboardModuleShell from "@/components/DashboardModuleShell";
+import { FileText } from "lucide-react";
+
+export default function ClaimsPage() {
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-ink-primary">Claims</h2>
-      <p className="text-sm text-ink-secondary">Claims page placeholder content</p>
-    </div>
+    <DashboardModuleShell
+      title="Claims"
+      description="Track RTO insurance claims, courier disputes, and payout status."
+      icon={FileText}
+    />
   );
 }

@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useMediaQuery } from "@/lib/hooks";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -43,23 +44,24 @@ const notifications = [
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const isDesktop = useMediaQuery("(min-width: 1024px)");
 
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const update = () => setIsDesktop(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
+  const closeMobileSidebar = () => {
+    if (!isDesktop) setIsSidebarOpen(false);
+  };
 
-  // Close mobile sidebar on path change
-  useEffect(() => {
-    setIsSidebarOpen(false);
-  }, [pathname]);
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const query = searchQuery.trim();
+    if (!query) return;
+    router.push(`/dashboard/orders?search=${encodeURIComponent(query)}`);
+    setSearchQuery("");
+  };
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -77,7 +79,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, []);
 
   // Get active nav item to display section title
-  const activeNavItem = navItems.find(item => pathname === item.href);
+  const activeNavItem = navItems.find((item) =>
+    item.href === "/dashboard"
+      ? pathname === "/dashboard"
+      : pathname.startsWith(item.href)
+  );
   const sectionTitle = activeNavItem?.label || "Dashboard";
 
   return (
@@ -142,12 +148,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Nav items */}
         <nav className="flex-1 overflow-y-auto p-4 space-y-1">
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive =
+              item.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname.startsWith(item.href);
             const Icon = item.icon;
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={closeMobileSidebar}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
                     ? "bg-accent-muted text-accent border-l-2 border-accent"
@@ -180,15 +190,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex-1" />
 
           {/* Search */}
-          <div className="hidden sm:flex items-center gap-2 bg-bg-raised border border-border-default rounded-lg px-3 py-2 w-64 focus-within:ring-1 focus-within:ring-accent focus-within:border-accent">
+          <form onSubmit={handleSearchSubmit} className="hidden sm:flex items-center gap-2 bg-bg-raised border border-border-default rounded-lg px-3 py-2 w-64 focus-within:ring-1 focus-within:ring-accent focus-within:border-accent">
             <Search className="w-4 h-4 text-ink-tertiary" />
             <input
               type="text"
-              placeholder="Search..."
+              placeholder="Search orders..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent outline-none text-xs text-ink-primary placeholder:text-ink-tertiary w-full"
             />
-          </div>
-          <button className="sm:hidden text-ink-secondary hover:text-ink-primary">
+          </form>
+          <button
+            type="button"
+            onClick={() => router.push("/dashboard/orders")}
+            className="sm:hidden text-ink-secondary hover:text-ink-primary"
+          >
             <Search className="w-4.5 h-4.5" />
           </button>
 

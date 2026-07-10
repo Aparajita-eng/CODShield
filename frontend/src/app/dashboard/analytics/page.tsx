@@ -1,10 +1,14 @@
 "use client";
 
-export default function Analytics() {
+import DashboardModuleShell from "@/components/DashboardModuleShell";
+import { BarChart3 } from "lucide-react";
+
+export default function AnalyticsPage() {
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-ink-primary">Analytics</h2>
-      <p className="text-sm text-ink-secondary">Analytics page placeholder content</p>
-    </div>
+    <DashboardModuleShell
+      title="Analytics"
+      description="Review RTO trends, verification pass rates, and regional risk breakdowns."
+      icon={BarChart3}
+    />
   );
 }

@@ -25,26 +25,48 @@ interface MerchantRatioResult {
   description: string;
 }
 
+interface TrustGraphResult {
+  success: boolean;
+  score: number;
+  verdict: string;
+  color: string;
+  statusClass: string;
+  connections: number;
+}
+
+interface PincodeResult {
+  success: boolean;
+  pincode: string;
+  weight: number;
+  rto: number;
+  accept: number;
+  level: string;
+  color: string;
+}
+
+interface FraudHistoryResult {
+  success: boolean;
+  flagged: boolean;
+  message: string;
+  flags: string[];
+  refusalCount?: number;
+}
+
+interface RiskAssessment {
+  score: number;
+  verdict: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  action: string;
+  reasons: string[];
+  pincodeRisk: number;
+  valueRisk: number;
+  phoneRisk: number;
+}
+
 
 function SandboxContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialTab = searchParams?.get("tab") || "otp";
-  const [activeTab, setActiveTab] = useState<string>(initialTab);
-
-  // Sync active tab from URL search param changes (e.g. browser back/forward).
-  // setState is intentional here — this is URL-to-state synchronisation, not a cascade.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => {
-    if (searchParams?.get("tab")) {
-      setActiveTab(searchParams.get("tab") as string);
-    }
-  }, [searchParams]);
-
-  const selectTab = (tab: string) => {
-    setActiveTab(tab);
-    router.push(`/sandbox?tab=${tab}`);
-  };
+  const activeTab = searchParams?.get("tab") || "otp";
 
   const [rawPayload, setRawPayload] = useState<string>("{\n  \"status\": \"awaiting_action\",\n  \"message\": \"Select a module and submit a request to view raw network logs.\"\n}");
   const [loading, setLoading] = useState<boolean>(false);
@@ -60,22 +82,22 @@ function SandboxContent() {
   // Module 2: Trust Graph State
   const [trustPhone, setTrustPhone] = useState<string>("9998887776");
   const [trustAddress, setTrustAddress] = useState<string>("342, Saki Naka Main Road, Mumbai");
-  const [trustResult, setTrustResult] = useState<any>(null);
+  const [trustResult, setTrustResult] = useState<TrustGraphResult | null>(null);
   const [trustScore, setTrustScore] = useState<number>(0);
 
   // Module 3: Pincode State
   const [pincodeVal, setPincodeVal] = useState<string>("400072");
-  const [pincodeResult, setPincodeResult] = useState<any>(null);
+  const [pincodeResult, setPincodeResult] = useState<PincodeResult | null>(null);
 
   // Module 4: Fraud History State
   const [fraudPhone, setFraudPhone] = useState<string>("9123456780");
-  const [fraudResult, setFraudResult] = useState<any>(null);
+  const [fraudResult, setFraudResult] = useState<FraudHistoryResult | null>(null);
 
   // Module 5: Risk Engine State
   const [riskPhone, setRiskPhone] = useState<string>("9123456780");
   const [riskPincode, setRiskPincode] = useState<string>("110044");
   const [riskValue, setRiskValue] = useState<number>(3890);
-  const [riskResult, setRiskResult] = useState<any>(null);
+  const [riskResult, setRiskResult] = useState<RiskAssessment | null>(null);
 
   // Module 6: Merchant Ratio State
   const [claimRatio, setClaimRatio] = useState<number>(4.2);
@@ -85,12 +107,10 @@ function SandboxContent() {
   const [claimOrderId, setClaimOrderId] = useState<string>("ord_live_8f0a312");
   const [claimSteps, setClaimSteps] = useState<ClaimStep[]>([]);
 
-  // Reset the raw payload panel label when the user switches module tabs.
-  // setState is intentional here — this is a deliberate display reset, not a cascade.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => {
-    setRawPayload(JSON.stringify({ status: "awaiting_action", activeModule: activeTab }, null, 2));
-  }, [activeTab]);
+  const selectTab = (tab: string) => {
+    setRawPayload(JSON.stringify({ status: "awaiting_action", activeModule: tab }, null, 2));
+    router.push(`/sandbox?tab=${tab}`);
+  };
 
   const handleSendOtp = async () => {
     setLoading(true);

@@ -3,16 +3,11 @@ import { SESSION_COOKIE_NAME, sessionCookieOptions } from "@/lib/auth";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
 
-async function setSessionCookie(response: NextResponse, token: string, rememberMe: boolean) {
-  response.cookies.set(SESSION_COOKIE_NAME, token, sessionCookieOptions(rememberMe));
-  return response;
-}
-
 export async function POST(request: Request) {
   const body = await request.json();
 
   try {
-    const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
+    const res = await fetch(`${BACKEND_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -30,7 +25,8 @@ export async function POST(request: Request) {
       user: data.user,
     });
 
-    return setSessionCookie(response, data.token, Boolean(body.rememberMe));
+    response.cookies.set(SESSION_COOKIE_NAME, data.token, sessionCookieOptions(true));
+    return response;
   } catch {
     return NextResponse.json(
       { success: false, message: "Failed to reach backend" },

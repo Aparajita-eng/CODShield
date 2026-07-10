@@ -6,8 +6,9 @@ import Integrations from "@/components/Integrations";
 import Pricing from "@/components/Pricing";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { useIsClient } from "@/lib/hooks";
 import { ArrowRight, TrendingDown, PackageX, PhoneOff, BarChart2, AlertTriangle, CheckCircle, Info, Smartphone, MessageSquare, Gauge, Network, History, MapPin, FileCheck, Bell, LineChart } from "lucide-react";
 import { EASE, fadeUp, clipReveal, staggerContainer, staggerItem } from "@/lib/motion";
 
@@ -81,15 +82,8 @@ const mockOrders: MockOrder[] = [
 
 export default function Home() {
   const [selectedOrderIdx, setSelectedOrderIdx] = useState(0);
-  const [isMounted, setIsMounted] = useState(false);
+  const isMounted = useIsClient();
   const shouldReduceMotion = useReducedMotion();
-
-  // Standard SSR hydration guard: setIsMounted gates client-only rendering.
-  // setState here is intentional — not a cascade. Suppressed per React docs pattern.
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const animationsDisabled = isMounted && shouldReduceMotion;
   const currentOrder = mockOrders[selectedOrderIdx];

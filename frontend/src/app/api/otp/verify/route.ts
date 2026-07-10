@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME, sessionCookieOptions } from "@/lib/auth";
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+
 export async function POST(request: Request) {
   const body = await request.json();
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
 
   try {
-    const res = await fetch(`${backendUrl}/api/otp/verify`, {
+    const res = await fetch(`${BACKEND_URL}/api/otp/verify`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -18,10 +19,13 @@ export async function POST(request: Request) {
       return NextResponse.json(data, { status: res.status });
     }
 
-    const sessionRes = await fetch(`${backendUrl}/api/auth/otp-session`, {
+    const sessionRes = await fetch(`${BACKEND_URL}/api/auth/otp-session`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: body.phone }),
+      body: JSON.stringify({
+        phone: body.phone,
+        rememberMe: body.rememberMe ?? true,
+      }),
     });
 
     const sessionData = await sessionRes.json();
@@ -38,7 +42,11 @@ export async function POST(request: Request) {
       message: data.message,
     });
 
-    response.cookies.set(SESSION_COOKIE_NAME, sessionData.token, sessionCookieOptions);
+    response.cookies.set(
+      SESSION_COOKIE_NAME,
+      sessionData.token,
+      sessionCookieOptions(body.rememberMe ?? true)
+    );
     return response;
   } catch {
     return NextResponse.json(

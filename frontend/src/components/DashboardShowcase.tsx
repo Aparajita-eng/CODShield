@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { 
   LayoutDashboard, 
   ShoppingBag, 
@@ -20,6 +20,7 @@ import {
 } from "recharts";
 import { motion, useReducedMotion } from "framer-motion";
 import { fadeUp } from "@/lib/motion";
+import { useIsClient } from "@/lib/hooks";
 
 const showcaseOrders = [
   { id: "#ORD-88231", customer: "Amit Sharma", city: "Mumbai", amount: "₹4,820", risk: "Low", score: 12 },
@@ -53,13 +54,9 @@ const pieData = [
 ];
 
 export default function DashboardShowcase() {
-  const [isMounted, setIsMounted] = useState(false);
+  const isMounted = useIsClient();
   const [activeTab, setActiveTab] = useState("Overview");
   const shouldReduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   const animationsDisabled = isMounted && shouldReduceMotion;
 

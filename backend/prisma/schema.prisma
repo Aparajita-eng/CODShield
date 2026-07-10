@@ -37,6 +37,8 @@ model Order {
   value            Float
   riskScore        Int
   protectionStatus String   // Protected, Held, Failed
+  fulfillmentStatus String @default("Pending") // Pending, Verified, Shipped, Delivered, RTO, Cancelled
+  fraudFlagged     Boolean  @default(false)
   statusReason     String
   createdAt        DateTime @default(now())
   claims           Claim[]

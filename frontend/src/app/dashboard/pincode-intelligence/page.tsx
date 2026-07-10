@@ -1,10 +1,14 @@
 "use client";
 
-export default function PincodeIntelligence() {
+import DashboardModuleShell from "@/components/DashboardModuleShell";
+import { MapPin } from "lucide-react";
+
+export default function PincodeIntelligencePage() {
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-ink-primary">Pincode Intelligence</h2>
-      <p className="text-sm text-ink-secondary">Pincode Intelligence page placeholder content</p>
-    </div>
+    <DashboardModuleShell
+      title="Pincode Intelligence"
+      description="Explore pincode-level RTO rates, risk zones, and delivery performance across India."
+      icon={MapPin}
+    />
   );
 }

@@ -4,7 +4,7 @@ import { SiShopify, SiWoocommerce, SiRazorpay, SiMeta, SiExpress, SiCloudflare }
 
 interface Integration {
   name: string;
-  icon?: React.ComponentType<any>;
+  icon?: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   brandColor: string;
 }
 
