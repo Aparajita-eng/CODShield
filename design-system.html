@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CODShield Design System</title>
+  <meta name="description" content="CODShield — Enterprise cybersecurity & fintech design system reference." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              base:    "#FFFFFF",
+              subtle:  "#F8F9FB",
+              muted:   "#F1F3F7",
+              inverse: "#0F172A",
+            },
+            border: {
+              DEFAULT: "#E5E7EB",
+              strong:  "#D1D5DB",
+              focus:   "#059669",
+            },
+            navy: {
+              50:  "#EEF2FF",
+              100: "#E0E7FF",
+              200: "#C7D2FE",
+              400: "#818CF8",
+              600: "#1E3A5F",
+              700: "#162D4A",
+              800: "#0D2137",
+              900: "#0F172A",
+              950: "#060D1A",
+            },
+            emerald: {
+              50:  "#ECFDF5",
+              100: "#D1FAE5",
+              200: "#A7F3D0",
+              300: "#6EE7B7",
+              400: "#34D399",
+              500: "#10B981",
+              600: "#059669",
+              700: "#047857",
+              800: "#065F46",
+            },
+            danger:  { light: "#FEF2F2", DEFAULT: "#DC2626", dark: "#B91C1C" },
+            warning: { light: "#FFFBEB", DEFAULT: "#F59E0B", dark: "#D97706" },
+            success: { light: "#F0FDF4", DEFAULT: "#16A34A", dark: "#15803D" },
+            info:    { light: "#EFF6FF", DEFAULT: "#2563EB", dark: "#1D4ED8" },
+          },
+          fontFamily: {
+            sans: ["Inter", "system-ui", "sans-serif"],
+            mono: ["JetBrains Mono", "Fira Code", "Consolas", "monospace"],
+          },
+          borderRadius: {
+            lg: "12px",
+            xl: "16px",
+            "2xl": "20px",
+          },
+          boxShadow: {
+            xs: "0 1px 2px 0 rgba(0,0,0,0.04)",
+            sm: "0 1px 3px 0 rgba(0,0,0,0.06), 0 1px 2px -1px rgba(0,0,0,0.04)",
+            DEFAULT: "0 2px 8px 0 rgba(0,0,0,0.06), 0 1px 3px -1px rgba(0,0,0,0.04)",
+            md: "0 4px 12px 0 rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05)",
+            lg: "0 8px 24px 0 rgba(0,0,0,0.08), 0 4px 8px -4px rgba(0,0,0,0.05)",
+          },
+          animation: {
+            "fade-in":  "fade-in 200ms ease-out",
+            "fade-up":  "fade-up 250ms ease-out",
+            "scale-in": "scale-in 200ms ease-out",
+          },
+          keyframes: {
+            "fade-in":  { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
+            "fade-up":  { "0%": { opacity: "0", transform: "translateY(8px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
+            "scale-in": { "0%": { opacity: "0", transform: "scale(0.97)" }, "100%": { opacity: "1", transform: "scale(1)" } },
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+    body { font-family: "Inter", system-ui, sans-serif; }
+    ::selection { background: rgba(5,150,105,0.15); }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 9999px; }
+
+    /* Section anchors */
+    .ds-section { padding: 64px 0 80px; border-bottom: 1px solid #E5E7EB; }
+    .ds-section:last-child { border-bottom: none; }
+
+    /* Swatch grid */
+    .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+    .swatch { border-radius: 12px; overflow: hidden; border: 1px solid #E5E7EB; }
+    .swatch-color { height: 64px; }
+    .swatch-info { padding: 10px 12px; background: #fff; }
+    .swatch-name { font-size: 12px; font-weight: 600; color: #111827; }
+    .swatch-hex  { font-size: 11px; font-family: "JetBrains Mono", monospace; color: #6B7280; }
+
+    /* Type specimen */
+    .type-row { display: grid; grid-template-columns: 140px 1fr; gap: 24px; align-items: start; padding: 16px 0; border-bottom: 1px solid #F1F3F7; }
+    .type-meta { font-size: 11px; font-family: "JetBrains Mono", monospace; color: #9CA3AF; padding-top: 4px; }
+
+    /* Nav sidebar fixed */
+    .ds-nav { position: fixed; top: 0; left: 0; bottom: 0; width: 220px; background: #fff; border-right: 1px solid #E5E7EB; padding: 24px 16px; overflow-y: auto; z-index: 100; }
+    .ds-main { margin-left: 220px; padding: 0 48px 120px; max-width: calc(1200px + 220px); }
+
+    @media (max-width: 900px) {
+      .ds-nav { display: none; }
+      .ds-main { margin-left: 0; padding: 24px 20px 80px; }
+    }
+
+    /* Component preview box */
+    .preview-box {
+      background: #F8F9FB;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 12px;
+    }
+
+    .preview-dark {
+      background: #0F172A;
+    }
+
+    /* Spacing visual */
+    .spacing-row { display: flex; align-items: center; gap: 16px; margin-bottom: 10px; }
+    .spacing-block { background: #059669; border-radius: 4px; flex-shrink: 0; }
+    .spacing-label { font-size: 12px; font-family: "JetBrains Mono", monospace; color: #6B7280; }
+
+    .token-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .token-table th { text-align: left; padding: 8px 12px; background: #F8F9FB; font-size: 11px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid #E5E7EB; }
+    .token-table td { padding: 10px 12px; border-bottom: 1px solid #F1F3F7; color: #111827; vertical-align: middle; }
+    .token-table tr:last-child td { border-bottom: none; }
+    .token-table code { font-family: "JetBrains Mono", monospace; font-size: 12px; background: #F1F3F7; padding: 2px 6px; border-radius: 4px; color: #0F172A; }
+  </style>
+</head>
+<body class="bg-white text-gray-900">
+
+<!-- ─── SIDEBAR NAV ─────────────────────────────────────── -->
+<nav class="ds-nav" role="navigation" aria-label="Design System Navigation">
+  <div class="mb-6">
+    <div class="flex items-center gap-2 mb-1">
+      <div class="w-7 h-7 bg-navy-900 rounded-lg flex items-center justify-center flex-shrink-0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <span class="text-sm font-bold text-gray-900">CODShield</span>
+    </div>
+    <p class="text-xs text-gray-400 mt-1 pl-9">Design System v1.0</p>
+  </div>
+
+  <div class="space-y-0.5">
+    <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-2 pt-2 pb-1">Foundation</p>
+    <a href="#colors" class="flex items-center gap-2 px-2.5 py-1.5 text-[13px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">Colors</a>
+    <a href="#typography" class="flex items-center gap-2 px-2.5 py-1.5 text-[13px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">Typography</a>
+    <a href="#spacing" class="flex items-center gap-2 px-2.5 py-1.5 text-[13px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">Spacing</a>
+    <a href="#shadows" class="flex items-center gap-2 px-2.5 py-1.5 text-[13px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">Shadows & Radius</a>
+    <a href="#motion" class="flex items-center gap-2 px-2.5 py-1.5 text-[13px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">Motion</a>
+
+    <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-2 pt-4 pb-1">Components</p>
+    <a href="#buttons" class="flex items-center gap-2 px-2.5 py-1.5 text-[13px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">Buttons</a>
+    <a href="#forms" class="flex items-center gap-2 px-2.5 py-1.5 text-[13px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">Forms</a>
+    <a href="#cards" class="flex items-center gap-2 px-2.5 py-1.5 text-[13px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">Cards & Stats</a>
+    <a href="#badges" class="flex items-center gap-2 px-2.5 py-1.5 text-[13px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">Badges & Pills</a>
+    <a href="#navigation" class="flex items-center gap-2 px-2.5 py-1.5 text-[13px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">Navigation</a>
+    <a href="#tables" class="flex items-center gap-2 px-2.5 py-1.5 text-[13px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">Tables</a>
+    <a href="#feedback" class="flex items-center gap-2 px-2.5 py-1.5 text-[13px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">Feedback</a>
+    <a href="#security" class="flex items-center gap-2 px-2.5 py-1.5 text-[13px] text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">Security UI</a>
+  </div>
+</nav>
+
+<!-- ─── MAIN CONTENT ─────────────────────────────────────── -->
+<main class="ds-main">
+
+  <!-- HEADER -->
+  <header style="padding: 64px 0 48px; border-bottom: 1px solid #E5E7EB; margin-bottom: 0;">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-10 h-10 bg-navy-900 rounded-xl flex items-center justify-center">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full border border-emerald-100 tracking-wider uppercase">Design System v1.0</span>
+    </div>
+    <h1 style="font-size: 48px; font-weight: 800; letter-spacing: -0.025em; line-height: 1.1; color: #111827; margin: 0 0 16px;">CODShield<br/><span style="color: #059669;">Design System</span></h1>
+    <p style="font-size: 18px; color: #4B5563; max-width: 56ch; line-height: 1.65; margin: 0 0 32px;">
+      A premium enterprise design system for cybersecurity & fintech. Built for clarity, trust, and performance. Inspired by Stripe, Linear, Vercel, and Cloudflare.
+    </p>
+    <div class="flex items-center gap-3 flex-wrap">
+      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Tailwind CSS v3
+      </span>
+      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Inter + JetBrains Mono
+      </span>
+      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        WCAG 2.1 AA
+      </span>
+      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        8pt Grid
+      </span>
+    </div>
+  </header>
+
+
+  <!-- ═══ 1. COLORS ══════════════════════════════════════ -->
+  <section id="colors" class="ds-section">
+    <div style="margin-bottom:40px;">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#059669;margin-bottom:8px;">Foundation</p>
+      <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.015em;color:#111827;margin:0 0 10px;">Color Tokens</h2>
+      <p style="font-size:15px;color:#4B5563;max-width:56ch;margin:0;">Semantic color tokens with strict roles. No decorative palette drift.</p>
+    </div>
+
+    <!-- Surface -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 14px;">Surface</h3>
+    <div class="swatch-grid" style="margin-bottom:36px;">
+      <div class="swatch"><div class="swatch-color" style="background:#FFFFFF;border-bottom:1px solid #E5E7EB;"></div><div class="swatch-info"><div class="swatch-name">surface.base</div><div class="swatch-hex">#FFFFFF</div><div class="swatch-hex" style="margin-top:2px;">Page background</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#F8F9FB;"></div><div class="swatch-info"><div class="swatch-name">surface.subtle</div><div class="swatch-hex">#F8F9FB</div><div class="swatch-hex" style="margin-top:2px;">Cards, sidebar</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#F1F3F7;"></div><div class="swatch-info"><div class="swatch-name">surface.muted</div><div class="swatch-hex">#F1F3F7</div><div class="swatch-hex" style="margin-top:2px;">Hover, disabled</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#0F172A;"></div><div class="swatch-info" style="background:#0F172A;"><div class="swatch-name" style="color:#F9FAFB;">surface.inverse</div><div class="swatch-hex" style="color:#6EE7B7;">#0F172A</div><div class="swatch-hex" style="color:#6B7280;margin-top:2px;">Dark nav, hero</div></div></div>
+    </div>
+
+    <!-- Brand – Navy -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 14px;">Brand — Deep Navy</h3>
+    <div class="swatch-grid" style="margin-bottom:36px;">
+      <div class="swatch"><div class="swatch-color" style="background:#EEF2FF;"></div><div class="swatch-info"><div class="swatch-name">navy.50</div><div class="swatch-hex">#EEF2FF</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#C7D2FE;"></div><div class="swatch-info"><div class="swatch-name">navy.200</div><div class="swatch-hex">#C7D2FE</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#1E3A5F;"></div><div class="swatch-info"><div class="swatch-name">navy.600</div><div class="swatch-hex">#1E3A5F</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#162D4A;"></div><div class="swatch-info"><div class="swatch-name">navy.700</div><div class="swatch-hex">#162D4A</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#0D2137;"></div><div class="swatch-info"><div class="swatch-name">navy.800</div><div class="swatch-hex">#0D2137</div></div></div>
+      <div class="swatch" style="border-color:#0F172A;"><div class="swatch-color" style="background:#0F172A;"></div><div class="swatch-info" style="background:#0F172A;border-top:1px solid #162D4A;"><div class="swatch-name" style="color:#fff;">navy.900 ★</div><div class="swatch-hex" style="color:#6EE7B7;">#0F172A</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#060D1A;"></div><div class="swatch-info" style="background:#060D1A;"><div class="swatch-name" style="color:#9CA3AF;">navy.950</div><div class="swatch-hex" style="color:#4B5563;">#060D1A</div></div></div>
+    </div>
+
+    <!-- Accent – Emerald -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 14px;">Accent — Emerald</h3>
+    <div class="swatch-grid" style="margin-bottom:36px;">
+      <div class="swatch"><div class="swatch-color" style="background:#ECFDF5;"></div><div class="swatch-info"><div class="swatch-name">emerald.50</div><div class="swatch-hex">#ECFDF5</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#D1FAE5;"></div><div class="swatch-info"><div class="swatch-name">emerald.100</div><div class="swatch-hex">#D1FAE5</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#6EE7B7;"></div><div class="swatch-info"><div class="swatch-name">emerald.300</div><div class="swatch-hex">#6EE7B7</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#10B981;"></div><div class="swatch-info"><div class="swatch-name">emerald.500</div><div class="swatch-hex">#10B981</div></div></div>
+      <div class="swatch" style="border-color:#059669;"><div class="swatch-color" style="background:#059669;"></div><div class="swatch-info" style="background:#059669;border-top:1px solid #047857;"><div class="swatch-name" style="color:#fff;">emerald.600 ★</div><div class="swatch-hex" style="color:#D1FAE5;">#059669</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#047857;"></div><div class="swatch-info" style="background:#047857;"><div class="swatch-name" style="color:#D1FAE5;">emerald.700</div><div class="swatch-hex" style="color:#6EE7B7;">#047857</div></div></div>
+    </div>
+
+    <!-- Semantic -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 14px;">Semantic</h3>
+    <div class="swatch-grid" style="margin-bottom:0;">
+      <div class="swatch"><div class="swatch-color" style="background:#DC2626;"></div><div class="swatch-info"><div class="swatch-name">danger</div><div class="swatch-hex">#DC2626</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#F59E0B;"></div><div class="swatch-info"><div class="swatch-name">warning</div><div class="swatch-hex">#F59E0B</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#16A34A;"></div><div class="swatch-info"><div class="swatch-name">success</div><div class="swatch-hex">#16A34A</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#2563EB;"></div><div class="swatch-info"><div class="swatch-name">info</div><div class="swatch-hex">#2563EB</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#E5E7EB;"></div><div class="swatch-info"><div class="swatch-name">border</div><div class="swatch-hex">#E5E7EB</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#111827;"></div><div class="swatch-info" style="background:#111827;"><div class="swatch-name" style="color:#F9FAFB;">text.primary</div><div class="swatch-hex" style="color:#6B7280;">#111827</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#4B5563;"></div><div class="swatch-info" style="background:#4B5563;"><div class="swatch-name" style="color:#F9FAFB;">text.secondary</div><div class="swatch-hex" style="color:#9CA3AF;">#4B5563</div></div></div>
+      <div class="swatch"><div class="swatch-color" style="background:#9CA3AF;"></div><div class="swatch-info"><div class="swatch-name">text.muted</div><div class="swatch-hex">#9CA3AF</div></div></div>
+    </div>
+  </section>
+
+
+  <!-- ═══ 2. TYPOGRAPHY ══════════════════════════════════ -->
+  <section id="typography" class="ds-section">
+    <div style="margin-bottom:40px;">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#059669;margin-bottom:8px;">Foundation</p>
+      <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.015em;color:#111827;margin:0 0 10px;">Typography</h2>
+      <p style="font-size:15px;color:#4B5563;max-width:56ch;margin:0;">Inter for UI. JetBrains Mono for code and data. Eight levels of hierarchy.</p>
+    </div>
+
+    <div style="background:#F8F9FB;border:1px solid #E5E7EB;border-radius:12px;padding:32px;margin-bottom:32px;">
+      <!-- Hero -->
+      <div class="type-row">
+        <div class="type-meta">Hero<br/>56px / 700<br/>-0.03em</div>
+        <div style="font-size:56px;font-weight:800;letter-spacing:-0.03em;line-height:1.07;color:#111827;">Secure by design.</div>
+      </div>
+      <!-- Display -->
+      <div class="type-row">
+        <div class="type-meta">Display<br/>48px / 700<br/>-0.025em</div>
+        <div style="font-size:48px;font-weight:700;letter-spacing:-0.025em;line-height:1.1;color:#111827;">Zero trust. Full control.</div>
+      </div>
+      <!-- Section -->
+      <div class="type-row">
+        <div class="type-meta">Section<br/>40px / 700<br/>-0.02em</div>
+        <div style="font-size:40px;font-weight:700;letter-spacing:-0.02em;line-height:1.15;color:#111827;">Real-time threat detection</div>
+      </div>
+      <!-- Heading -->
+      <div class="type-row">
+        <div class="type-meta">Heading<br/>32px / 600<br/>-0.015em</div>
+        <div style="font-size:32px;font-weight:600;letter-spacing:-0.015em;line-height:1.25;color:#111827;">Transaction Monitoring</div>
+      </div>
+      <!-- Subheading -->
+      <div class="type-row">
+        <div class="type-meta">Subheading<br/>24px / 600<br/>-0.01em</div>
+        <div style="font-size:24px;font-weight:600;letter-spacing:-0.01em;line-height:1.35;color:#111827;">Account Security Overview</div>
+      </div>
+      <!-- Body XL -->
+      <div class="type-row">
+        <div class="type-meta">Body XL<br/>20px / 400</div>
+        <div style="font-size:20px;line-height:1.6;color:#4B5563;">CODShield monitors every transaction in real time, surfacing anomalies before they become incidents.</div>
+      </div>
+      <!-- Body LG -->
+      <div class="type-row">
+        <div class="type-meta">Body LG<br/>18px / 400</div>
+        <div style="font-size:18px;line-height:1.65;color:#4B5563;">Your compliance dashboard gives you a complete audit trail, exportable on demand.</div>
+      </div>
+      <!-- Body -->
+      <div class="type-row">
+        <div class="type-meta">Body<br/>16px / 400</div>
+        <div style="font-size:16px;line-height:1.6;color:#4B5563;">Each alert is enriched with context, risk scoring, and recommended remediation steps.</div>
+      </div>
+      <!-- Body SM -->
+      <div class="type-row">
+        <div class="type-meta">Body SM<br/>14px / 400</div>
+        <div style="font-size:14px;line-height:1.55;color:#6B7280;">Last updated: 2 minutes ago · All systems operational · 99.99% uptime SLA</div>
+      </div>
+      <!-- Label -->
+      <div class="type-row">
+        <div class="type-meta">Label<br/>12px / 700<br/>+0.06em</div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#6B7280;">Transaction Volume</div>
+      </div>
+      <!-- Code -->
+      <div class="type-row" style="border-bottom:none;">
+        <div class="type-meta">Code<br/>13px mono</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:13px;color:#059669;background:#ECFDF5;padding:8px 12px;border-radius:8px;border:1px solid #D1FAE5;">curl -H "Authorization: Bearer sk_live_..." https://api.codshield.io/v1/threats</div>
+      </div>
+    </div>
+
+    <!-- Font token table -->
+    <table class="token-table" style="border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;">
+      <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr><td><code>font-sans</code></td><td>Inter, system-ui</td><td>All UI text</td></tr>
+        <tr><td><code>font-mono</code></td><td>JetBrains Mono</td><td>Code, IDs, addresses, data</td></tr>
+        <tr><td><code>font-normal</code></td><td>400</td><td>Body copy</td></tr>
+        <tr><td><code>font-medium</code></td><td>500</td><td>UI elements, nav</td></tr>
+        <tr><td><code>font-semibold</code></td><td>600</td><td>Labels, subheadings</td></tr>
+        <tr><td><code>font-bold</code></td><td>700</td><td>Headings, CTAs</td></tr>
+        <tr><td><code>font-extrabold</code></td><td>800</td><td>Hero, display text</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+
+  <!-- ═══ 3. SPACING ═════════════════════════════════════ -->
+  <section id="spacing" class="ds-section">
+    <div style="margin-bottom:40px;">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#059669;margin-bottom:8px;">Foundation</p>
+      <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.015em;color:#111827;margin:0 0 10px;">Spacing Scale</h2>
+      <p style="font-size:15px;color:#4B5563;max-width:56ch;margin:0;">8-point grid. Every value is a multiple of 4px for pixel-perfect consistency.</p>
+    </div>
+
+    <div style="background:#F8F9FB;border:1px solid #E5E7EB;border-radius:12px;padding:32px;margin-bottom:28px;">
+      <div class="spacing-row"><div class="spacing-block" style="width:4px;height:16px;"></div><span class="spacing-label">1 = 4px — xs, icon padding</span></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:8px;height:16px;"></div><span class="spacing-label">2 = 8px — tight gap, badge padding</span></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:12px;height:16px;"></div><span class="spacing-label">3 = 12px — small gap, sm button</span></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:16px;height:16px;"></div><span class="spacing-label">4 = 16px — base gap, input padding</span></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:24px;height:16px;"></div><span class="spacing-label">6 = 24px — component padding, card inner</span></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:32px;height:16px;"></div><span class="spacing-label">8 = 32px — section inner gap</span></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:48px;height:16px;"></div><span class="spacing-label">12 = 48px — large section spacer</span></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:64px;height:16px;"></div><span class="spacing-label">16 = 64px — hero padding</span></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:80px;height:16px;"></div><span class="spacing-label">20 = 80px — section vertical</span></div>
+      <div class="spacing-row"><div class="spacing-block" style="width:96px;height:16px;"></div><span class="spacing-label">24 = 96px — jumbo spacing</span></div>
+    </div>
+
+    <table class="token-table" style="border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;">
+      <thead><tr><th>Token</th><th>px value</th><th>Use case</th></tr></thead>
+      <tbody>
+        <tr><td><code>p-2</code></td><td>8px</td><td>Badge, icon padding</td></tr>
+        <tr><td><code>p-3</code></td><td>12px</td><td>sm button, tag</td></tr>
+        <tr><td><code>p-4 / px-4 py-2.5</code></td><td>16px / 10px</td><td>Default button</td></tr>
+        <tr><td><code>p-5</code></td><td>20px</td><td>Card inner (subtle)</td></tr>
+        <tr><td><code>p-6</code></td><td>24px</td><td>Card inner (base)</td></tr>
+        <tr><td><code>p-8</code></td><td>32px</td><td>Pricing card, modal</td></tr>
+        <tr><td><code>gap-6</code></td><td>24px</td><td>Grid gap (cards)</td></tr>
+        <tr><td><code>gap-12</code></td><td>48px</td><td>Two-col layout gap</td></tr>
+        <tr><td><code>py-20</code></td><td>80px</td><td>Section padding</td></tr>
+        <tr><td><code>py-28</code></td><td>112px</td><td>Hero section padding</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+
+  <!-- ═══ 4. SHADOWS & RADIUS ════════════════════════════ -->
+  <section id="shadows" class="ds-section">
+    <div style="margin-bottom:40px;">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#059669;margin-bottom:8px;">Foundation</p>
+      <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.015em;color:#111827;margin:0 0 10px;">Shadows & Border Radius</h2>
+    </div>
+
+    <!-- Shadows -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 16px;">Shadow Scale (Very Subtle)</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:40px;">
+      <div style="background:#fff;border:1px solid #F1F3F7;border-radius:12px;padding:24px;box-shadow:0 1px 2px 0 rgba(0,0,0,0.04);">
+        <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:4px;">shadow-xs</div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#9CA3AF;">0 1px 2px rgba(0,0,0,0.04)</div>
+      </div>
+      <div style="background:#fff;border:1px solid #F1F3F7;border-radius:12px;padding:24px;box-shadow:0 1px 3px 0 rgba(0,0,0,0.06),0 1px 2px -1px rgba(0,0,0,0.04);">
+        <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:4px;">shadow-sm</div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#9CA3AF;">0 1px 3px rgba(0,0,0,.06)</div>
+      </div>
+      <div style="background:#fff;border:1px solid #F1F3F7;border-radius:12px;padding:24px;box-shadow:0 4px 12px 0 rgba(0,0,0,0.07),0 2px 4px -2px rgba(0,0,0,0.05);">
+        <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:4px;">shadow-md</div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#9CA3AF;">0 4px 12px rgba(0,0,0,.07)</div>
+      </div>
+      <div style="background:#fff;border:1px solid #F1F3F7;border-radius:12px;padding:24px;box-shadow:0 8px 24px 0 rgba(0,0,0,0.08),0 4px 8px -4px rgba(0,0,0,0.05);">
+        <div style="font-size:13px;font-weight:600;color:#111827;margin-bottom:4px;">shadow-lg</div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#9CA3AF;">0 8px 24px rgba(0,0,0,.08)</div>
+      </div>
+      <div style="background:#fff;border:1px solid #F1F3F7;border-radius:12px;padding:24px;box-shadow:0 0 0 3px rgba(5,150,105,0.2);">
+        <div style="font-size:13px;font-weight:600;color:#059669;margin-bottom:4px;">focus-ring</div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#9CA3AF;">0 0 0 3px rgba(5,150,105,.2)</div>
+      </div>
+    </div>
+
+    <!-- Radius -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 16px;">Border Radius</h3>
+    <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;">
+      <div style="text-align:center;">
+        <div style="width:48px;height:48px;background:#0F172A;border-radius:4px;margin:0 auto 8px;"></div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#6B7280;">xs<br/>4px</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:56px;height:56px;background:#0F172A;border-radius:6px;margin:0 auto 8px;"></div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#6B7280;">sm<br/>6px</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:64px;height:64px;background:#0F172A;border-radius:8px;margin:0 auto 8px;"></div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#6B7280;">md<br/>8px</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:72px;height:72px;background:#059669;border-radius:12px;margin:0 auto 8px;"></div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#059669;font-weight:700;">lg ★<br/>12px</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:80px;height:80px;background:#0F172A;border-radius:16px;margin:0 auto 8px;"></div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#6B7280;">xl<br/>16px</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:88px;height:88px;background:#0F172A;border-radius:20px;margin:0 auto 8px;"></div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#6B7280;">2xl<br/>20px</div>
+      </div>
+      <div style="text-align:center;">
+        <div style="width:48px;height:48px;background:#0F172A;border-radius:9999px;margin:0 auto 8px;"></div>
+        <div style="font-size:11px;font-family:'JetBrains Mono',monospace;color:#6B7280;">full<br/>∞</div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ 5. MOTION ══════════════════════════════════════ -->
+  <section id="motion" class="ds-section">
+    <div style="margin-bottom:40px;">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#059669;margin-bottom:8px;">Foundation</p>
+      <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.015em;color:#111827;margin:0 0 10px;">Motion Principles</h2>
+      <p style="font-size:15px;color:#4B5563;max-width:56ch;margin:0;">Subtle. Purposeful. Never distracting. Every animation serves clarity.</p>
+    </div>
+
+    <table class="token-table" style="border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;margin-bottom:28px;">
+      <thead><tr><th>Name</th><th>Duration</th><th>Easing</th><th>Use</th></tr></thead>
+      <tbody>
+        <tr><td><code>fade-in</code></td><td>200ms</td><td>ease-out</td><td>Modals, tooltips appearing</td></tr>
+        <tr><td><code>fade-up</code></td><td>250ms</td><td>ease-out</td><td>Content sections, cards loading</td></tr>
+        <tr><td><code>scale-in</code></td><td>200ms</td><td>ease-out</td><td>Modals, dropdowns, popovers</td></tr>
+        <tr><td><code>slide-in-right</code></td><td>250ms</td><td>ease-out</td><td>Toasts, drawers</td></tr>
+        <tr><td><code>slide-in-left</code></td><td>250ms</td><td>ease-out</td><td>Sidebar drawers</td></tr>
+        <tr><td><code>pulse-soft</code></td><td>2s loop</td><td>ease-in-out</td><td>Status indicators, live data</td></tr>
+        <tr><td><code>shimmer</code></td><td>1.8s loop</td><td>linear</td><td>Skeleton loaders</td></tr>
+        <tr><td><code>spinner</code></td><td>700ms loop</td><td>linear</td><td>Loading spinners</td></tr>
+      </tbody>
+    </table>
+
+    <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:16px 20px;display:flex;gap:12px;">
+      <svg style="flex-shrink:0;margin-top:2px;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <p style="font-size:13.5px;color:#92400E;margin:0;line-height:1.6;"><strong>Constraint:</strong> Never use bounce, spring, or slide animations for data-dense dashboards. Stick to fade and scale. Respect <code>prefers-reduced-motion</code> by wrapping all animations in a media query.</p>
+    </div>
+  </section>
+
+
+  <!-- ═══ 6. BUTTONS ═════════════════════════════════════ -->
+  <section id="buttons" class="ds-section">
+    <div style="margin-bottom:40px;">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#059669;margin-bottom:8px;">Components</p>
+      <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.015em;color:#111827;margin:0 0 10px;">Buttons</h2>
+      <p style="font-size:15px;color:#4B5563;max-width:56ch;margin:0;">Minimal, rounded, no gradients. Clear hierarchy through weight and color.</p>
+    </div>
+
+    <!-- Variants -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 16px;">Variants</h3>
+    <div class="preview-box flex flex-wrap gap-3 items-center" style="margin-bottom:24px;">
+      <!-- Primary -->
+      <button id="btn-primary" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#0F172A;color:#fff;border:1px solid #0F172A;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='#162D4A'" onmouseout="this.style.background='#0F172A'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Primary
+      </button>
+
+      <!-- Accent -->
+      <button id="btn-accent" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#059669;color:#fff;border:1px solid #059669;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">
+        Accent
+      </button>
+
+      <!-- Secondary -->
+      <button id="btn-secondary" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:transparent;color:#111827;border:1px solid #E5E7EB;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='#F8F9FB';this.style.borderColor='#D1D5DB';" onmouseout="this.style.background='transparent';this.style.borderColor='#E5E7EB';">
+        Secondary
+      </button>
+
+      <!-- Ghost -->
+      <button id="btn-ghost" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:transparent;color:#4B5563;border:1px solid transparent;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='#F8F9FB';this.style.color='#111827';" onmouseout="this.style.background='transparent';this.style.color='#4B5563';">
+        Ghost
+      </button>
+
+      <!-- Danger -->
+      <button id="btn-danger" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#DC2626;color:#fff;border:1px solid #DC2626;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;" onmouseover="this.style.background='#B91C1C'" onmouseout="this.style.background='#DC2626'">
+        Danger
+      </button>
+
+      <!-- Disabled -->
+      <button id="btn-disabled" disabled style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#0F172A;color:#fff;border:1px solid #0F172A;border-radius:10px;font-size:14px;font-weight:600;cursor:not-allowed;font-family:inherit;opacity:0.4;">
+        Disabled
+      </button>
+    </div>
+
+    <!-- Sizes -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 16px;">Sizes</h3>
+    <div class="preview-box flex flex-wrap gap-3 items-center" style="margin-bottom:24px;">
+      <button id="btn-xs" style="padding:6px 12px;background:#0F172A;color:#fff;border:1px solid #0F172A;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">xs</button>
+      <button id="btn-sm" style="padding:8px 14px;background:#0F172A;color:#fff;border:1px solid #0F172A;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">Small</button>
+      <button id="btn-md-sz" style="padding:10px 20px;background:#0F172A;color:#fff;border:1px solid #0F172A;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Medium (default)</button>
+      <button id="btn-lg" style="padding:12px 24px;background:#0F172A;color:#fff;border:1px solid #0F172A;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;">Large</button>
+      <button id="btn-xl" style="padding:16px 32px;background:#0F172A;color:#fff;border:1px solid #0F172A;border-radius:12px;font-size:17px;font-weight:600;cursor:pointer;font-family:inherit;">Extra Large</button>
+    </div>
+
+    <!-- With Icons -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 16px;">With Icons</h3>
+    <div class="preview-box flex flex-wrap gap-3 items-center">
+      <button id="btn-icon-add" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#0F172A;color:#fff;border:1px solid #0F172A;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Threat Rule
+      </button>
+      <button id="btn-icon-download" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:transparent;color:#111827;border:1px solid #E5E7EB;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export Report
+      </button>
+      <button id="btn-icon-trailing" style="display:inline-flex;align-items:center;gap:8px;padding:10px 20px;background:#059669;color:#fff;border:1px solid #059669;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">
+        View Dashboard
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+      <!-- Icon only -->
+      <button id="btn-icon-only" style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;background:transparent;color:#6B7280;border:1px solid #E5E7EB;border-radius:10px;cursor:pointer;" title="Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </section>
+
+
+  <!-- ═══ 7. FORMS ════════════════════════════════════════ -->
+  <section id="forms" class="ds-section">
+    <div style="margin-bottom:40px;">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#059669;margin-bottom:8px;">Components</p>
+      <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.015em;color:#111827;margin:0 0 10px;">Form Elements</h2>
+    </div>
+
+    <div class="preview-box" style="max-width:520px;margin-bottom:24px;">
+      <div style="display:flex;flex-direction:column;gap:20px;">
+
+        <!-- Text input -->
+        <div>
+          <label for="input-api-key" style="display:block;font-size:13px;font-weight:600;color:#111827;margin-bottom:6px;">API Key</label>
+          <input id="input-api-key" type="text" placeholder="sk_live_..." style="width:100%;padding:10px 16px;border:1px solid #E5E7EB;border-radius:10px;font-size:15px;color:#111827;background:#fff;font-family:inherit;outline:none;transition:all .15s;" onfocus="this.style.borderColor='#059669';this.style.boxShadow='0 0 0 3px rgba(5,150,105,.15)'" onblur="this.style.borderColor='#E5E7EB';this.style.boxShadow='none'" />
+          <p style="margin:6px 0 0;font-size:12px;color:#6B7280;">Found in Settings → API Keys</p>
+        </div>
+
+        <!-- Input with error -->
+        <div>
+          <label for="input-email" style="display:block;font-size:13px;font-weight:600;color:#111827;margin-bottom:6px;">Work Email <span style="font-weight:400;color:#9CA3AF;">(required)</span></label>
+          <input id="input-email" type="email" value="john@" style="width:100%;padding:10px 16px;border:1px solid #DC2626;border-radius:10px;font-size:15px;color:#111827;background:#fff;font-family:inherit;outline:none;box-shadow:0 0 0 3px rgba(220,38,38,.10);" />
+          <p style="margin:6px 0 0;font-size:12px;color:#DC2626;">Please enter a valid email address.</p>
+        </div>
+
+        <!-- Select -->
+        <div>
+          <label for="select-region" style="display:block;font-size:13px;font-weight:600;color:#111827;margin-bottom:6px;">Data Region</label>
+          <select id="select-region" style="width:100%;padding:10px 40px 10px 16px;border:1px solid #E5E7EB;border-radius:10px;font-size:15px;color:#111827;background:#fff url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2216%22 height=%2216%22 fill=%22none%22 viewBox=%220 0 24 24%22%3E%3Cpath stroke=%22%239CA3AF%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 stroke-width=%221.5%22 d=%22m6 9 6 6 6-6%22/%3E%3C/svg%3E') no-repeat right 12px center;appearance:none;font-family:inherit;outline:none;transition:all .15s;" onfocus="this.style.borderColor='#059669';this.style.boxShadow='0 0 0 3px rgba(5,150,105,.15)'" onblur="this.style.borderColor='#E5E7EB';this.style.boxShadow='none'">
+            <option>US East (Virginia)</option>
+            <option>EU West (Frankfurt)</option>
+            <option>AP Southeast (Singapore)</option>
+          </select>
+        </div>
+
+        <!-- Textarea -->
+        <div>
+          <label for="textarea-notes" style="display:block;font-size:13px;font-weight:600;color:#111827;margin-bottom:6px;">Incident Notes</label>
+          <textarea id="textarea-notes" rows="3" placeholder="Describe the suspicious activity…" style="width:100%;padding:10px 16px;border:1px solid #E5E7EB;border-radius:10px;font-size:15px;color:#111827;background:#fff;font-family:inherit;outline:none;transition:all .15s;resize:vertical;" onfocus="this.style.borderColor='#059669';this.style.boxShadow='0 0 0 3px rgba(5,150,105,.15)'" onblur="this.style.borderColor='#E5E7EB';this.style.boxShadow='none'"></textarea>
+        </div>
+
+        <!-- Checkbox & Radio -->
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:#374151;font-weight:500;">
+            <input id="checkbox-2fa" type="checkbox" checked style="width:16px;height:16px;accent-color:#059669;border-radius:4px;cursor:pointer;" />
+            Enforce two-factor authentication
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:#374151;font-weight:500;">
+            <input id="checkbox-alerts" type="checkbox" style="width:16px;height:16px;accent-color:#059669;border-radius:4px;cursor:pointer;" />
+            Send real-time breach alerts
+          </label>
+        </div>
+
+        <!-- Toggle -->
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="font-size:14px;font-weight:600;color:#111827;">IP Allowlisting</div>
+            <div style="font-size:12px;color:#6B7280;margin-top:2px;">Restrict access to specific IP ranges</div>
+          </div>
+          <button id="toggle-ip" role="switch" aria-checked="true" onclick="this.getAttribute('aria-checked')==='true'?this.setAttribute('aria-checked','false'):this.setAttribute('aria-checked','true');this.style.background=this.getAttribute('aria-checked')==='true'?'#059669':'#D1D5DB';this.querySelector('.thumb').style.transform=this.getAttribute('aria-checked')==='true'?'translateX(20px)':'translateX(0)';" style="position:relative;display:inline-flex;width:42px;height:22px;border-radius:9999px;background:#059669;cursor:pointer;border:none;transition:background .2s;flex-shrink:0;">
+            <span class="thumb" style="position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:9999px;transition:transform .2s;transform:translateX(20px);box-shadow:0 1px 2px rgba(0,0,0,.15);"></span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ 8. CARDS & STATS ════════════════════════════════ -->
+  <section id="cards" class="ds-section">
+    <div style="margin-bottom:40px;">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#059669;margin-bottom:8px;">Components</p>
+      <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.015em;color:#111827;margin:0 0 10px;">Cards & Stat Tiles</h2>
+    </div>
+
+    <!-- Stat cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:32px;">
+      <!-- Stat 1 -->
+      <div id="card-threats" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:8px;transition:box-shadow .2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.07)'" onmouseout="this.style.boxShadow='none'">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;font-weight:600;color:#6B7280;">Threats Blocked</span>
+          <div style="width:32px;height:32px;background:#FEF2F2;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.2" stroke-linecap="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+        </div>
+        <div style="font-size:36px;font-weight:800;letter-spacing:-0.02em;color:#111827;line-height:1.1;">1,284</div>
+        <div style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#F0FDF4;border-radius:9999px;font-size:11px;font-weight:700;color:#16A34A;align-self:flex-start;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+          12% this week
+        </div>
+      </div>
+
+      <!-- Stat 2 -->
+      <div id="card-score" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:8px;transition:box-shadow .2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.07)'" onmouseout="this.style.boxShadow='none'">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;font-weight:600;color:#6B7280;">Security Score</span>
+          <div style="width:32px;height:32px;background:#ECFDF5;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+        </div>
+        <div style="font-size:36px;font-weight:800;letter-spacing:-0.02em;color:#111827;line-height:1.1;">94<span style="font-size:20px;font-weight:600;color:#9CA3AF;">/100</span></div>
+        <div style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#F0FDF4;border-radius:9999px;font-size:11px;font-weight:700;color:#16A34A;align-self:flex-start;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 15 12 9 6 15"/></svg>
+          +3 pts
+        </div>
+      </div>
+
+      <!-- Stat 3 -->
+      <div id="card-txn" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:8px;transition:box-shadow .2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,.07)'" onmouseout="this.style.boxShadow='none'">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;font-weight:600;color:#6B7280;">Transactions Scanned</span>
+          <div style="width:32px;height:32px;background:#EFF6FF;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+        </div>
+        <div style="font-size:36px;font-weight:800;letter-spacing:-0.02em;color:#111827;line-height:1.1;">2.4M</div>
+        <div style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:#FEF2F2;border-radius:9999px;font-size:11px;font-weight:700;color:#DC2626;align-self:flex-start;">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="18 9 12 15 6 9"/></svg>
+          3% vs last week
+        </div>
+      </div>
+
+      <!-- Stat 4 – Dark -->
+      <div id="card-uptime" style="background:#0F172A;border:1px solid #162D4A;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:8px;">
+        <span style="font-size:13px;font-weight:600;color:#6EE7B7;">System Uptime</span>
+        <div style="font-size:36px;font-weight:800;letter-spacing:-0.02em;color:#fff;line-height:1.1;">99.99<span style="font-size:20px;font-weight:600;color:#4B5563;">%</span></div>
+        <div style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;background:rgba(5,150,105,.15);border-radius:9999px;font-size:11px;font-weight:700;color:#6EE7B7;align-self:flex-start;">
+          All systems operational
+        </div>
+      </div>
+    </div>
+
+    <!-- Base & Feature cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;">
+      <div id="card-feature-1" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:16px;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='#D1D5DB';this.style.boxShadow='0 4px 12px rgba(0,0,0,.07)'" onmouseout="this.style.borderColor='#E5E7EB';this.style.boxShadow='none'">
+        <div style="width:40px;height:40px;background:#EEF2FF;border:1px solid #C7D2FE;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div>
+          <div style="font-size:17px;font-weight:600;color:#111827;margin-bottom:6px;">Threat Intelligence</div>
+          <div style="font-size:14px;color:#6B7280;line-height:1.55;">Real-time feeds from 50+ global threat databases, updated every 60 seconds.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:#059669;margin-top:auto;">
+          Learn more <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+
+      <div id="card-feature-2" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:16px;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='#D1D5DB';this.style.boxShadow='0 4px 12px rgba(0,0,0,.07)'" onmouseout="this.style.borderColor='#E5E7EB';this.style.boxShadow='none'">
+        <div style="width:40px;height:40px;background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div>
+          <div style="font-size:17px;font-weight:600;color:#111827;margin-bottom:6px;">Behavioral Analytics</div>
+          <div style="font-size:14px;color:#6B7280;line-height:1.55;">ML models surface anomalous patterns across users, sessions, and transactions.</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:13px;font-weight:600;color:#059669;margin-top:auto;">
+          Learn more <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ 9. BADGES ══════════════════════════════════════ -->
+  <section id="badges" class="ds-section">
+    <div style="margin-bottom:40px;">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#059669;margin-bottom:8px;">Components</p>
+      <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.015em;color:#111827;margin:0 0 10px;">Badges & Pills</h2>
+    </div>
+
+    <div class="preview-box flex flex-wrap gap-3 items-center" style="margin-bottom:24px;">
+      <span id="badge-gray" style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#F1F3F7;color:#4B5563;font-size:11px;font-weight:700;letter-spacing:.04em;border-radius:9999px;text-transform:uppercase;">Default</span>
+      <span id="badge-navy" style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#EEF2FF;color:#0F172A;font-size:11px;font-weight:700;letter-spacing:.04em;border-radius:9999px;text-transform:uppercase;">Navy</span>
+      <span id="badge-emerald" style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#ECFDF5;color:#047857;font-size:11px;font-weight:700;letter-spacing:.04em;border-radius:9999px;text-transform:uppercase;"><span style="width:6px;height:6px;background:#059669;border-radius:9999px;display:inline-block;"></span>Verified</span>
+      <span id="badge-success" style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#F0FDF4;color:#15803D;font-size:11px;font-weight:700;letter-spacing:.04em;border-radius:9999px;text-transform:uppercase;"><span style="width:6px;height:6px;background:#16A34A;border-radius:9999px;display:inline-block;"></span>Active</span>
+      <span id="badge-warning" style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#FFFBEB;color:#D97706;font-size:11px;font-weight:700;letter-spacing:.04em;border-radius:9999px;text-transform:uppercase;"><span style="width:6px;height:6px;background:#F59E0B;border-radius:9999px;display:inline-block;"></span>Review</span>
+      <span id="badge-danger" style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#FEF2F2;color:#B91C1C;font-size:11px;font-weight:700;letter-spacing:.04em;border-radius:9999px;text-transform:uppercase;"><span style="width:6px;height:6px;background:#DC2626;border-radius:9999px;display:inline-block;"></span>Critical</span>
+      <span id="badge-info" style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#EFF6FF;color:#1D4ED8;font-size:11px;font-weight:700;letter-spacing:.04em;border-radius:9999px;text-transform:uppercase;">Info</span>
+      <!-- Count badge -->
+      <span id="badge-count" style="display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;background:#059669;color:#fff;font-size:11px;font-weight:700;border-radius:9999px;">12</span>
+    </div>
+  </section>
+
+
+  <!-- ═══ 10. NAVIGATION ══════════════════════════════════ -->
+  <section id="navigation" class="ds-section">
+    <div style="margin-bottom:40px;">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#059669;margin-bottom:8px;">Components</p>
+      <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.015em;color:#111827;margin:0 0 10px;">Navigation</h2>
+    </div>
+
+    <!-- Top Nav preview -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 16px;">Top Navigation Bar</h3>
+    <div style="border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;margin-bottom:32px;">
+      <div style="background:#fff;height:64px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid #E5E7EB;gap:32px;">
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+          <div style="width:28px;height:28px;background:#0F172A;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <span style="font-size:15px;font-weight:700;color:#111827;">CODShield</span>
+        </div>
+        <nav style="display:flex;align-items:center;gap:4px;flex:1;">
+          <a id="nav-dashboard" href="#" style="padding:6px 12px;font-size:14px;font-weight:600;color:#111827;border-radius:8px;background:#F1F3F7;text-decoration:none;">Dashboard</a>
+          <a id="nav-threats" href="#" style="padding:6px 12px;font-size:14px;font-weight:500;color:#6B7280;border-radius:8px;text-decoration:none;">Threats</a>
+          <a id="nav-compliance" href="#" style="padding:6px 12px;font-size:14px;font-weight:500;color:#6B7280;border-radius:8px;text-decoration:none;">Compliance</a>
+          <a id="nav-reports" href="#" style="padding:6px 12px;font-size:14px;font-weight:500;color:#6B7280;border-radius:8px;text-decoration:none;">Reports</a>
+        </nav>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button id="nav-btn-docs" style="padding:7px 14px;font-size:13px;font-weight:600;color:#4B5563;background:transparent;border:1px solid #E5E7EB;border-radius:8px;cursor:pointer;font-family:inherit;">Docs</button>
+          <button id="nav-btn-cta" style="padding:7px 16px;font-size:13px;font-weight:600;color:#fff;background:#0F172A;border:1px solid #0F172A;border-radius:8px;cursor:pointer;font-family:inherit;">Get started</button>
+          <div style="width:32px;height:32px;background:#0F172A;border-radius:9999px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+            <span style="font-size:12px;font-weight:700;color:#fff;">JD</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar Nav preview -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 16px;">Sidebar Navigation</h3>
+    <div style="border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;display:flex;">
+      <div style="width:220px;background:#fff;border-right:1px solid #E5E7EB;padding:20px 12px;flex-shrink:0;">
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9CA3AF;padding:0 8px;margin:0 0 6px;">Monitoring</p>
+        <div id="sidenav-dashboard" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:#EEF2FF;cursor:pointer;margin-bottom:2px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0F172A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span style="font-size:13.5px;font-weight:700;color:#0F172A;">Dashboard</span>
+        </div>
+        <div id="sidenav-alerts" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:2px;" onmouseover="this.style.background='#F8F9FB'" onmouseout="this.style.background='transparent'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span style="font-size:13.5px;font-weight:500;color:#4B5563;">Alerts</span>
+          <span style="margin-left:auto;font-size:11px;font-weight:700;background:#059669;color:#fff;border-radius:9999px;padding:1px 7px;">4</span>
+        </div>
+        <div id="sidenav-threats" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:2px;" onmouseover="this.style.background='#F8F9FB'" onmouseout="this.style.background='transparent'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span style="font-size:13.5px;font-weight:500;color:#4B5563;">Threats</span>
+        </div>
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9CA3AF;padding:12px 8px 6px;margin:0;">Compliance</p>
+        <div id="sidenav-audit" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:2px;" onmouseover="this.style.background='#F8F9FB'" onmouseout="this.style.background='transparent'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span style="font-size:13.5px;font-weight:500;color:#4B5563;">Audit Log</span>
+        </div>
+        <div id="sidenav-reports" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;margin-bottom:2px;" onmouseover="this.style.background='#F8F9FB'" onmouseout="this.style.background='transparent'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span style="font-size:13.5px;font-weight:500;color:#4B5563;">Reports</span>
+        </div>
+      </div>
+      <div style="flex:1;background:#F8F9FB;padding:24px;display:flex;align-items:center;justify-content:center;">
+        <span style="font-size:13px;color:#9CA3AF;">Page content area</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ 11. TABLES ══════════════════════════════════════ -->
+  <section id="tables" class="ds-section">
+    <div style="margin-bottom:40px;">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#059669;margin-bottom:8px;">Components</p>
+      <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.015em;color:#111827;margin:0 0 10px;">Data Tables</h2>
+    </div>
+
+    <div style="border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #E5E7EB;">
+        <div>
+          <div style="font-size:15px;font-weight:600;color:#111827;">Recent Incidents</div>
+          <div style="font-size:12px;color:#9CA3AF;margin-top:1px;">Showing 5 of 1,284 total</div>
+        </div>
+        <button id="table-export-btn" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:transparent;color:#4B5563;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:13.5px;">
+        <thead>
+          <tr style="background:#F8F9FB;">
+            <th style="padding:10px 20px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #E5E7EB;">Incident ID</th>
+            <th style="padding:10px 20px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #E5E7EB;">Type</th>
+            <th style="padding:10px 20px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #E5E7EB;">Severity</th>
+            <th style="padding:10px 20px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #E5E7EB;">Status</th>
+            <th style="padding:10px 20px;text-align:left;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #E5E7EB;">Detected</th>
+            <th style="padding:10px 20px;text-align:right;font-size:11px;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #E5E7EB;"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="table-row-1" style="transition:background .1s;" onmouseover="this.style.background='#F8F9FB'" onmouseout="this.style.background='transparent'">
+            <td style="padding:14px 20px;border-bottom:1px solid #F1F3F7;font-family:'JetBrains Mono',monospace;font-size:12px;color:#6B7280;">#INC-4821</td>
+            <td style="padding:14px 20px;border-bottom:1px solid #F1F3F7;font-weight:500;color:#111827;">SQL Injection Attempt</td>
+            <td style="padding:14px 20px;border-bottom:1px solid #F1F3F7;"><span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:#FEF2F2;color:#B91C1C;font-size:11px;font-weight:700;border-radius:9999px;letter-spacing:.04em;text-transform:uppercase;"><span style="width:5px;height:5px;background:#DC2626;border-radius:9999px;"></span>Critical</span></td>
+            <td style="padding:14px 20px;border-bottom:1px solid #F1F3F7;"><span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:#FFFBEB;color:#D97706;font-size:11px;font-weight:700;border-radius:9999px;letter-spacing:.04em;text-transform:uppercase;">Investigating</span></td>
+            <td style="padding:14px 20px;border-bottom:1px solid #F1F3F7;font-size:12px;color:#9CA3AF;">2 min ago</td>
+            <td style="padding:14px 20px;border-bottom:1px solid #F1F3F7;text-align:right;"><button id="table-row-1-view" style="font-size:12px;font-weight:600;color:#059669;background:none;border:none;cursor:pointer;font-family:inherit;padding:0;">View →</button></td>
+          </tr>
+          <tr id="table-row-2" style="transition:background .1s;" onmouseover="this.style.background='#F8F9FB'" onmouseout="this.style.background='transparent'">
+            <td style="padding:14px 20px;border-bottom:1px solid #F1F3F7;font-family:'JetBrains Mono',monospace;font-size:12px;color:#6B7280;">#INC-4820</td>
+            <td style="padding:14px 20px;border-bottom:1px solid #F1F3F7;font-weight:500;color:#111827;">Brute Force Login</td>
+            <td style="padding:14px 20px;border-bottom:1px solid #F1F3F7;"><span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:#FFFBEB;color:#D97706;font-size:11px;font-weight:700;border-radius:9999px;letter-spacing:.04em;text-transform:uppercase;"><span style="width:5px;height:5px;background:#F59E0B;border-radius:9999px;"></span>High</span></td>
+            <td style="padding:14px 20px;border-bottom:1px solid #F1F3F7;"><span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:#F0FDF4;color:#15803D;font-size:11px;font-weight:700;border-radius:9999px;letter-spacing:.04em;text-transform:uppercase;"><span style="width:5px;height:5px;background:#16A34A;border-radius:9999px;"></span>Resolved</span></td>
+            <td style="padding:14px 20px;border-bottom:1px solid #F1F3F7;font-size:12px;color:#9CA3AF;">18 min ago</td>
+            <td style="padding:14px 20px;border-bottom:1px solid #F1F3F7;text-align:right;"><button id="table-row-2-view" style="font-size:12px;font-weight:600;color:#059669;background:none;border:none;cursor:pointer;font-family:inherit;padding:0;">View →</button></td>
+          </tr>
+          <tr id="table-row-3" style="transition:background .1s;" onmouseover="this.style.background='#F8F9FB'" onmouseout="this.style.background='transparent'">
+            <td style="padding:14px 20px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#6B7280;">#INC-4819</td>
+            <td style="padding:14px 20px;font-weight:500;color:#111827;">Anomalous API Call Pattern</td>
+            <td style="padding:14px 20px;"><span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:#F1F3F7;color:#4B5563;font-size:11px;font-weight:700;border-radius:9999px;letter-spacing:.04em;text-transform:uppercase;">Low</span></td>
+            <td style="padding:14px 20px;"><span style="display:inline-flex;align-items:center;gap:5px;padding:3px 8px;background:#F0FDF4;color:#15803D;font-size:11px;font-weight:700;border-radius:9999px;letter-spacing:.04em;text-transform:uppercase;"><span style="width:5px;height:5px;background:#16A34A;border-radius:9999px;"></span>Resolved</span></td>
+            <td style="padding:14px 20px;font-size:12px;color:#9CA3AF;">1 hr ago</td>
+            <td style="padding:14px 20px;text-align:right;"><button id="table-row-3-view" style="font-size:12px;font-weight:600;color:#059669;background:none;border:none;cursor:pointer;font-family:inherit;padding:0;">View →</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+
+  <!-- ═══ 12. FEEDBACK ═══════════════════════════════════ -->
+  <section id="feedback" class="ds-section">
+    <div style="margin-bottom:40px;">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#059669;margin-bottom:8px;">Components</p>
+      <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.015em;color:#111827;margin:0 0 10px;">Feedback & Alerts</h2>
+    </div>
+
+    <!-- Alerts -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 16px;">Inline Alerts</h3>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:32px;">
+      <div id="alert-success" style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;font-size:14px;color:#15803D;">
+        <svg style="flex-shrink:0;margin-top:1px;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <div><strong>Security scan complete.</strong> No threats detected in the last 24 hours. All systems are operating normally.</div>
+      </div>
+      <div id="alert-warning" style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;font-size:14px;color:#92400E;">
+        <svg style="flex-shrink:0;margin-top:1px;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <div><strong>Compliance review required.</strong> Your SOC 2 Type II audit window opens in 14 days. Please review pending controls.</div>
+      </div>
+      <div id="alert-danger" style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;font-size:14px;color:#991B1B;">
+        <svg style="flex-shrink:0;margin-top:1px;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <div><strong>Critical threat detected.</strong> Unauthorized API access attempt from IP 192.168.1.254. Access has been revoked. <a href="#" style="color:#DC2626;font-weight:600;text-decoration:underline;">View incident →</a></div>
+      </div>
+      <div id="alert-info" style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;font-size:14px;color:#1D4ED8;">
+        <svg style="flex-shrink:0;margin-top:1px;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <div><strong>Maintenance scheduled.</strong> CODShield will undergo a 15-minute maintenance window on Jul 14 at 02:00 UTC.</div>
+      </div>
+    </div>
+
+    <!-- Toast previews -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 16px;">Toast Notifications</h3>
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:420px;margin-bottom:32px;">
+      <div id="toast-success" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#fff;border:1px solid #E5E7EB;border-left:4px solid #16A34A;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.07);">
+        <svg style="flex-shrink:0;margin-top:1px;color:#16A34A;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#111827;">Threat rule saved</div>
+          <div style="font-size:13px;color:#6B7280;margin-top:2px;">Your new rule will take effect immediately.</div>
+        </div>
+      </div>
+      <div id="toast-danger" style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:#fff;border:1px solid #E5E7EB;border-left:4px solid #DC2626;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.07);">
+        <svg style="flex-shrink:0;margin-top:1px;color:#DC2626;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#111827;">Critical alert</div>
+          <div style="font-size:13px;color:#6B7280;margin-top:2px;">Breach attempt detected. Reviewing now.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 16px;">Progress & Skeleton</h3>
+    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px;max-width:400px;">
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500;color:#374151;margin-bottom:8px;"><span>Security Posture</span><span style="color:#059669;font-weight:700;">94%</span></div>
+        <div style="height:6px;background:#F1F3F7;border-radius:9999px;overflow:hidden;"><div style="width:94%;height:100%;background:#059669;border-radius:9999px;"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500;color:#374151;margin-bottom:8px;"><span>API Quota Used</span><span style="color:#F59E0B;font-weight:700;">72%</span></div>
+        <div style="height:6px;background:#F1F3F7;border-radius:9999px;overflow:hidden;"><div style="width:72%;height:100%;background:#F59E0B;border-radius:9999px;"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:500;color:#374151;margin-bottom:8px;"><span>Threat Rules Active</span><span style="color:#DC2626;font-weight:700;">89%</span></div>
+        <div style="height:6px;background:#F1F3F7;border-radius:9999px;overflow:hidden;"><div style="width:89%;height:100%;background:#DC2626;border-radius:9999px;"></div></div>
+      </div>
+    </div>
+
+    <!-- Skeleton -->
+    <div style="display:flex;flex-direction:column;gap:10px;max-width:400px;">
+      <div style="height:24px;border-radius:8px;background:linear-gradient(90deg,#F1F3F7 25%,#F8F9FB 50%,#F1F3F7 75%);background-size:200% 100%;animation:shimmer 1.8s linear infinite;"></div>
+      <div style="height:14px;border-radius:6px;background:linear-gradient(90deg,#F1F3F7 25%,#F8F9FB 50%,#F1F3F7 75%);background-size:200% 100%;animation:shimmer 1.8s linear infinite;width:75%;"></div>
+      <div style="height:14px;border-radius:6px;background:linear-gradient(90deg,#F1F3F7 25%,#F8F9FB 50%,#F1F3F7 75%);background-size:200% 100%;animation:shimmer 1.8s linear infinite;width:55%;"></div>
+    </div>
+    <style>@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}</style>
+  </section>
+
+
+  <!-- ═══ 13. SECURITY UI ════════════════════════════════ -->
+  <section id="security" class="ds-section" style="border-bottom:none;">
+    <div style="margin-bottom:40px;">
+      <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#059669;margin-bottom:8px;">CODShield Specific</p>
+      <h2 style="font-size:32px;font-weight:700;letter-spacing:-0.015em;color:#111827;margin:0 0 10px;">Security UI Patterns</h2>
+      <p style="font-size:15px;color:#4B5563;max-width:56ch;margin:0;">Domain-specific components for cybersecurity & fintech contexts.</p>
+    </div>
+
+    <!-- Risk score rings -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 16px;">Risk Score Indicators</h3>
+    <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-bottom:40px;">
+      <div style="text-align:center;">
+        <div id="risk-low" style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:9999px;border:4px solid #16A34A;background:#F0FDF4;font-size:22px;font-weight:800;color:#16A34A;">12</div>
+        <div style="font-size:12px;font-weight:600;color:#6B7280;margin-top:8px;">Low Risk</div>
+      </div>
+      <div style="text-align:center;">
+        <div id="risk-medium" style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:9999px;border:4px solid #F59E0B;background:#FFFBEB;font-size:22px;font-weight:800;color:#D97706;">51</div>
+        <div style="font-size:12px;font-weight:600;color:#6B7280;margin-top:8px;">Medium Risk</div>
+      </div>
+      <div style="text-align:center;">
+        <div id="risk-high" style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:9999px;border:4px solid #DC2626;background:#FEF2F2;font-size:22px;font-weight:800;color:#DC2626;">87</div>
+        <div style="font-size:12px;font-weight:600;color:#6B7280;margin-top:8px;">High Risk</div>
+      </div>
+    </div>
+
+    <!-- Shield status pills -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 16px;">Shield Status Pills</h3>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px;">
+      <span id="shield-secure" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#F0FDF4;border-radius:9999px;font-size:13px;font-weight:600;color:#15803D;border:1px solid #BBF7D0;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Fully Secured
+      </span>
+      <span id="shield-warning" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#FFFBEB;border-radius:9999px;font-size:13px;font-weight:600;color:#D97706;border:1px solid #FDE68A;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
+        Needs Attention
+      </span>
+      <span id="shield-breach" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#FEF2F2;border-radius:9999px;font-size:13px;font-weight:600;color:#DC2626;border:1px solid #FECACA;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        Breach Detected
+      </span>
+    </div>
+
+    <!-- Activity feed -->
+    <h3 style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9CA3AF;margin:0 0 16px;">Live Activity Feed</h3>
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;max-width:560px;">
+      <div style="padding:16px 20px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:8px;">
+        <span style="width:8px;height:8px;background:#059669;border-radius:9999px;display:inline-block;"></span>
+        <span style="font-size:14px;font-weight:600;color:#111827;">Live Feed</span>
+        <span style="font-size:12px;color:#9CA3AF;margin-left:2px;">• Updated 2s ago</span>
+      </div>
+      <div id="activity-feed" style="padding:4px 0;">
+        <div style="display:flex;gap:12px;padding:12px 20px;border-bottom:1px solid #F1F3F7;">
+          <div style="width:8px;height:8px;background:#059669;border-radius:9999px;flex-shrink:0;margin-top:5px;"></div>
+          <div style="flex:1;">
+            <div style="font-size:13.5px;font-weight:500;color:#111827;">Firewall rule #482 triggered</div>
+            <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">Blocked 192.168.1.12 · XSS attempt</div>
+          </div>
+          <div style="font-size:11px;color:#9CA3AF;white-space:nowrap;padding-top:2px;">2s ago</div>
+        </div>
+        <div style="display:flex;gap:12px;padding:12px 20px;border-bottom:1px solid #F1F3F7;">
+          <div style="width:8px;height:8px;background:#16A34A;border-radius:9999px;flex-shrink:0;margin-top:5px;"></div>
+          <div style="flex:1;">
+            <div style="font-size:13.5px;font-weight:500;color:#111827;">User auth verified</div>
+            <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">alice@acme.com · MFA confirmed</div>
+          </div>
+          <div style="font-size:11px;color:#9CA3AF;white-space:nowrap;padding-top:2px;">14s ago</div>
+        </div>
+        <div style="display:flex;gap:12px;padding:12px 20px;border-bottom:1px solid #F1F3F7;">
+          <div style="width:8px;height:8px;background:#F59E0B;border-radius:9999px;flex-shrink:0;margin-top:5px;"></div>
+          <div style="flex:1;">
+            <div style="font-size:13.5px;font-weight:500;color:#111827;">Anomalous geo-login flagged</div>
+            <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">bob@acme.com · Lagos, Nigeria</div>
+          </div>
+          <div style="font-size:11px;color:#9CA3AF;white-space:nowrap;padding-top:2px;">1m ago</div>
+        </div>
+        <div style="display:flex;gap:12px;padding:12px 20px;">
+          <div style="width:8px;height:8px;background:#DC2626;border-radius:9999px;flex-shrink:0;margin-top:5px;"></div>
+          <div style="flex:1;">
+            <div style="font-size:13.5px;font-weight:500;color:#111827;">API key rotated (forced)</div>
+            <div style="font-size:12px;color:#9CA3AF;margin-top:2px;">sk_live_... revoked · 3 failed auth attempts</div>
+          </div>
+          <div style="font-size:11px;color:#9CA3AF;white-space:nowrap;padding-top:2px;">4m ago</div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+</body>
+</html>
