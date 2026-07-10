@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import DashboardShowcase from "@/components/DashboardShowcase";
+import Integrations from "@/components/Integrations";
 import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight, TrendingDown, PackageX, PhoneOff, BarChart2, AlertTriangle, CheckCircle, Info, Smartphone, MessageSquare, Gauge, Network, History, MapPin, FileCheck, Bell, LineChart } from "lucide-react";
@@ -545,6 +546,7 @@ export default function Home() {
       </section>
 
       <DashboardShowcase />
+      <Integrations />
     </>
   );
 }
