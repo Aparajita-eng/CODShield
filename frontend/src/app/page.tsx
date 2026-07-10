@@ -3,7 +3,7 @@ import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, TrendingDown, PackageX, PhoneOff, BarChart2, AlertTriangle, CheckCircle, Info, Smartphone, MessageSquare, Gauge, Network, History, MapPin, FileCheck, Bell } from "lucide-react";
+import { ArrowRight, TrendingDown, PackageX, PhoneOff, BarChart2, AlertTriangle, CheckCircle, Info, Smartphone, MessageSquare, Gauge, Network, History, MapPin, FileCheck, Bell, LineChart } from "lucide-react";
 import { EASE, fadeUp, clipReveal, staggerContainer, staggerItem } from "@/lib/motion";
 
 interface MockOrder {
@@ -422,7 +422,7 @@ export default function Home() {
                 className="group relative bg-white border border-border-default rounded-xl p-6 flex flex-col gap-5 hover:border-border-strong hover:shadow-md transition-all duration-200"
               >
                 {/* Icon — always --negative (#DC2626) */}
-                <div className="w-10 h-10 rounded-lg border border-[#FECACA] bg-[#FEF2F2] flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-lg border border-negative/20 bg-negative/8 flex items-center justify-center shrink-0">
                   <card.icon className="w-5 h-5 text-negative" strokeWidth={1.75} />
                 </div>
 
@@ -507,7 +507,7 @@ export default function Home() {
                 description: "Automates courier claim filing and dispute resolution when RTO losses occur, cutting manual ops work."
               },
               {
-                icon: BarChart2,
+                icon: LineChart,
                 name: "Analytics",
                 description: "A live dashboard of fraud trends, RTO rates, and verification pass rates by region."
               },
