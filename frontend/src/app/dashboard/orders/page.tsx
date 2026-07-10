@@ -28,6 +28,7 @@ import {
   Filter,
   Calendar,
   ArrowUpDown,
+  CheckCircle2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -341,7 +342,7 @@ export default function OrdersPage() {
             <ArrowUpDown className="w-3 h-3" />
           </button>
         ),
-        cell: (info) => <span className="text-xs font-mono">{info.getValue()}</span>,
+        cell: (info) => <span className="text-xs font-mono">{info.getValue() as string}</span>,
       },
       {
         accessorKey: "customerName",
@@ -354,7 +355,7 @@ export default function OrdersPage() {
             <ArrowUpDown className="w-3 h-3" />
           </button>
         ),
-        cell: (info) => <span className="text-xs font-medium">{info.getValue()}</span>,
+        cell: (info) => <span className="text-xs font-medium">{info.getValue() as string}</span>,
       },
       {
         accessorKey: "phone",
@@ -369,7 +370,7 @@ export default function OrdersPage() {
         ),
         cell: (info) => (
           <span className="text-xs text-ink-secondary hidden sm:table-cell">
-            {info.getValue()}
+            {info.getValue() as string}
           </span>
         ),
       },
@@ -384,7 +385,7 @@ export default function OrdersPage() {
             <ArrowUpDown className="w-3 h-3" />
           </button>
         ),
-        cell: (info) => <span className="text-xs font-mono">{info.getValue()}</span>,
+        cell: (info) => <span className="text-xs font-mono">{info.getValue() as string}</span>,
       },
       {
         accessorKey: "value",
@@ -1011,7 +1012,7 @@ export default function OrdersPage() {
                   <div className="flex items-center gap-2 text-sm">
                     {selectedOrder.otpVerified ? (
                       <>
-                        <CheckCircle className="w-4 h-4 text-positive" />
+                        <CheckCircle2 className="w-4 h-4 text-positive" />
                         <span className="text-positive font-medium">Verified</span>
                       </>
                     ) : (
