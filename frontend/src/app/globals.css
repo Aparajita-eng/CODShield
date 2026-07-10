@@ -7,6 +7,7 @@
   --color-ink-primary: var(--ink-primary);
   --color-ink-secondary: var(--ink-secondary);
   --color-ink-tertiary: var(--ink-tertiary);
+  --color-ink-inverse: var(--ink-inverse);
   --color-accent: var(--accent);
   --color-accent-muted: var(--accent-muted);
   --color-border-subtle: var(--border-subtle);
@@ -23,6 +24,7 @@
   --ink-primary: #111827;
   --ink-secondary: #4B5563;
   --ink-tertiary: #9CA3AF;
+  --ink-inverse: #FFFFFF;
   --accent: #059669;
   --accent-muted: rgba(5, 150, 105, 0.08);
   --border-subtle: #F1F3F7;

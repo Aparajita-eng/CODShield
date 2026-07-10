@@ -102,14 +102,14 @@ export default function Pricing() {
                     {tier.name}
                   </span>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-sans font-bold text-4xl text-white tracking-tight">
+                    <span className="font-sans font-bold text-4xl text-ink-inverse tracking-tight">
                       {tier.price}
                     </span>
-                    <span className="text-sm text-white/50 font-normal">
+                    <span className="text-sm text-ink-inverse/50 font-normal">
                       {tier.priceNote}
                     </span>
                   </div>
-                  <p className="mt-3 text-sm text-white/60 leading-relaxed">
+                  <p className="mt-3 text-sm text-ink-inverse/60 leading-relaxed">
                     {tier.description}
                   </p>
                 </div>
@@ -119,7 +119,7 @@ export default function Pricing() {
                   {tier.features.map((feature) => (
                     <li
                       key={feature}
-                      className="flex items-start gap-2.5 text-sm text-white/80"
+                      className="flex items-start gap-2.5 text-sm text-ink-inverse/80"
                     >
                       <Check
                         className="w-4 h-4 text-accent shrink-0 mt-0.5"
@@ -133,7 +133,7 @@ export default function Pricing() {
                 {/* CTA */}
                 <Link
                   href={tier.ctaHref}
-                  className="w-full inline-flex items-center justify-center h-11 rounded-lg bg-accent text-white text-sm font-semibold transition-all duration-200 hover:bg-accent/90"
+                  className="w-full inline-flex items-center justify-center h-11 rounded-lg bg-accent text-ink-inverse text-sm font-semibold transition-all duration-200 hover:bg-accent/90"
                 >
                   {tier.cta}
                 </Link>
@@ -142,7 +142,7 @@ export default function Pricing() {
               /* Starter & Growth — standard light card */
               <div
                 key={tier.name}
-                className="relative bg-white border border-border-default rounded-xl p-8 flex flex-col hover:border-border-default hover:shadow-sm transition-all duration-200"
+                className="relative bg-bg-base border border-border-default rounded-xl p-8 flex flex-col hover:border-border-default hover:shadow-sm transition-all duration-200"
               >
                 {/* Plan name */}
                 <div className="mb-6">
@@ -181,7 +181,7 @@ export default function Pricing() {
                 {/* CTA */}
                 <Link
                   href={tier.ctaHref}
-                  className="w-full inline-flex items-center justify-center h-11 rounded-lg border border-accent text-accent text-sm font-semibold transition-all duration-200 hover:bg-accent hover:text-white"
+                  className="w-full inline-flex items-center justify-center h-11 rounded-lg border border-accent text-accent text-sm font-semibold transition-all duration-200 hover:bg-accent hover:text-ink-inverse"
                 >
                   {tier.cta}
                 </Link>
