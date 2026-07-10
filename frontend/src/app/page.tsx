@@ -3,7 +3,7 @@ import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import { useState, useEffect } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, ShieldCheck, AlertTriangle, CheckCircle, Info, RefreshCw, Smartphone } from "lucide-react";
+import { ArrowRight, TrendingDown, PackageX, PhoneOff, BarChart2, AlertTriangle, CheckCircle, Info, Smartphone } from "lucide-react";
 import { EASE, fadeUp, clipReveal, staggerContainer, staggerItem } from "@/lib/motion";
 
 interface MockOrder {
@@ -349,6 +349,119 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* WHY COD BUSINESSES LOSE MILLIONS */}
+      <section className="bg-bg-raised border-t border-border-default">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-24">
+
+          {/* Section Header */}
+          <motion.div
+            variants={animationsDisabled ? {} : fadeUp}
+            initial={animationsDisabled ? "visible" : "hidden"}
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            className="max-w-xl mb-16"
+          >
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-mono font-bold tracking-widest text-accent uppercase mb-3">
+              <span className="w-3 h-px bg-accent inline-block"></span>
+              The Problem
+            </span>
+            <h2 className="font-sans font-bold text-3xl sm:text-4xl text-ink-primary tracking-tight leading-[1.15]">
+              Why COD Businesses<br />Lose Millions
+            </h2>
+            <p className="mt-4 text-base text-ink-secondary leading-relaxed">
+              Cash-on-delivery is the default payment method for 65% of Indian e-commerce — yet it carries the highest loss surface of any fulfillment model.
+            </p>
+          </motion.div>
+
+          {/* Stats Cards */}
+          <motion.div
+            variants={animationsDisabled ? {} : staggerContainer}
+            initial={animationsDisabled ? "visible" : "hidden"}
+            whileInView="visible"
+            viewport={{ once: true, margin: "-60px" }}
+            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5"
+          >
+            {[
+              {
+                icon: TrendingDown,
+                stat: "35%",
+                statSuffix: "avg. RTO rate",
+                label: "Return-to-Origin Losses",
+                description:
+                  "1 in 3 COD shipments returns undelivered. Each failed trip costs 2× in forward and reverse logistics alone — before repackaging.",
+                accent: "text-red-600",
+                iconBg: "bg-red-50 border-red-100",
+              },
+              {
+                icon: PackageX,
+                stat: "48%",
+                statSuffix: "of fraud orders",
+                label: "Fake & Bogus Orders",
+                description:
+                  "Nearly half of high-risk COD orders are placed with no purchase intent — bots, rivals, and repeat abusers exploiting open checkout flows.",
+                accent: "text-amber-600",
+                iconBg: "bg-amber-50 border-amber-100",
+              },
+              {
+                icon: PhoneOff,
+                stat: "₹4,200",
+                statSuffix: "avg. loss per refusal",
+                label: "Doorstep Refusals",
+                description:
+                  "Buyers refusing parcels at the door after transit is complete. The merchant absorbs shipping, handling, and restocking in full.",
+                accent: "text-orange-600",
+                iconBg: "bg-orange-50 border-orange-100",
+              },
+              {
+                icon: BarChart2,
+                stat: "3×",
+                statSuffix: "more ops overhead",
+                label: "Manual Verification Cost",
+                description:
+                  "Calling every COD customer to confirm intent adds 3× per-order ops cost versus prepaid — and still misses 30% of bad actors.",
+                accent: "text-sky-600",
+                iconBg: "bg-sky-50 border-sky-100",
+              },
+            ].map((card, i) => (
+              <motion.div
+                key={i}
+                variants={animationsDisabled ? {} : staggerItem}
+                className="group relative bg-white border border-border-default rounded-xl p-6 flex flex-col gap-5 hover:border-border-strong hover:shadow-md transition-all duration-200"
+              >
+                {/* Icon */}
+                <div className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 ${card.iconBg}`}>
+                  <card.icon className={`w-5 h-5 ${card.accent}`} strokeWidth={1.75} />
+                </div>
+
+                {/* Stat */}
+                <div>
+                  <div className={`font-sans font-bold text-3xl tracking-tight leading-none ${card.accent}`}>
+                    {card.stat}
+                  </div>
+                  <div className="text-[11px] font-mono text-ink-tertiary uppercase tracking-widest mt-1">
+                    {card.statSuffix}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="h-px bg-border-default w-full" />
+
+                {/* Label & Description */}
+                <div className="flex flex-col gap-1.5">
+                  <h3 className="font-sans font-semibold text-[14px] text-ink-primary leading-snug">
+                    {card.label}
+                  </h3>
+                  <p className="text-[13px] text-ink-secondary leading-relaxed">
+                    {card.description}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+
+        </div>
+      </section>
     </>
   );
 }
