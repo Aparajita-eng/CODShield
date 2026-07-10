@@ -1,95 +1,112 @@
-# CODShield Design System
+# CODShield
 
-> Premium enterprise design system for cybersecurity & fintech SaaS.
-> Inspired by **Stripe · Linear · Vercel · Ramp · Cloudflare**
+> COD Trust Infrastructure for E-Commerce
 
----
-
-## Overview
-
-CODShield Design System is a complete, production-ready Tailwind CSS design system built for enterprise-grade cybersecurity and fintech products. It prioritizes clarity, trust, and premium aesthetics — without AI-generated clichés like neon gradients, glassmorphism blobs, or purple noise backgrounds.
+CODShield is a full-stack platform that evaluates checkout intent before every cash-on-delivery shipment. It verifies buyer identities, scores regional postal risk zones, detects repeat-refusal fraud, and protects merchant dispatch margins through a programmatic API layer.
 
 ---
 
-## Files
+## Monorepo Structure
 
-| File | Description |
-|------|-------------|
-| `tailwind.config.js` | Full Tailwind theme extension — all color, spacing, typography, shadow, animation tokens |
-| `components.css` | `@apply` component classes for every UI pattern |
-| `design-system.html` | Interactive reference — open in browser, no build step needed |
-
----
-
-## Color Palette
-
-| Role | Token | Value |
-|------|-------|-------|
-| Background | `surface.base` | `#FFFFFF` |
-| Secondary BG | `surface.subtle` | `#F8F9FB` |
-| Primary Text | `text.primary` | `#111827` |
-| Secondary Text | `text.secondary` | `#4B5563` |
-| Borders | `border` | `#E5E7EB` |
-| **Brand (Navy)** | `navy.900` | `#0F172A` |
-| **Accent (Emerald)** | `emerald.600` | `#059669` |
-| Danger | `danger` | `#DC2626` |
-| Warning | `warning` | `#F59E0B` |
-| Success | `success` | `#16A34A` |
-
----
-
-## Typography
-
-- **UI Font**: [Inter](https://fonts.google.com/specimen/Inter)
-- **Code/Data Font**: [JetBrains Mono](https://fonts.google.com/specimen/JetBrains+Mono)
-
-| Level | Size | Weight |
-|-------|------|--------|
-| Hero | 56px | 800 |
-| Section | 40px | 700 |
-| Body | 18px | 400 |
-
----
-
-## Design Principles
-
-- ✅ Generous whitespace — 8-pt grid throughout
-- ✅ `12px` border radius on all cards and panels
-- ✅ Very subtle shadows — max `0.10` opacity
-- ✅ Fade-only animations — 150–300ms, no bounce
-- ❌ No purple gradients
-- ❌ No neon colors
-- ❌ No glassmorphism cards
-- ❌ No decorative blobs
+```
+CODShield/
+├── backend/          # Express + TypeScript API server (port 5001)
+├── frontend/         # Next.js 16 web application (port 3000)
+│   └── design-system/  # Tailwind design system tokens & reference
+├── package.json      # Root — unified dev scripts via concurrently
+└── README.md
+```
 
 ---
 
 ## Quick Start
 
-1. Copy `tailwind.config.js` into your project root
-2. Import `components.css` into your main stylesheet
-3. Open `design-system.html` in a browser for a live reference of all components
+### 1. Clone & install all dependencies
 
-```html
-<!-- Example button usage -->
-<button class="btn-primary">Activate Shield</button>
-<button class="btn-accent">View Dashboard</button>
-<button class="btn-secondary">Cancel</button>
+```bash
+git clone https://github.com/Aparajita-eng/CODShield.git
+cd CODShield
+npm install          # installs concurrently at root
+npm run install:all  # installs deps in both backend/ and frontend/
+```
+
+### 2. Configure environment variables
+
+```bash
+# Backend — PostgreSQL + SMS gateway
+cp backend/.env.example backend/.env
+
+# Frontend — backend URL
+cp frontend/.env.example frontend/.env.local
+```
+
+Edit `backend/.env` with your database URL and SMS provider keys.
+
+### 3. Set up the database
+
+```bash
+cd backend
+npx prisma migrate dev --name init   # runs migrations
+npm run prisma:seed                  # seeds test merchants + risk data
+cd ..
+```
+
+### 4. Run both services
+
+```bash
+npm run dev          # starts backend (5001) + frontend (3000) together
+```
+
+Or run them separately:
+
+```bash
+npm run dev:backend   # Express API on http://localhost:5001
+npm run dev:frontend  # Next.js app on http://localhost:3000
 ```
 
 ---
 
-## Component Coverage
+## Services
 
-- **Buttons** — Primary, Accent, Secondary, Ghost, Danger, 5 sizes, icon variants
-- **Forms** — Input, Select, Textarea, Toggle, Checkbox, error/focus states
-- **Cards** — Base, Interactive, Subtle, Dark (filled), Stat tiles with deltas
-- **Badges & Pills** — 7 semantic variants, count badges, status dots
-- **Navigation** — Top navbar, sidebar nav, tabs, pill tabs
-- **Tables** — Full data table with sortable headers, row hover
-- **Feedback** — Alerts (4 types), Toasts (4 types), Progress bars, Skeletons
-- **Overlays** — Modal, Dropdown, Tooltip
-- **Security UI** — Risk score rings, shield status pills, live activity feed
+| Service | Port | Description |
+|---------|------|-------------|
+| Backend API | 5001 | REST API — OTP, risk engine, dashboard, public merchant API |
+| Frontend | 3000 | Next.js app — landing page, dashboard, sandbox console |
+
+---
+
+## Core Features
+
+| Feature | Description |
+|---------|-------------|
+| **OTP Verification** | Confirms buyer intent at checkout via SMS (2Factor.in / Twilio) |
+| **Trust Graph** | Cross-merchant identity matching and delivery cluster analysis |
+| **Pincode Intelligence** | Regional RTO risk weighting for 6-digit Indian postal codes |
+| **Fraud History** | Phone number blacklist across repeat-refusal incidents |
+| **Dynamic Risk Engine** | Weighted scoring (0–100) combining pincode, order value, and phone history |
+| **Merchant Scoring** | Compliance tier tracking based on claim ratios |
+| **Claims & Payouts** | Automated 4-step insurance claim workflow for failed deliveries |
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Backend | Node.js · Express · TypeScript · Prisma ORM |
+| Database | PostgreSQL |
+| Frontend | Next.js 16 · React 19 · TypeScript |
+| Styling | Tailwind CSS v4 |
+| Animations | Framer Motion 12 |
+| SMS | 2Factor.in (primary) · Twilio (fallback) |
+
+---
+
+## Documentation
+
+- [`backend/README.md`](./backend/README.md) — Backend setup, API reference, project structure
+- [`frontend/README.md`](./frontend/README.md) — Frontend setup, page map, environment variables
+- [`frontend/design-system/`](./frontend/design-system/) — Design system reference (open `design-system.html` in browser)
 
 ---
 

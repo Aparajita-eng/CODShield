@@ -6,3 +6,9 @@ dist/
 
 # Environment files
 .env
+.env.local
+
+# Database files — never commit dev database to git
+prisma/*.db
+prisma/*.db-journal
+prisma/*.db-wal
