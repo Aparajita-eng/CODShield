@@ -390,8 +390,6 @@ export default function Home() {
                 label: "Return-to-Origin Losses",
                 description:
                   "1 in 3 COD shipments returns undelivered. Each failed trip costs 2× in forward and reverse logistics alone — before repackaging.",
-                accent: "text-red-600",
-                iconBg: "bg-red-50 border-red-100",
               },
               {
                 icon: PackageX,
@@ -400,8 +398,6 @@ export default function Home() {
                 label: "Fake & Bogus Orders",
                 description:
                   "Nearly half of high-risk COD orders are placed with no purchase intent — bots, rivals, and repeat abusers exploiting open checkout flows.",
-                accent: "text-amber-600",
-                iconBg: "bg-amber-50 border-amber-100",
               },
               {
                 icon: PhoneOff,
@@ -410,8 +406,6 @@ export default function Home() {
                 label: "Doorstep Refusals",
                 description:
                   "Buyers refusing parcels at the door after transit is complete. The merchant absorbs shipping, handling, and restocking in full.",
-                accent: "text-orange-600",
-                iconBg: "bg-orange-50 border-orange-100",
               },
               {
                 icon: BarChart2,
@@ -420,8 +414,6 @@ export default function Home() {
                 label: "Manual Verification Cost",
                 description:
                   "Calling every COD customer to confirm intent adds 3× per-order ops cost versus prepaid — and still misses 30% of bad actors.",
-                accent: "text-sky-600",
-                iconBg: "bg-sky-50 border-sky-100",
               },
             ].map((card, i) => (
               <motion.div
@@ -429,14 +421,14 @@ export default function Home() {
                 variants={animationsDisabled ? {} : staggerItem}
                 className="group relative bg-white border border-border-default rounded-xl p-6 flex flex-col gap-5 hover:border-border-strong hover:shadow-md transition-all duration-200"
               >
-                {/* Icon */}
-                <div className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 ${card.iconBg}`}>
-                  <card.icon className={`w-5 h-5 ${card.accent}`} strokeWidth={1.75} />
+                {/* Icon — always --negative (#DC2626) */}
+                <div className="w-10 h-10 rounded-lg border border-[#FECACA] bg-[#FEF2F2] flex items-center justify-center shrink-0">
+                  <card.icon className="w-5 h-5 text-negative" strokeWidth={1.75} />
                 </div>
 
                 {/* Stat */}
                 <div>
-                  <div className={`font-sans font-bold text-3xl tracking-tight leading-none ${card.accent}`}>
+                  <div className="font-sans font-bold text-3xl tracking-tight leading-none text-negative">
                     {card.stat}
                   </div>
                   <div className="text-[11px] font-mono text-ink-tertiary uppercase tracking-widest mt-1">
