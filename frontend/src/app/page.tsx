@@ -237,6 +237,7 @@ export default function Home() {
                             strokeWidth="10"
                             fill="transparent"
                             strokeDasharray={circumference}
+                            initial={{ strokeDashoffset: circumference }}
                             animate={{ strokeDashoffset: strokeDashoffset }}
                             transition={{ duration: 0.4, ease: EASE }}
                           />
