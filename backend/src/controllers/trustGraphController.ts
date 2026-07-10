@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { prisma } from "../lib/db";
+import { fetchOrders, fetchBlacklists } from "../lib/dataAccess";
 import { buildTrustGraphFromOrders } from "../lib/trustGraph";
 
 function normalizePhone(input: string): string {
@@ -32,15 +32,13 @@ export async function getFraudTrustGraph(req: Request, res: Response): Promise<v
       where.createdAt = { ...where.createdAt, lte: end };
     }
 
-    const orders = await prisma.order.findMany({
+    const orders = await fetchOrders({
       where: Object.keys(where).length ? where : undefined,
       orderBy: { createdAt: "desc" },
     });
 
     const phones = [...new Set(orders.map((o) => o.phone))];
-    const blacklists = await prisma.blacklist.findMany({
-      where: { phone: { in: phones } },
-    });
+    const blacklists = await fetchBlacklists({ phones });
 
     let resolvedPhone: string | undefined;
     if (focusPhone) {

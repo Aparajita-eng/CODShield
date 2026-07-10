@@ -1,4 +1,4 @@
-import { prisma } from "./db";
+import { fetchPincodeRisk, fetchBlacklistByPhone } from "./dataAccess";
 
 export interface RiskAssessment {
   score: number; // 0 to 100
@@ -18,9 +18,7 @@ export async function calculateRisk(
   const reasons: string[] = [];
 
   // 1. Fetch Pincode Risk Weight
-  const pinRecord = await prisma.pincodeRisk.findUnique({
-    where: { pincode },
-  });
+  const pinRecord = await fetchPincodeRisk(pincode);
   const pincodeRiskWeight = pinRecord ? pinRecord.riskWeight : 0.25; // default moderate risk
   if (pinRecord) {
     if (pincodeRiskWeight > 0.6) {
@@ -33,9 +31,7 @@ export async function calculateRisk(
   }
 
   // 2. Fetch Phone Blacklist History
-  const blacklistRecord = await prisma.blacklist.findUnique({
-    where: { phone },
-  });
+  const blacklistRecord = await fetchBlacklistByPhone(phone);
   const refusalCount = blacklistRecord ? blacklistRecord.refusalCount : 0;
   const phoneRiskFactor = Math.min(1.0, refusalCount / 3.0);
   if (refusalCount > 0) {

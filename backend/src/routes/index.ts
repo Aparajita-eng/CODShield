@@ -17,6 +17,8 @@ import {
 } from "../controllers/sandboxController";
 import { getDashboardData, submitClaim } from "../controllers/dashboardController";
 import { getFraudTrustGraph } from "../controllers/trustGraphController";
+import { getPincodeIntelligence, getPincodeDetail } from "../controllers/pincodeController";
+import { listFraudEvents } from "../controllers/fraudEventsController";
 import { requireSession } from "../middleware/requireSession";
 import { checkOrderRisk } from "../controllers/v1Controller";
 
@@ -41,6 +43,13 @@ router.patch("/orders/bulk", bulkUpdateOrders);
 router.get("/customers", listCustomers);
 router.get("/customers/search", searchCustomers);
 router.get("/customers/profile", getCustomerProfile);
+
+// Pincode intelligence
+router.get("/pincodes/intelligence", getPincodeIntelligence);
+router.get("/pincodes/:pincode/detail", getPincodeDetail);
+
+// Fraud events
+router.get("/fraud/events", listFraudEvents);
 
 // Fraud / trust graph (session required)
 router.get("/fraud/trust-graph", requireSession, getFraudTrustGraph);

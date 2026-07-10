@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/db";
 import { calculateRisk } from "../lib/risk";
+import { fetchPincodeRisk, fetchBlacklistByPhone } from "../lib/dataAccess";
 
 function hashStr(str: string): number {
   let h = 0;
@@ -106,9 +107,7 @@ export async function checkPincode(req: Request, res: Response): Promise<any> {
     }
 
     const pin = pincode.trim();
-    const pinRecord = await prisma.pincodeRisk.findUnique({
-      where: { pincode: pin },
-    });
+    const pinRecord = await fetchPincodeRisk(pin);
 
     const weight = pinRecord ? pinRecord.riskWeight : 0.25;
     const h = hashStr(pin);
@@ -158,9 +157,7 @@ export async function checkFraudHistory(req: Request, res: Response): Promise<an
     }
 
     const key = phone.trim();
-    const blacklistRecord = await prisma.blacklist.findUnique({
-      where: { phone: key },
-    });
+    const blacklistRecord = await fetchBlacklistByPhone(key);
 
     if (!blacklistRecord) {
       return res.json({

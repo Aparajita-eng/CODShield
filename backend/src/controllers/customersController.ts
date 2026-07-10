@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import { Blacklist, Order } from "@prisma/client";
-import { prisma } from "../lib/db";
+import {
+  fetchOrders,
+  fetchBlacklists,
+  fetchBlacklistByPhone,
+} from "../lib/dataAccess";
 
 type TrustLabel = "Low" | "Medium" | "High";
 type Severity = "Low" | "Medium" | "High";
@@ -340,7 +344,7 @@ async function groupOrdersByPhone(phoneFilter?: string) {
     ? { phone: { contains: normalizedFilter } }
     : undefined;
 
-  const orders = await prisma.order.findMany({
+  const orders = await fetchOrders({
     where,
     orderBy: { createdAt: "desc" },
   });
@@ -360,9 +364,7 @@ export async function listCustomers(req: Request, res: Response): Promise<any> {
     const grouped = await groupOrdersByPhone();
     const phones = Array.from(grouped.keys());
 
-    const blacklists = await prisma.blacklist.findMany({
-      where: { phone: { in: phones } },
-    });
+    const blacklists = await fetchBlacklists({ phones });
     const blacklistMap = new Map(blacklists.map((b) => [b.phone, b]));
 
     const customers = phones
@@ -394,9 +396,7 @@ export async function searchCustomers(req: Request, res: Response): Promise<any>
       normalizePhone(phone).includes(query)
     );
 
-    const blacklists = await prisma.blacklist.findMany({
-      where: { phone: { in: phones } },
-    });
+    const blacklists = await fetchBlacklists({ phones });
     const blacklistMap = new Map(blacklists.map((b) => [b.phone, b]));
 
     const customers = phones
@@ -421,7 +421,7 @@ export async function getCustomerProfile(req: Request, res: Response): Promise<a
       return res.status(400).json({ success: false, message: "Phone number is required" });
     }
 
-    const orders = await prisma.order.findMany({
+    const orders = await fetchOrders({
       where: { phone: { contains: normalized } },
       orderBy: { createdAt: "desc" },
     });
@@ -433,7 +433,7 @@ export async function getCustomerProfile(req: Request, res: Response): Promise<a
     }
 
     const phone = exactOrders[0].phone;
-    const blacklist = await prisma.blacklist.findUnique({ where: { phone } });
+    const blacklist = await fetchBlacklistByPhone(phone);
     const { score, label } = calculateBuyerTrustScore(exactOrders, blacklist);
 
     const delivered = exactOrders.filter((o) => o.fulfillmentStatus === "Delivered").length;

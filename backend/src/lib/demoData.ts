@@ -1,0 +1,250 @@
+import type { Blacklist, Merchant, Order, PincodeRisk } from "@prisma/client";
+
+export const DEMO_MERCHANT_ACME_ID = "a0000000-0000-4000-8000-000000000001";
+export const DEMO_MERCHANT_BETA_ID = "a0000000-0000-4000-8000-000000000002";
+export const DEMO_MERCHANT_DELTA_ID = "a0000000-0000-4000-8000-000000000003";
+
+const merchantCreatedAt = new Date("2025-06-01T00:00:00Z");
+
+export const demoMerchants: Merchant[] = [
+  {
+    id: DEMO_MERCHANT_ACME_ID,
+    name: "Acme Apparel",
+    apiKey: "codshield_live_acme_growth_9843",
+    tier: "Growth",
+    claimRatio: 4.0,
+    createdAt: merchantCreatedAt,
+  },
+  {
+    id: DEMO_MERCHANT_BETA_ID,
+    name: "Beta Electronics",
+    apiKey: "codshield_live_beta_starter_1294",
+    tier: "Starter",
+    claimRatio: 1.5,
+    createdAt: merchantCreatedAt,
+  },
+  {
+    id: DEMO_MERCHANT_DELTA_ID,
+    name: "Delta Direct",
+    apiKey: "codshield_live_delta_enterprise_0481",
+    tier: "Enterprise",
+    claimRatio: 9.5,
+    createdAt: merchantCreatedAt,
+  },
+];
+
+export const demoPincodeRisks: PincodeRisk[] = [
+  { pincode: "560034", riskWeight: 0.15 },
+  { pincode: "110044", riskWeight: 0.65 },
+  { pincode: "400072", riskWeight: 0.85 },
+  { pincode: "600041", riskWeight: 0.12 },
+  { pincode: "700091", riskWeight: 0.28 },
+  { pincode: "500081", riskWeight: 0.18 },
+  { pincode: "380009", riskWeight: 0.22 },
+  { pincode: "411001", riskWeight: 0.2 },
+  { pincode: "122001", riskWeight: 0.45 },
+  { pincode: "201301", riskWeight: 0.55 },
+];
+
+const blacklistCreatedAt = new Date("2025-08-01T00:00:00Z");
+
+export const demoBlacklists: Blacklist[] = [
+  {
+    phone: "9123456780",
+    refusalCount: 3,
+    reason: "Repeat COD refusal (3 orders, 60 days)",
+    createdAt: blacklistCreatedAt,
+  },
+  {
+    phone: "9876543211",
+    refusalCount: 2,
+    reason: "Multiple accounts, same device ID",
+    createdAt: blacklistCreatedAt,
+  },
+  {
+    phone: "9998887776",
+    refusalCount: 4,
+    reason: "Address flagged by another merchant",
+    createdAt: blacklistCreatedAt,
+  },
+  {
+    phone: "8887776665",
+    refusalCount: 1,
+    reason: "Delivery attempt cancelled post-dispatch",
+    createdAt: blacklistCreatedAt,
+  },
+];
+
+type OrderSeed = Omit<Order, "id" | "fraudFlagged"> & { id: string; fraudFlagged?: boolean };
+
+const orderSeeds: OrderSeed[] = [
+  {
+    id: "b0000000-0000-4000-8000-000000000001",
+    merchantId: DEMO_MERCHANT_ACME_ID,
+    phone: "9876543210",
+    pincode: "560034",
+    value: 1240.0,
+    riskScore: 27,
+    protectionStatus: "Protected",
+    fulfillmentStatus: "Delivered",
+    statusReason: "Low risk pincode and clear phone history",
+    createdAt: new Date("2026-01-12T10:30:00Z"),
+  },
+  {
+    id: "b0000000-0000-4000-8000-000000000002",
+    merchantId: DEMO_MERCHANT_ACME_ID,
+    phone: "9876543210",
+    pincode: "560034",
+    value: 2180.0,
+    riskScore: 22,
+    protectionStatus: "Protected",
+    fulfillmentStatus: "Delivered",
+    statusReason: "Repeat buyer with clean delivery history",
+    createdAt: new Date("2025-11-08T14:15:00Z"),
+  },
+  {
+    id: "b0000000-0000-4000-8000-000000000003",
+    merchantId: DEMO_MERCHANT_ACME_ID,
+    phone: "9876543210",
+    pincode: "500081",
+    value: 890.0,
+    riskScore: 18,
+    protectionStatus: "Protected",
+    fulfillmentStatus: "Delivered",
+    statusReason: "Low order value. Verified pincode",
+    createdAt: new Date("2025-09-20T09:00:00Z"),
+  },
+  {
+    id: "b0000000-0000-4000-8000-000000000004",
+    merchantId: DEMO_MERCHANT_ACME_ID,
+    phone: "9876543210",
+    pincode: "600041",
+    value: 1560.0,
+    riskScore: 24,
+    protectionStatus: "Protected",
+    fulfillmentStatus: "Shipped",
+    statusReason: "Standard COD order in transit",
+    createdAt: new Date("2026-03-02T11:45:00Z"),
+  },
+  {
+    id: "b0000000-0000-4000-8000-000000000005",
+    merchantId: DEMO_MERCHANT_ACME_ID,
+    phone: "9123456780",
+    pincode: "110044",
+    value: 3890.0,
+    riskScore: 58,
+    protectionStatus: "Held",
+    fulfillmentStatus: "Pending",
+    statusReason:
+      "[cluster:cod-ring-delhi] Medium risk pincode. Phone blacklisted with 3 refusals. OTP verification required",
+    createdAt: new Date("2026-02-18T16:20:00Z"),
+  },
+  {
+    id: "b0000000-0000-4000-8000-000000000006",
+    merchantId: DEMO_MERCHANT_ACME_ID,
+    phone: "9123456780",
+    pincode: "122001",
+    value: 2450.0,
+    riskScore: 62,
+    protectionStatus: "Held",
+    fulfillmentStatus: "RTO",
+    statusReason: "[cluster:cod-ring-delhi] Buyer refused delivery at doorstep",
+    createdAt: new Date("2025-12-05T08:30:00Z"),
+  },
+  {
+    id: "b0000000-0000-4000-8000-000000000007",
+    merchantId: DEMO_MERCHANT_ACME_ID,
+    phone: "9123456780",
+    pincode: "201301",
+    value: 1720.0,
+    riskScore: 55,
+    protectionStatus: "Failed",
+    fulfillmentStatus: "RTO",
+    statusReason: "[cluster:cod-ring-delhi] Multiple delivery attempts failed",
+    createdAt: new Date("2025-10-14T13:10:00Z"),
+  },
+  {
+    id: "b0000000-0000-4000-8000-000000000008",
+    merchantId: DEMO_MERCHANT_ACME_ID,
+    phone: "9998887776",
+    pincode: "400072",
+    value: 6150.0,
+    riskScore: 88,
+    protectionStatus: "Failed",
+    fulfillmentStatus: "RTO",
+    fraudFlagged: true,
+    statusReason: "[cluster:cod-ring-delhi] High risk pincode. Phone blacklisted with 4 refusals",
+    createdAt: new Date("2026-01-28T12:00:00Z"),
+  },
+  {
+    id: "b0000000-0000-4000-8000-000000000009",
+    merchantId: DEMO_MERCHANT_ACME_ID,
+    phone: "9998887776",
+    pincode: "400072",
+    value: 4820.0,
+    riskScore: 82,
+    protectionStatus: "Failed",
+    fulfillmentStatus: "Cancelled",
+    fraudFlagged: true,
+    statusReason: "[cluster:cod-ring-delhi] Manually flagged as fraud by merchant",
+    createdAt: new Date("2025-11-22T17:40:00Z"),
+  },
+  {
+    id: "b0000000-0000-4000-8000-000000000010",
+    merchantId: DEMO_MERCHANT_ACME_ID,
+    phone: "9998887776",
+    pincode: "110044",
+    value: 3290.0,
+    riskScore: 76,
+    protectionStatus: "Failed",
+    fulfillmentStatus: "RTO",
+    fraudFlagged: true,
+    statusReason: "[cluster:cod-ring-delhi] Address mismatch flagged during verification",
+    createdAt: new Date("2025-09-03T10:05:00Z"),
+  },
+  {
+    id: "b0000000-0000-4000-8000-000000000011",
+    merchantId: DEMO_MERCHANT_ACME_ID,
+    phone: "8887776665",
+    pincode: "600041",
+    value: 980.0,
+    riskScore: 15,
+    protectionStatus: "Protected",
+    fulfillmentStatus: "Verified",
+    statusReason: "Low risk order value. Clear phone history. Verified pincode",
+    createdAt: new Date("2026-02-10T15:25:00Z"),
+  },
+  {
+    id: "b0000000-0000-4000-8000-000000000012",
+    merchantId: DEMO_MERCHANT_ACME_ID,
+    phone: "8887776665",
+    pincode: "600041",
+    value: 1340.0,
+    riskScore: 19,
+    protectionStatus: "Protected",
+    fulfillmentStatus: "Delivered",
+    statusReason: "Successful repeat delivery to same pincode",
+    createdAt: new Date("2025-12-18T09:50:00Z"),
+  },
+  {
+    id: "b0000000-0000-4000-8000-000000000013",
+    merchantId: DEMO_MERCHANT_ACME_ID,
+    phone: "9876543211",
+    pincode: "380009",
+    value: 2100.0,
+    riskScore: 48,
+    protectionStatus: "Held",
+    fulfillmentStatus: "Pending",
+    statusReason: "Multiple accounts linked to same device ID",
+    createdAt: new Date("2026-03-05T07:15:00Z"),
+  },
+];
+
+export const demoOrders: Order[] = orderSeeds.map((order) => ({
+  ...order,
+  fraudFlagged: order.fraudFlagged ?? false,
+}));
+
+export function isDemoDataMode(): boolean {
+  return !process.env.DATABASE_URL?.trim();
+}

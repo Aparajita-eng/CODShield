@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/db";
+import { fetchMerchants, fetchOrders, fetchOrderById, fetchPincodeRisk } from "../lib/dataAccess";
 import { Claim, Order, PincodeRisk } from "@prisma/client";
 
 type OrderStatus = "Pending" | "Verified" | "Shipped" | "Delivered" | "RTO" | "Cancelled";
@@ -202,13 +203,13 @@ export async function listOrders(req: Request, res: Response): Promise<any> {
   try {
     const merchantId = req.query.merchantId as string | undefined;
 
-    const merchants = await prisma.merchant.findMany();
+    const merchants = await fetchMerchants();
     if (!merchants.length) {
       return res.json({ success: true, orders: [], merchants: [] });
     }
 
     const selectedMerchantId = merchantId || merchants[0].id;
-    const orders = await prisma.order.findMany({
+    const orders = await fetchOrders({
       where: { merchantId: selectedMerchantId },
       orderBy: { createdAt: "desc" },
     });
@@ -229,14 +230,14 @@ export async function getOrderById(req: Request, res: Response): Promise<any> {
   try {
     const { orderId } = req.params;
 
-    const order = await prisma.order.findUnique({ where: { id: orderId } });
+    const order = await fetchOrderById(orderId);
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
 
     const [pincodeRisk, claim] = await Promise.all([
-      prisma.pincodeRisk.findUnique({ where: { pincode: order.pincode } }),
-      prisma.claim.findFirst({ where: { orderId: order.id } }),
+      fetchPincodeRisk(order.pincode),
+      prisma.claim.findFirst({ where: { orderId: order.id } }).catch(() => null),
     ]);
 
     return res.json({

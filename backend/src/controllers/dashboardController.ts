@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/db";
+import { fetchMerchants, fetchMerchantById, fetchOrders } from "../lib/dataAccess";
 
 export async function getDashboardData(req: Request, res: Response): Promise<any> {
   try {
     const merchantId = req.query.merchantId as string | undefined;
 
     // Fetch all merchants to populate selection dropdown
-    const merchants = await prisma.merchant.findMany();
+    const merchants = await fetchMerchants();
 
     if (!merchants.length) {
       return res.json({
@@ -17,9 +18,7 @@ export async function getDashboardData(req: Request, res: Response): Promise<any
 
     // Default to the first merchant if none specified
     const selectedMerchantId = merchantId || merchants[0].id;
-    const selectedMerchant = await prisma.merchant.findUnique({
-      where: { id: selectedMerchantId },
-    });
+    const selectedMerchant = await fetchMerchantById(selectedMerchantId);
 
     if (!selectedMerchant) {
       return res.status(404).json({
@@ -29,23 +28,28 @@ export async function getDashboardData(req: Request, res: Response): Promise<any
     }
 
     // Fetch orders for this merchant
-    const orders = await prisma.order.findMany({
+    const orders = await fetchOrders({
       where: { merchantId: selectedMerchantId },
       orderBy: { createdAt: "desc" },
     });
 
-    // Fetch claims for this merchant's orders
-    const claims = await prisma.claim.findMany({
-      where: {
-        order: {
-          merchantId: selectedMerchantId,
+    // Fetch claims for this merchant's orders (empty in demo mode without DB)
+    let claims: Awaited<ReturnType<typeof prisma.claim.findMany>> = [];
+    try {
+      claims = await prisma.claim.findMany({
+        where: {
+          order: {
+            merchantId: selectedMerchantId,
+          },
         },
-      },
-      include: {
-        order: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
+        include: {
+          order: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    } catch {
+      claims = [];
+    }
 
     // Calculate aggregated dashboard metrics
     const totalOrdersCount = orders.length;

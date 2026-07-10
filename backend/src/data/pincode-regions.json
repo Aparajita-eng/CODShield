@@ -1,0 +1,12 @@
+{
+  "560034": { "city": "Koramangala", "district": "Bengaluru Urban", "state": "Karnataka" },
+  "110044": { "city": "Okhla", "district": "South East Delhi", "state": "Delhi" },
+  "400072": { "city": "Saki Naka", "district": "Mumbai Suburban", "state": "Maharashtra" },
+  "600041": { "city": "Adyar", "district": "Chennai", "state": "Tamil Nadu" },
+  "700091": { "city": "Salt Lake", "district": "Kolkata", "state": "West Bengal" },
+  "500081": { "city": "Madhapur", "district": "Hyderabad", "state": "Telangana" },
+  "380009": { "city": "Navrangpura", "district": "Ahmedabad", "state": "Gujarat" },
+  "411001": { "city": "Pune Camp", "district": "Pune", "state": "Maharashtra" },
+  "122001": { "city": "Gurugram", "district": "Gurugram", "state": "Haryana" },
+  "201301": { "city": "Noida", "district": "Gautam Buddha Nagar", "state": "Uttar Pradesh" }
+}
