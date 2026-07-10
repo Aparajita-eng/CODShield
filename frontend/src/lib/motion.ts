@@ -21,6 +21,6 @@ export const clipReveal = {
 };
 
 export const cardHover = {
-  rest: { y: 0, borderColor: "rgba(237,232,223,0.14)" },
-  hover: { y: -2, borderColor: "rgba(201,154,75,0.4)", transition: { duration: 0.2 } }
+  rest: { y: 0, borderColor: "var(--border-default)" },
+  hover: { y: -2, borderColor: "var(--accent)", transition: { duration: 0.2 } }
 };

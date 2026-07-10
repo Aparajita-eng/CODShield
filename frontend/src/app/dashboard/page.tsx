@@ -88,7 +88,7 @@ export default function Dashboard() {
       if (data.success) {
         setSimFeedback(`Authorized. Score: ${data.riskAssessment.score} Action: ${data.riskAssessment.action}`);
         fetchDashboardData(selectedMerchantId);
-        confetti({ particleCount: 30, spread: 20, colors: ["#C99A4B", "#B5563C"] });
+        confetti({ particleCount: 30, spread: 20, colors: ["#059669", "#DC2626"] });
       } else {
         setSimFeedback(`Order check failed: ${data.message}`);
       }
@@ -109,7 +109,7 @@ export default function Dashboard() {
       const data = await res.json();
       if (data.success) {
         fetchDashboardData(selectedMerchantId);
-        confetti({ particleCount: 30, spread: 20, colors: ["#C99A4B"] });
+        confetti({ particleCount: 30, spread: 20, colors: ["#059669"] });
       } else {
         alert(data.message || "Failed to submit claim");
       }

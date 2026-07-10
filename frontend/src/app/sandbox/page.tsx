@@ -106,7 +106,7 @@ function SandboxContent() {
       if (data.success) {
         setOtpSuccess(true);
         setOtpStatus("Verification successful. Identity authenticated.");
-        confetti({ particleCount: 50, spread: 30, colors: ["#C99A4B", "#B5563C"] });
+        confetti({ particleCount: 50, spread: 30, colors: ["#059669", "#DC2626"] });
       } else {
         setOtpSuccess(false);
         setOtpStatus(data.message || "Verification code failed mismatch check.");
@@ -241,7 +241,7 @@ function SandboxContent() {
           await new Promise((resolve) => setTimeout(resolve, 600));
           setClaimSteps(steps.slice(0, i));
           if (i === steps.length) {
-            confetti({ particleCount: 30, spread: 20, colors: ["#C99A4B"] });
+            confetti({ particleCount: 30, spread: 20, colors: ["#059669"] });
           }
         }
       }
