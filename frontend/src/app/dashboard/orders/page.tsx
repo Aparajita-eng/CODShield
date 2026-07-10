@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
 import {
   useReactTable,
   getCoreRowModel,
@@ -472,17 +473,25 @@ export default function OrdersPage() {
         id: "actions",
         header: () => null,
         cell: ({ row }) => (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelectedOrder(row.original);
-            }}
-            className="text-ink-tertiary hover:text-ink-primary"
-          >
-            <Eye className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedOrder(row.original);
+              }}
+              className="text-ink-tertiary hover:text-ink-primary"
+            >
+              <Eye className="w-4 h-4" />
+            </button>
+            <Link
+              href={`/dashboard/orders/${row.original.id}`}
+              className="text-xs font-semibold text-accent hover:text-accent/80"
+            >
+              View Full Details
+            </Link>
+          </div>
         ),
-        size: 40,
+        size: 140,
         enableSorting: false,
         enableHiding: false,
       },
@@ -1053,6 +1062,12 @@ export default function OrdersPage() {
 
               {/* Drawer Footer */}
               <div className="flex items-center gap-3 p-6 border-t border-border-default">
+                <Link
+                  href={`/dashboard/orders/${selectedOrder.id}`}
+                  className="flex-1 px-4 py-2.5 rounded-lg border border-border-default bg-bg-base hover:bg-bg-raised text-sm font-semibold text-ink-primary transition-colors text-center"
+                >
+                  View Full Details
+                </Link>
                 <button className="flex-1 px-4 py-2.5 rounded-lg border border-border-default bg-bg-base hover:bg-bg-raised text-sm font-semibold text-ink-primary transition-colors">
                   Flag as Fraud
                 </button>
