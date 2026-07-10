@@ -92,6 +92,7 @@ export default function Integrations() {
                       {Icon ? (
                         <>
                           <Icon
+                            aria-hidden="true"
                             className="w-4 h-4 text-ink-tertiary transition-colors duration-200"
                             style={
                               {
