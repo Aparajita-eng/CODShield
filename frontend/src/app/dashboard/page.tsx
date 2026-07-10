@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Copy, Eye, EyeOff, Clock, PlusCircle } from "lucide-react";
 import confetti from "canvas-confetti";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
 
 /** Matches the Prisma Merchant model returned by GET /api/dashboard/data */
 interface Merchant {

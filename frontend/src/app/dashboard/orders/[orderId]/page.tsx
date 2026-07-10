@@ -1,82 +1,23 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Eye,
   EyeOff,
-  X,
   AlertTriangle,
   CheckCircle2,
   XCircle,
   ShieldAlert,
 } from "lucide-react";
-
-// --- Type Definitions ---
-type OrderStatus = "Pending" | "Verified" | "Shipped" | "Delivered" | "RTO" | "Cancelled";
-type RiskLevel = "Low" | "Medium" | "High";
-type RiskDecision = "Auto-approved" | "Manual review" | "Auto-flagged";
-type ClaimStatus = "Pending" | "Open" | "Under Review" | "Resolved" | "Rejected";
-
-interface OrderDetail {
-  id: string;
-  status: OrderStatus;
-  customer: {
-    name: string;
-    phone: string;
-    email: string;
-    pastOrderCount: number;
-    pastRtoRate: number;
-  };
-  address: {
-    line1: string;
-    line2?: string;
-    city: string;
-    state: string;
-    pincode: string;
-    pincodeRisk: RiskLevel;
-  };
-  value: number;
-  riskScore: number;
-  riskBreakdown: {
-    factor: string;
-    weight: number;
-    contribution: number;
-  }[];
-  otpHistory: {
-    timestamp: string;
-    channel: "SMS" | "WhatsApp" | "Call";
-    status: "Sent" | "Verified" | "Expired" | "Failed";
-    attemptCount: number;
-  }[];
-  fraudEvents: {
-    id: string;
-    timestamp: string;
-    message: string;
-    severity: RiskLevel;
-  }[];
-  timeline: {
-    id: string;
-    timestamp: string;
-    title: string;
-    description: string;
-  }[];
-  claim?: {
-    id: string;
-    status: ClaimStatus;
-    type: string;
-  };
-  otpVerified: boolean;
-  riskDecision: RiskDecision;
-  items: {
-    name: string;
-    quantity: number;
-    price: number;
-  }[];
-  paymentMethod: string;
-}
+import {
+  getOrderDetailById,
+  type OrderDetail,
+  type OrderStatus,
+  type RiskLevel,
+} from "@/lib/orders-data";
 
 // --- Helper Functions ---
 const getStatusColor = (status: OrderStatus) => {
@@ -126,101 +67,6 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-// --- Mock Data Fetch ---
-const mockFetchOrder = async (orderId: string): Promise<OrderDetail> => {
-  await new Promise(r => setTimeout(r, 500));
-  
-  // Create a consistent sample order based on orderId (for uniqueness)
-  return {
-    id: orderId,
-    status: ["Pending", "Verified", "Shipped", "Delivered", "RTO"][Math.floor(Math.random() * 5)] as OrderStatus,
-    customer: {
-      name: "Rahul Sharma",
-      phone: "+91 9876543210",
-      email: "rahul.sharma@example.com",
-      pastOrderCount: 12,
-      pastRtoRate: 8.3,
-    },
-    address: {
-      line1: "123, Main Street",
-      line2: "Sector 45",
-      city: "Gurugram",
-      state: "Haryana",
-      pincode: "122001",
-      pincodeRisk: "Medium",
-    },
-    value: 2499,
-    riskScore: 45,
-    riskBreakdown: [
-      { factor: "Pincode Risk", weight: 0.3, contribution: 15 },
-      { factor: "Customer History", weight: 0.4, contribution: 20 },
-      { factor: "Order Value vs Avg", weight: 0.2, contribution: 8 },
-      { factor: "OTP Status", weight: 0.1, contribution: 2 },
-    ],
-    otpHistory: [
-      {
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        channel: "SMS",
-        status: "Sent",
-        attemptCount: 1,
-      },
-      {
-        timestamp: new Date(Date.now() - 3500000).toISOString(),
-        channel: "WhatsApp",
-        status: "Verified",
-        attemptCount: 2,
-      },
-    ],
-    fraudEvents: [
-      {
-        id: "fe1",
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        message: "Pincode flagged high-RTO",
-        severity: "Medium",
-      },
-    ],
-    timeline: [
-      {
-        id: "t1",
-        timestamp: new Date(Date.now() - 7200000).toISOString(),
-        title: "Order Placed",
-        description: "Order received from customer",
-      },
-      {
-        id: "t2",
-        timestamp: new Date(Date.now() - 3600000).toISOString(),
-        title: "OTP Sent",
-        description: "OTP sent to +91 9876543210",
-      },
-      {
-        id: "t3",
-        timestamp: new Date(Date.now() - 3500000).toISOString(),
-        title: "OTP Verified",
-        description: "Customer confirmed delivery address",
-      },
-      {
-        id: "t4",
-        timestamp: new Date(Date.now() - 1800000).toISOString(),
-        title: "Risk Scored",
-        description: "Order assigned risk score of 45",
-      },
-      {
-        id: "t5",
-        timestamp: new Date(Date.now() - 900000).toISOString(),
-        title: "Status Changed",
-        description: "Order marked as Verified",
-      },
-    ],
-    claim: { id: "cl1", status: "Pending", type: "RTO Dispute" },
-    otpVerified: true,
-    riskDecision: "Manual review",
-    items: [
-      { name: "Wireless Bluetooth Headphones", quantity: 1, price: 2499 },
-    ],
-    paymentMethod: "COD",
-  };
-};
-
 // --- Badge Component ---
 const StatusBadge = ({ status, color }: { status: string, color: string }) => (
   <div
@@ -239,13 +85,10 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [showPhone, setShowPhone] = useState(false);
 
-  // --- Fetch Data ---
   useEffect(() => {
-    (async () => {
-      const data = await mockFetchOrder(orderId);
-      setOrder(data);
-      setLoading(false);
-    })();
+    const data = getOrderDetailById(orderId);
+    setOrder(data ?? null);
+    setLoading(false);
   }, [orderId]);
 
   if (loading) {

@@ -12,7 +12,7 @@ export async function sendOtp(req: Request, res: Response): Promise<any> {
       });
     }
 
-    const rawCode = Math.floor(1000 + Math.random() * 9000).toString();
+    const rawCode = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minute expiry
 
     otpStore.set(phone.trim(), { code: rawCode, expiresAt });

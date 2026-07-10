@@ -46,6 +46,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   // Close mobile sidebar on path change
   useEffect(() => {
@@ -90,10 +99,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <motion.aside
         initial={false}
         animate={{
-          x: isSidebarOpen ? 0 : "-100%",
+          x: isDesktop ? 0 : isSidebarOpen ? 0 : "-100%",
         }}
         transition={{ type: "tween", duration: 0.2 }}
-        className="fixed left-0 top-0 h-full w-64 bg-bg-raised border-r border-border-default z-50 flex flex-col lg:translate-x-0"
+        className="fixed left-0 top-0 h-full w-64 bg-bg-raised border-r border-border-default z-50 flex flex-col"
       >
         {/* Logo section */}
         <div className="p-6 border-b border-border-default flex items-center gap-3">
@@ -261,7 +270,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </Link>
                   </div>
                   <div className="p-2 border-t border-border-default">
-                    <button className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-negative hover:bg-negative/5 w-full text-left">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await fetch("/api/auth/logout", { method: "POST" });
+                        window.location.href = "/login";
+                      }}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-xs text-negative hover:bg-negative/5 w-full text-left"
+                    >
                       Log out
                     </button>
                   </div>

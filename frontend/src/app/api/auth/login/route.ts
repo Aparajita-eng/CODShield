@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
 
   try {
-    const res = await fetch(`${backendUrl}/api/otp/verify`, {
+    const res = await fetch(`${backendUrl}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -14,31 +14,17 @@ export async function POST(request: Request) {
 
     const data = await res.json();
 
-    if (!data.success) {
+    if (!data.success || !data.token) {
       return NextResponse.json(data, { status: res.status });
-    }
-
-    const sessionRes = await fetch(`${backendUrl}/api/auth/otp-session`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: body.phone }),
-    });
-
-    const sessionData = await sessionRes.json();
-
-    if (!sessionData.success || !sessionData.token) {
-      return NextResponse.json(
-        { success: false, message: "Verified but failed to create session" },
-        { status: 500 }
-      );
     }
 
     const response = NextResponse.json({
       success: true,
       message: data.message,
+      user: data.user,
     });
 
-    response.cookies.set(SESSION_COOKIE_NAME, sessionData.token, sessionCookieOptions);
+    response.cookies.set(SESSION_COOKIE_NAME, data.token, sessionCookieOptions);
     return response;
   } catch {
     return NextResponse.json(

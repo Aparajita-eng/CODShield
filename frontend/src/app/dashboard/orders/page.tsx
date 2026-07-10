@@ -32,170 +32,17 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-// --- Type Definitions ---
-
-type OrderStatus = "Pending" | "Verified" | "Shipped" | "Delivered" | "RTO" | "Cancelled";
-type RiskLevel = "Low" | "Medium" | "High";
-
-interface Order {
-  id: string;
-  customerName: string;
-  phone: string;
-  pincode: string;
-  value: number;
-  riskScore: number;
-  status: OrderStatus;
-  orderDate: string;
-  riskFactors: string[];
-  otpVerified: boolean;
-  timeline: { date: string; status: string; description: string }[];
-}
-
-// --- Sample Data ---
-const sampleOrders: Order[] = [
-  {
-    id: "COD-8342",
-    customerName: "Rahul Sharma",
-    phone: "+91 9876543210",
-    pincode: "110001",
-    value: 2499,
-    riskScore: 12,
-    status: "Delivered",
-    orderDate: "2025-07-09T10:30:00Z",
-    riskFactors: ["Low RTO history", "Pincode low risk", "Verified phone"],
-    otpVerified: true,
-    timeline: [
-      { date: "2025-07-05", status: "Order Placed", description: "Order received from customer" },
-      { date: "2025-07-06", status: "Verified", description: "OTP verified successfully" },
-      { date: "2025-07-07", status: "Shipped", description: "Dispatched to logistics" },
-      { date: "2025-07-09", status: "Delivered", description: "Delivered to customer" },
-    ],
-  },
-  {
-    id: "COD-8341",
-    customerName: "Priya Mehta",
-    phone: "+91 8765432109",
-    pincode: "400001",
-    value: 5999,
-    riskScore: 68,
-    status: "Shipped",
-    orderDate: "2025-07-08T14:15:00Z",
-    riskFactors: ["High order value", "Pincode medium risk"],
-    otpVerified: false,
-    timeline: [
-      { date: "2025-07-06", status: "Order Placed", description: "Order received from customer" },
-      { date: "2025-07-08", status: "Shipped", description: "Dispatched to logistics" },
-    ],
-  },
-  {
-    id: "COD-8340",
-    customerName: "Amit Patel",
-    phone: "+91 7654321098",
-    pincode: "560001",
-    value: 1299,
-    riskScore: 45,
-    status: "Pending",
-    orderDate: "2025-07-10T09:45:00Z",
-    riskFactors: ["Pincode medium risk"],
-    otpVerified: false,
-    timeline: [
-      { date: "2025-07-10", status: "Order Placed", description: "Order received from customer" },
-    ],
-  },
-  {
-    id: "COD-8339",
-    customerName: "Neha Singh",
-    phone: "+91 9988776655",
-    pincode: "600001",
-    value: 3499,
-    riskScore: 89,
-    status: "RTO",
-    orderDate: "2025-06-28T11:20:00Z",
-    riskFactors: ["High RTO history", "Pincode high risk"],
-    otpVerified: false,
-    timeline: [
-      { date: "2025-06-28", status: "Order Placed", description: "Order received from customer" },
-      { date: "2025-06-30", status: "Shipped", description: "Dispatched to logistics" },
-      { date: "2025-07-05", status: "RTO", description: "Returned to origin" },
-    ],
-  },
-  {
-    id: "COD-8338",
-    customerName: "Rohit Verma",
-    phone: "+91 9123456789",
-    pincode: "700001",
-    value: 899,
-    riskScore: 5,
-    status: "Verified",
-    orderDate: "2025-07-09T16:00:00Z",
-    riskFactors: ["Low RTO history", "Verified phone"],
-    otpVerified: true,
-    timeline: [
-      { date: "2025-07-09", status: "Order Placed", description: "Order received from customer" },
-      { date: "2025-07-09", status: "Verified", description: "OTP verified successfully" },
-    ],
-  },
-  {
-    id: "COD-8337",
-    customerName: "Sneha Gupta",
-    phone: "+91 8800112233",
-    pincode: "201301",
-    value: 7999,
-    riskScore: 95,
-    status: "Cancelled",
-    orderDate: "2025-06-25T13:00:00Z",
-    riskFactors: ["High RTO history", "High order value", "Pincode high risk"],
-    otpVerified: false,
-    timeline: [
-      { date: "2025-06-25", status: "Order Placed", description: "Order received from customer" },
-      { date: "2025-06-26", status: "Cancelled", description: "Order cancelled by customer" },
-    ],
-  },
-  {
-    id: "COD-8336",
-    customerName: "Vikram Yadav",
-    phone: "+91 9966554433",
-    pincode: "500001",
-    value: 1999,
-    riskScore: 22,
-    status: "Delivered",
-    orderDate: "2025-07-03T10:00:00Z",
-    riskFactors: ["Low RTO history"],
-    otpVerified: true,
-    timeline: [
-      { date: "2025-07-03", status: "Order Placed", description: "Order received from customer" },
-      { date: "2025-07-03", status: "Verified", description: "OTP verified successfully" },
-      { date: "2025-07-04", status: "Shipped", description: "Dispatched to logistics" },
-      { date: "2025-07-06", status: "Delivered", description: "Delivered to customer" },
-    ],
-  },
-  {
-    id: "COD-8335",
-    customerName: "Ritu Jain",
-    phone: "+91 9432109876",
-    pincode: "302001",
-    value: 4599,
-    riskScore: 55,
-    status: "Shipped",
-    orderDate: "2025-07-07T15:30:00Z",
-    riskFactors: ["Pincode medium risk"],
-    otpVerified: true,
-    timeline: [
-      { date: "2025-07-07", status: "Order Placed", description: "Order received from customer" },
-      { date: "2025-07-07", status: "Verified", description: "OTP verified successfully" },
-      { date: "2025-07-08", status: "Shipped", description: "Dispatched to logistics" },
-    ],
-  },
-];
+import {
+  sampleOrders,
+  type Order,
+  type OrderStatus,
+  type RiskLevel,
+  getRiskLevelFromScore,
+} from "@/lib/orders-data";
 
 // --- Helper Functions ---
 
-const getRiskLevel = (score: number): RiskLevel => {
-  if (score <= 30) return "Low";
-  if (score <= 70) return "Medium";
-  return "High";
-};
+const getRiskLevel = getRiskLevelFromScore;
 
 const getStatusColor = (status: OrderStatus) => {
   switch (status) {
@@ -246,7 +93,7 @@ const formatCurrency = (amount: number) => {
 
 export default function OrdersPage() {
   // --- State ---
-  const [data, setData] = useState<Order[]>(sampleOrders);
+  const [data] = useState<Order[]>(sampleOrders);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [globalFilter, setGlobalFilter] = useState("");

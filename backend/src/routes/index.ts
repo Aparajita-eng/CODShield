@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { sendOtp, verifyOtp } from "../controllers/otpController";
+import { loginWithPassword, createOtpSession } from "../controllers/authController";
 import {
   evaluateTrustGraph,
   checkRiskEngine,
@@ -16,6 +17,10 @@ const router = Router();
 // OTP verification dispatches
 router.post("/otp/send", sendOtp);
 router.post("/otp/verify", verifyOtp);
+
+// Auth session endpoints
+router.post("/auth/login", loginWithPassword);
+router.post("/auth/otp-session", createOtpSession);
 
 // Sandbox simulation endpoints
 router.post("/sandbox/trust-graph", evaluateTrustGraph);

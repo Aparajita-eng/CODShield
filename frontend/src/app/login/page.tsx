@@ -73,7 +73,23 @@ export default function LoginPage() {
         setIsLoading(false);
       }
     } else {
-      setTimeout(() => setIsLoading(false), 1000);
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          router.push("/dashboard");
+        } else {
+          setErrors({ password: data.message || "Invalid email or password" });
+        }
+      } catch {
+        setErrors({ password: "Network error, please try again" });
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 

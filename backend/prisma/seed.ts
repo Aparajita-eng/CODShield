@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { hashPassword } from "../src/lib/auth";
 
 const prisma = new PrismaClient();
 
@@ -11,6 +12,7 @@ async function main() {
   await prisma.merchant.deleteMany();
   await prisma.pincodeRisk.deleteMany();
   await prisma.blacklist.deleteMany();
+  await prisma.user.deleteMany();
 
   // 1. Seed Merchants
   const merchants = [
@@ -42,6 +44,18 @@ async function main() {
     createdMerchants.push(merchant);
   }
   console.log(`Seeded ${createdMerchants.length} merchants.`);
+
+  // Demo dashboard user (password: Demo@1234)
+  await prisma.user.create({
+    data: {
+      email: "demo@codshield.com",
+      passwordHash: hashPassword("Demo@1234"),
+      name: "Demo Merchant",
+      companyName: "FastCommerce Inc.",
+      phone: "+919876543210",
+    },
+  });
+  console.log("Seeded demo user (demo@codshield.com / Demo@1234).");
 
   const acmeId = createdMerchants[0].id;
 

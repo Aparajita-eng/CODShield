@@ -8,6 +8,16 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  companyName  String?
+  phone        String?
+  createdAt    DateTime @default(now())
+}
+
 model Merchant {
   id         String   @id @default(uuid())
   name       String
