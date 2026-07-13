@@ -103,7 +103,6 @@ npm run dev:frontend  # Next.js app on http://localhost:3000
 
 ## Documentation
 
-- [`docs/DEPLOY_RENDER.md`](./docs/DEPLOY_RENDER.md) — Deploy backend, frontend, and Postgres to Render
 - [`backend/README.md`](./backend/README.md) — Backend setup, API reference, project structure
 - [`frontend/README.md`](./frontend/README.md) — Frontend setup, page map, environment variables
 - [`frontend/design-system/`](./frontend/design-system/) — Design system reference (open `design-system.html` in browser)

@@ -8,9 +8,6 @@
     "start": "next start",
     "lint": "eslint"
   },
-  "engines": {
-    "node": ">=20.0.0"
-  },
   "dependencies": {
     "@prisma/client": "^5.22.0",
     "@tanstack/react-table": "^8.21.3",
