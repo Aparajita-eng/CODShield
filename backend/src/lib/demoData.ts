@@ -294,6 +294,37 @@ export function listDemoClaimsForMerchant(merchantId: string): ClaimWithOrder[] 
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 }
 
+export type BulkOrderAction = "verify" | "flag_fraud";
+
+/** In-memory bulk order updates for demo mode — not persisted across restarts. */
+export function bulkUpdateDemoOrders(orderIds: string[], action: BulkOrderAction): Order[] {
+  const updated: Order[] = [];
+  for (const orderId of orderIds) {
+    const index = demoOrders.findIndex((o) => o.id === orderId);
+    if (index === -1) continue;
+
+    const order = demoOrders[index];
+    if (action === "verify") {
+      demoOrders[index] = {
+        ...order,
+        fulfillmentStatus: "Verified",
+        protectionStatus: "Protected",
+        fraudFlagged: false,
+      };
+    } else {
+      demoOrders[index] = {
+        ...order,
+        fulfillmentStatus: "Cancelled",
+        protectionStatus: "Failed",
+        fraudFlagged: true,
+        statusReason: "Manually flagged as fraud by merchant",
+      };
+    }
+    updated.push(demoOrders[index]);
+  }
+  return updated.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+}
+
 export function isDemoDataMode(): boolean {
   return !process.env.DATABASE_URL?.trim();
 }

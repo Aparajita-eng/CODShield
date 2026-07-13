@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { prisma } from "../lib/db";
-import { fetchMerchants, fetchOrders, fetchOrderById, fetchPincodeRisk } from "../lib/dataAccess";
+import { fetchMerchants, fetchOrders, fetchOrderById, fetchPincodeRisk, bulkUpdateOrdersByIds } from "../lib/dataAccess";
 import {
   assertSessionMerchantAccess,
   resolveActiveMerchantId,
@@ -290,33 +290,11 @@ export async function bulkUpdateOrders(req: AuthenticatedRequest, res: Response)
       }
     }
 
-    if (action === "verify") {
-      await prisma.order.updateMany({
-        where: { id: { in: orderIds } },
-        data: {
-          fulfillmentStatus: "Verified",
-          protectionStatus: "Protected",
-          fraudFlagged: false,
-        },
-      });
-    } else if (action === "flag_fraud") {
-      await prisma.order.updateMany({
-        where: { id: { in: orderIds } },
-        data: {
-          fulfillmentStatus: "Cancelled",
-          protectionStatus: "Failed",
-          fraudFlagged: true,
-          statusReason: "Manually flagged as fraud by merchant",
-        },
-      });
-    } else {
+    if (action !== "verify" && action !== "flag_fraud") {
       return res.status(400).json({ success: false, message: "Unknown bulk action" });
     }
 
-    const orders = await prisma.order.findMany({
-      where: { id: { in: orderIds } },
-      orderBy: { createdAt: "desc" },
-    });
+    const orders = await bulkUpdateOrdersByIds(orderIds, action);
 
     return res.json({
       success: true,

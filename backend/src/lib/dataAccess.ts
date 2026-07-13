@@ -1,6 +1,7 @@
 import { Prisma, type Blacklist, type Claim, type Merchant, type Order, type PincodeRisk } from "@prisma/client";
 import { prisma } from "./db";
 import {
+  bulkUpdateDemoOrders,
   createDemoClaim,
   demoBlacklists,
   demoMerchants,
@@ -9,6 +10,7 @@ import {
   findDemoClaimByOrderId,
   isDemoDataMode,
   listDemoClaimsForMerchant,
+  type BulkOrderAction,
   type ClaimWithOrder,
 } from "./demoData";
 
@@ -173,6 +175,48 @@ export async function createClaimForOrder(
         "Database unavailable — storing claim in in-memory demo store (not persisted across restarts)."
       );
       return createInDemo();
+    }
+    throw error;
+  }
+}
+
+export async function bulkUpdateOrdersByIds(
+  orderIds: string[],
+  action: BulkOrderAction
+): Promise<Order[]> {
+  const applyDemo = () => bulkUpdateDemoOrders(orderIds, action);
+
+  if (isDemoDataMode()) {
+    return applyDemo();
+  }
+
+  const data =
+    action === "verify"
+      ? {
+          fulfillmentStatus: "Verified",
+          protectionStatus: "Protected",
+          fraudFlagged: false,
+        }
+      : {
+          fulfillmentStatus: "Cancelled",
+          protectionStatus: "Failed",
+          fraudFlagged: true,
+          statusReason: "Manually flagged as fraud by merchant",
+        };
+
+  try {
+    await prisma.order.updateMany({
+      where: { id: { in: orderIds } },
+      data,
+    });
+    return prisma.order.findMany({
+      where: { id: { in: orderIds } },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (error) {
+    if (isPrismaInitError(error)) {
+      console.warn("Database unavailable — applying bulk order update in demo memory.");
+      return applyDemo();
     }
     throw error;
   }
