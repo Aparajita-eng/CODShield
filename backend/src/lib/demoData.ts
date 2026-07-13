@@ -132,8 +132,8 @@ const orderSeeds: OrderSeed[] = [
     value: 1560.0,
     riskScore: 24,
     protectionStatus: "Protected",
-    fulfillmentStatus: "Shipped",
-    statusReason: "Standard COD order in transit",
+    fulfillmentStatus: "Delivered",
+    statusReason: "Standard COD order delivered successfully",
     createdAt: new Date("2026-03-02T11:45:00Z"),
   },
   {
@@ -157,8 +157,8 @@ const orderSeeds: OrderSeed[] = [
     value: 2450.0,
     riskScore: 62,
     protectionStatus: "Held",
-    fulfillmentStatus: "RTO",
-    statusReason: "[cluster:cod-ring-delhi] Buyer refused delivery at doorstep",
+    fulfillmentStatus: "Delivered",
+    statusReason: "Delivered successfully. Buyer verified via alternate contact",
     createdAt: new Date("2025-12-05T08:30:00Z"),
   },
   {
@@ -169,8 +169,8 @@ const orderSeeds: OrderSeed[] = [
     value: 1720.0,
     riskScore: 55,
     protectionStatus: "Failed",
-    fulfillmentStatus: "RTO",
-    statusReason: "[cluster:cod-ring-delhi] Multiple delivery attempts failed",
+    fulfillmentStatus: "Delivered",
+    statusReason: "Delivered on second attempt after location confirmation",
     createdAt: new Date("2025-10-14T13:10:00Z"),
   },
   {
@@ -220,8 +220,8 @@ const orderSeeds: OrderSeed[] = [
     value: 980.0,
     riskScore: 15,
     protectionStatus: "Protected",
-    fulfillmentStatus: "Verified",
-    statusReason: "Low risk order value. Clear phone history. Verified pincode",
+    fulfillmentStatus: "Delivered",
+    statusReason: "Low risk order value. Delivered to verified customer",
     createdAt: new Date("2026-02-10T15:25:00Z"),
   },
   {
