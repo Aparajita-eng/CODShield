@@ -112,8 +112,19 @@ export class OrderService {
   }
 
   async getOrderDetails(merchantId: string, id: string) {
-    const order = await fetchOrderById(id);
-    if (!order || order.merchantId !== merchantId) {
+    if (isDemoDataMode()) {
+      const order = demoOrders.find((o) => o.id === id && o.merchantId === merchantId);
+      if (!order) {
+        throw new NotFoundException("Order not found");
+      }
+      return order;
+    }
+
+    const order = await this.prisma.order.findFirst({
+      where: { id, merchantId },
+    });
+
+    if (!order) {
       throw new NotFoundException("Order not found");
     }
     return order;
