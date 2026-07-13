@@ -1,5 +1,4 @@
 import { scryptSync, randomBytes, timingSafeEqual } from "crypto";
-import { SignJWT, jwtVerify } from "jose";
 
 export const SESSION_COOKIE_NAME = "codshield_session";
 export const SESSION_COOKIE_REFRESH = "codshield_refresh";
@@ -47,6 +46,7 @@ export async function signSessionToken(
   payload: SessionPayload,
   ttl: string = ACCESS_TOKEN_TTL
 ): Promise<string> {
+  const { SignJWT } = await import("jose");
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -55,6 +55,7 @@ export async function signSessionToken(
 }
 
 export async function signRefreshToken(payload: SessionPayload): Promise<string> {
+  const { SignJWT } = await import("jose");
   return new SignJWT({ ...payload, tokenType: "refresh" })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -64,6 +65,7 @@ export async function signRefreshToken(payload: SessionPayload): Promise<string>
 
 export async function verifySessionToken(token: string): Promise<SessionPayload | null> {
   try {
+    const { jwtVerify } = await import("jose");
     const { payload } = await jwtVerify(token, getSecret());
     if (!payload.sub || !payload.authType) return null;
     return payload as unknown as SessionPayload;
@@ -74,6 +76,7 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
 
 export async function verifyRefreshToken(token: string): Promise<SessionPayload | null> {
   try {
+    const { jwtVerify } = await import("jose");
     const { payload } = await jwtVerify(token, getRefreshSecret());
     if (!payload.sub || !payload.authType || payload.tokenType !== "refresh") return null;
     // Strip tokenType before returning

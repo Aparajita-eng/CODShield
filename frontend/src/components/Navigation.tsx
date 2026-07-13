@@ -43,14 +43,6 @@ export default function Navigation() {
 
         <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-ink-secondary tracking-wide">
           <Link
-            href="/sandbox"
-            className={`hover:text-accent transition-colors ${
-              pathname === "/sandbox" ? "text-accent" : ""
-            }`}
-          >
-            SANDBOX CONSOLE
-          </Link>
-          <Link
             href="/dashboard"
             className={`hover:text-accent transition-colors ${
               pathname === "/dashboard" ? "text-accent" : ""
@@ -66,12 +58,6 @@ export default function Navigation() {
             className="hidden sm:inline-block text-xs font-semibold text-ink-secondary hover:text-accent transition-colors"
           >
             DASHBOARD
-          </Link>
-          <Link
-            href="/sandbox"
-            className="inline-flex items-center border border-accent bg-bg-raised text-accent hover:bg-accent hover:text-bg-base text-[10px] font-bold px-3.5 py-1.5 rounded transition-all"
-          >
-            TRY SANDBOX
           </Link>
         </div>
       </div>

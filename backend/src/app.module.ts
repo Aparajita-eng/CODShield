@@ -10,6 +10,7 @@ import { CustomerModule } from './modules/customer/customer.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { SandboxModule } from './modules/sandbox/sandbox.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { BookDemoModule } from './modules/book-demo/book-demo.module';
 
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from './modules/auth/roles.guard';
@@ -28,6 +29,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
     AnalyticsModule,
     SandboxModule,
     DashboardModule,
+    BookDemoModule,
     ThrottlerModule.forRoot([{
       ttl: 60000,  // 1 minute window
       limit: 5,    // max 5 requests per window

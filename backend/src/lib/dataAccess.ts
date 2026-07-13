@@ -77,6 +77,19 @@ export async function fetchMerchantById(id: string): Promise<Merchant | null> {
   );
 }
 
+export async function fetchMerchantByApiKeyHash(apiKeyHash: string): Promise<Merchant | null> {
+  console.log('Looking for merchant with hash:', apiKeyHash);
+  console.log('Demo merchants:', demoMerchants.map(m => ({ name: m.name, hash: m.apiKeyHash })));
+  return withData(
+    () => prisma.merchant.findUnique({ where: { apiKeyHash } }),
+    () => {
+      const found = demoMerchants.find((m) => m.apiKeyHash === apiKeyHash);
+      console.log('Found in demo:', found);
+      return found ?? null;
+    }
+  );
+}
+
 export async function fetchOrders(args?: {
   where?: Prisma.OrderWhereInput;
   orderBy?: Prisma.OrderOrderByWithRelationInput;

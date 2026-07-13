@@ -17,6 +17,7 @@ import { AuthGuard } from '../auth/auth.guard';
 import { ReqSession } from '../auth/session.decorator';
 import { resolveActiveMerchantId } from '../../lib/merchantAccess';
 import { hashApiKey } from '../../lib/auth';
+import { fetchMerchantById, fetchMerchantByApiKeyHash } from '../../lib/dataAccess';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 
@@ -130,9 +131,10 @@ export class OrderController {
       throw new UnauthorizedException("Authentication required. Provide x-api-key header.");
     }
 
-    const merchant = await this.prisma.merchant.findUnique({
-      where: { apiKeyHash: hashApiKey(apiKey) },
-    });
+    const hashed = hashApiKey(apiKey);
+    console.log("Hashed API key:", hashed);
+    const merchant = await fetchMerchantByApiKeyHash(hashed);
+    console.log("Merchant found:", merchant);
 
     if (!merchant) {
       throw new UnauthorizedException("Invalid API key provided");

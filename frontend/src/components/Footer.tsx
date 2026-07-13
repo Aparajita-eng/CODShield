@@ -107,11 +107,6 @@ export default function Footer() {
             </span>
             <ul className="space-y-2 text-xs text-ink-secondary font-medium font-sans">
               <li>
-                <Link href="/sandbox" className="hover:text-accent transition-colors">
-                  Sandbox Console
-                </Link>
-              </li>
-              <li>
                 <Link
                   href="/#integrations"
                   onClick={(e) => handleScroll(e, "integrations")}
@@ -147,25 +142,24 @@ export default function Footer() {
             </span>
             <ul className="space-y-2 text-xs text-ink-secondary font-medium font-sans">
               <li>
-                {/* Placeholder — no real page yet; using button to avoid no-html-link-for-pages */}
-                <button type="button" className="hover:text-accent transition-colors cursor-pointer">
+                <Link href="/compliance/merchant-policy" className="hover:text-accent transition-colors">
                   Merchant Policy
-                </button>
+                </Link>
               </li>
               <li>
-                <button type="button" className="hover:text-accent transition-colors cursor-pointer">
+                <Link href="/compliance/rto-protection-terms" className="hover:text-accent transition-colors">
                   RTO Protection Terms
-                </button>
+                </Link>
               </li>
               <li>
-                <button type="button" className="hover:text-accent transition-colors cursor-pointer">
+                <Link href="/compliance/fraud-detection-policy" className="hover:text-accent transition-colors">
                   Fraud Detection Policy
-                </button>
+                </Link>
               </li>
               <li>
-                <button type="button" className="hover:text-accent transition-colors cursor-pointer">
+                <Link href="/compliance/claim-process-sla" className="hover:text-accent transition-colors">
                   Claim Process SLA
-                </button>
+                </Link>
               </li>
             </ul>
           </div>

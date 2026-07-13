@@ -56,28 +56,18 @@ export class AuthController {
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
     const resetLink = `${frontendUrl}/forgot-password?token=${token}`;
 
-    const resendApiKey = process.env.RESEND_API_KEY;
+    const { sendMail } = await import('../../lib/mailer.js');
     let emailSent = false;
-
-    if (resendApiKey) {
-      try {
-        const emailRes = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${resendApiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            from: process.env.RESET_EMAIL_FROM || "CODShield <noreply@codshield.com>",
-            to: normalizedEmail,
-            subject: "Reset your CODShield password",
-            html: `<p>Click <a href="${resetLink}">here</a> to reset your password. This link expires in 1 hour.</p>`,
-          }),
-        });
-        emailSent = emailRes.ok;
-      } catch (err) {
-        console.error("Password reset email error:", err);
-      }
+    try {
+      const result = await sendMail({
+        from: process.env.RESET_EMAIL_FROM || 'CODShield <noreply@codshield.com>',
+        to: normalizedEmail,
+        subject: 'Reset your CODShield password',
+        html: `<p>Click <a href="${resetLink}">here</a> to reset your password. This link expires in 1 hour.</p>`,
+      });
+      emailSent = (result as any)?.success === true;
+    } catch (err) {
+      console.error('Password reset email error:', err);
     }
 
     if (!emailSent) {
@@ -114,8 +104,8 @@ export class AuthController {
     const rawCode = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 5 * 60 * 1000;
 
-    // B-11: reset attempt counter on every new send
-    otpStore.set(phone.trim(), { code: rawCode, expiresAt, attempts: 0 });
+    // B-11: reset attempt counter on every new send; B-09: reset in-progress flag
+    otpStore.set(phone.trim(), { code: rawCode, expiresAt, attempts: 0, verifyingInProgress: false });
 
     let formattedPhone = phone.trim();
     if (!formattedPhone.startsWith("+")) {
@@ -231,6 +221,14 @@ export class AuthController {
       };
     }
 
+    // B-09: Prevent double-submit
+    if (record.verifyingInProgress) {
+      return {
+        success: false,
+        message: "Verification already in progress. Please wait a moment."
+      };
+    }
+
     if (Date.now() > record.expiresAt) {
       otpStore.delete(phone.trim());
       return {
@@ -260,6 +258,8 @@ export class AuthController {
       };
     }
 
+    // B-09: Mark as verifying in progress before deleting
+    record.verifyingInProgress = true;
     otpStore.delete(phone.trim());
 
     return {

@@ -3,7 +3,6 @@ import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import DashboardShowcase from "@/components/DashboardShowcase";
 import Integrations from "@/components/Integrations";
-import Pricing from "@/components/Pricing";
 import FAQ from "@/components/FAQ";
 import Footer from "@/components/Footer";
 import { useState } from "react";
@@ -154,7 +153,7 @@ export default function Home() {
                 className="flex flex-wrap items-center gap-4"
               >
                 <a
-                  href="mailto:demo@codshield.com?subject=Book%20Demo"
+                  href="/book-demo"
                   className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-ink-inverse font-semibold text-xs px-5 py-3.5 rounded-lg transition-colors cursor-pointer"
                 >
                   Book Demo
@@ -458,7 +457,7 @@ export default function Home() {
       </section>
 
       {/* THE CODSHIELD ENGINE */}
-      <section className="bg-bg-base border-t border-border-default">
+      <section id="modules" className="bg-bg-base border-t border-border-default">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 py-24">
 
           {/* Section Header - Static / No entrance animations */}
@@ -546,7 +545,6 @@ export default function Home() {
 
       <DashboardShowcase />
       <Integrations />
-      <Pricing />
       <FAQ />
       <Footer />
     </>

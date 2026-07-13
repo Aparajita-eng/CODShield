@@ -27,7 +27,7 @@ const tiers: PricingTier[] = [
       "Email support",
     ],
     cta: "Get Started",
-    ctaHref: "mailto:demo@codshield.com?subject=Book%20Demo",
+    ctaHref: "/book-demo",
     highlighted: false,
   },
   {
@@ -44,7 +44,7 @@ const tiers: PricingTier[] = [
       "Priority support",
     ],
     cta: "Get Started",
-    ctaHref: "mailto:demo@codshield.com?subject=Book%20Demo",
+    ctaHref: "/book-demo",
     highlighted: false,
   },
   {

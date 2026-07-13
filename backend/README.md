@@ -32,7 +32,9 @@ npm install
 
 # 2. Configure environment
 cp .env.example .env
-# Fill in DATABASE_URL, DIRECT_URL, and SMS keys in .env
+# Fill in DATABASE_URL, DIRECT_URL, and SMS keys in .env.
+# For Supabase, set DATABASE_URL/DIRECT_URL to the Supabase PostgreSQL connection string.
+# The Supabase anon/service_role keys are not used by Prisma.
 
 # 3. Generate Prisma client
 npm run prisma:generate

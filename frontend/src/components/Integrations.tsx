@@ -48,7 +48,7 @@ const categories: Category[] = [
 
 export default function Integrations() {
   return (
-    <section className="bg-bg-raised border-t border-border-default">
+    <section id="integrations" className="bg-bg-raised border-t border-border-default">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-24">
         {/* Section Header */}
         <div className="max-w-xl mb-16">

@@ -58,7 +58,7 @@ export class OrderService {
       let items = [...demoOrders].filter(o => o.merchantId === merchantId);
 
       if (status) {
-        items = items.filter(o => o.protectionStatus === status);
+        items = items.filter(o => o.protectionStatus === status || o.fulfillmentStatus === status);
       }
       if (risk) {
         if (risk === 'HIGH') items = items.filter(o => o.riskScore >= 75);
@@ -152,13 +152,16 @@ export class OrderService {
   }
 
   async processRiskCheck(merchant: any, body: any) {
-    const { phone, pincode, value, address } = body;
+    const phone = body.phone ?? body.customerPhone;
+    const pincode = body.pincode ?? body.deliveryPincode;
+    const value = body.value ?? body.amount;
+    const address = body.address ?? body.fullAddress;
 
     if (!phone || !pincode || value === undefined) {
       throw new BadRequestException("Required fields missing: phone, pincode, and value are required");
     }
 
-    const orderValue = parseFloat(value);
+    const orderValue = parseFloat(String(value));
     if (isNaN(orderValue) || orderValue < 0) {
       throw new BadRequestException("Valid numeric order value is required");
     }
