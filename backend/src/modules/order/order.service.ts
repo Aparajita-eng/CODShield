@@ -19,13 +19,22 @@ export class OrderService {
     const status = query.status as string | undefined;
     const risk = query.risk as string | undefined;
     const search = query.search as string | undefined;
-    const sortBy = (query.sortBy as string) || 'createdAt';
-    const sortOrder = (query.sortOrder as string) || 'desc';
+
+    // B-10: allowlist sortBy to prevent Prisma injection
+    const ALLOWED_SORT_FIELDS = ['createdAt', 'value', 'riskScore', 'fulfillmentStatus', 'protectionStatus'];
+    const rawSortBy = (query.sortBy as string) || 'createdAt';
+    const sortBy = ALLOWED_SORT_FIELDS.includes(rawSortBy) ? rawSortBy : 'createdAt';
+    const sortOrder = (query.sortOrder as string) === 'asc' ? 'asc' : 'desc';
 
     const where: any = { merchantId };
 
     if (status) {
-      where.protectionStatus = status;
+      // B-04: frontend sends fulfillmentStatus values (Pending/Verified/RTO/Shipped/Delivered)
+      // query both columns so filters work regardless of which field was populated
+      where.OR = [
+        { fulfillmentStatus: status },
+        { protectionStatus: status },
+      ];
     }
     if (risk) {
       if (risk === 'HIGH') where.riskScore = { gte: 75 };
@@ -33,12 +42,17 @@ export class OrderService {
       else if (risk === 'LOW') where.riskScore = { lt: 40 };
     }
     if (search) {
-      where.OR = [
+      const searchOR = [
         { id: { contains: search } },
         { phone: { contains: search } },
         { pincode: { contains: search } },
       ];
+      // Merge with existing OR if status filter already set it
+      where.AND = where.AND ?? [];
+      where.AND.push({ OR: searchOR });
+      if (where.OR) { where.AND.push({ OR: where.OR }); delete where.OR; }
     }
+
 
     if (isDemoDataMode()) {
       let items = [...demoOrders].filter(o => o.merchantId === merchantId);

@@ -110,7 +110,8 @@ export class AuthController {
     const rawCode = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = Date.now() + 5 * 60 * 1000;
 
-    otpStore.set(phone.trim(), { code: rawCode, expiresAt });
+    // B-11: reset attempt counter on every new send
+    otpStore.set(phone.trim(), { code: rawCode, expiresAt, attempts: 0 });
 
     let formattedPhone = phone.trim();
     if (!formattedPhone.startsWith("+")) {
@@ -206,6 +207,7 @@ export class AuthController {
     }
 
     const submittedCode = code.trim();
+    const MAX_ATTEMPTS = 3;
 
     // Dev/test bypass: if DEV_OTP_BYPASS is set in env and the submitted code matches, always accept.
     const bypassCode = process.env.DEV_OTP_BYPASS;
@@ -233,10 +235,24 @@ export class AuthController {
       };
     }
 
-    if (record.code !== submittedCode) {
+    // B-11: enforce max attempt limit
+    if (record.attempts >= MAX_ATTEMPTS) {
+      otpStore.delete(phone.trim());
       return {
         success: false,
-        message: "Invalid verification code"
+        message: "Too many incorrect attempts. Please request a new code."
+      };
+    }
+
+    if (record.code !== submittedCode) {
+      // Increment attempt counter
+      record.attempts += 1;
+      const remaining = MAX_ATTEMPTS - record.attempts;
+      return {
+        success: false,
+        message: remaining > 0
+          ? `Invalid verification code. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`
+          : "Too many incorrect attempts. Please request a new code."
       };
     }
 
