@@ -17,6 +17,7 @@ model User {
   phone        String?
   merchantId   String?
   merchant     Merchant? @relation(fields: [merchantId], references: [id], onDelete: SetNull)
+  role         String    @default("Owner")
   createdAt    DateTime  @default(now())
 
   @@index([merchantId])

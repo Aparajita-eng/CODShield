@@ -1,10 +1,11 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Req, Res, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { randomBytes } from 'crypto';
 import { passwordResetStore } from '../../lib/passwordResetStore';
 import { otpStore } from '../../lib/otpStore';
-import { signSessionToken } from '../../lib/auth';
+import { signSessionToken, signRefreshToken, verifyRefreshToken } from '../../lib/auth';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
 
 @ApiTags('Authentication')
 @Controller()
@@ -12,10 +13,12 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('api/auth/login')
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiResponse({ status: 200, description: 'Successful login' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({ status: 429, description: 'Too Many Requests' })
   async login(@Body() body: any) {
     return this.authService.login(body);
   }
@@ -95,6 +98,7 @@ export class AuthController {
   }
 
   @Post('api/otp/send')
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Send OTP SMS to a phone number' })
   async sendOtp(@Body() body: any) {
@@ -278,15 +282,43 @@ export class AuthController {
     }
 
     const normalizedPhone = phone.trim();
-    const token = await signSessionToken(
-      { sub: `otp:${normalizedPhone}`, phone: normalizedPhone, authType: "otp" },
-      rememberMe ? '30d' : '1d'
-    );
+    const sessionPayload = { sub: `otp:${normalizedPhone}`, phone: normalizedPhone, authType: "otp" as const };
+    const token = await signSessionToken(sessionPayload);
+    const refreshToken = await signRefreshToken(sessionPayload);
 
     return {
       success: true,
       message: "Session created",
       token,
+      refreshToken,
+    };
+  }
+
+  // B-15: Rotate refresh token → issue new short-lived access token
+  @Post('api/auth/refresh')
+  @SkipThrottle()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Exchange a valid refresh token for a new access + refresh token pair' })
+  async refresh(@Body() body: any) {
+    const { refreshToken } = body;
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token is required');
+    }
+
+    const payload = await verifyRefreshToken(refreshToken);
+    if (!payload) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+
+    // Issue new short-lived access token + rotated refresh token
+    const sessionPayload = { sub: payload.sub, email: payload.email, phone: payload.phone, name: payload.name, authType: payload.authType };
+    const newAccessToken = await signSessionToken(sessionPayload);
+    const newRefreshToken = await signRefreshToken(sessionPayload);
+
+    return {
+      success: true,
+      token: newAccessToken,
+      refreshToken: newRefreshToken,
     };
   }
 }

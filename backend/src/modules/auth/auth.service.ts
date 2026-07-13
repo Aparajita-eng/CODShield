@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { hashPassword, verifyPassword, signSessionToken, hashApiKey, maskApiKey } from '../../lib/auth';
+import { hashPassword, verifyPassword, signSessionToken, signRefreshToken, hashApiKey, maskApiKey } from '../../lib/auth';
 import { isDemoDataMode } from '../../lib/demoData';
 
 const DEMO_EMAIL = (process.env.DEMO_USER_EMAIL || "demo@codshield.com").toLowerCase();
@@ -19,14 +19,14 @@ export class AuthService {
     const normalizedEmail = email.trim().toLowerCase();
 
     if (normalizedEmail === DEMO_EMAIL && password === DEMO_PASSWORD) {
-      const token = await signSessionToken(
-        { sub: 'demo-user', email: DEMO_EMAIL, name: 'Demo Merchant', authType: 'password' },
-        rememberMe ? '30d' : '1d'
-      );
+      const sessionPayload = { sub: 'demo-user', email: DEMO_EMAIL, name: 'Demo Merchant', authType: 'password' as const };
+      const token = await signSessionToken(sessionPayload);
+      const refreshToken = await signRefreshToken(sessionPayload);
       return {
         success: true,
         message: "Logged in successfully",
         token,
+        refreshToken,
         user: { id: 'demo-user', email: DEMO_EMAIL, name: 'Demo Merchant', companyName: 'FastCommerce Inc.' }
       };
     }
@@ -34,14 +34,14 @@ export class AuthService {
     try {
       const user = await this.prisma.user.findUnique({ where: { email: normalizedEmail } });
       if (user && verifyPassword(password, user.passwordHash)) {
-        const token = await signSessionToken(
-          { sub: user.id, email: user.email, name: user.name, authType: 'password' },
-          rememberMe ? '30d' : '1d'
-        );
+        const sessionPayload = { sub: user.id, email: user.email, name: user.name, authType: 'password' as const };
+        const token = await signSessionToken(sessionPayload);
+        const refreshToken = await signRefreshToken(sessionPayload);
         return {
           success: true,
           message: "Logged in successfully",
           token,
+          refreshToken,
           user: { id: user.id, email: user.email, name: user.name, companyName: user.companyName }
         };
       }
@@ -53,7 +53,7 @@ export class AuthService {
   }
 
   async register(body: any) {
-    const { fullName, companyName, email, password, phone } = body;
+    const { fullName, companyName, email, password, phone, role } = body;
     if (!fullName?.trim() || !companyName?.trim() || !email?.trim() || !password) {
       throw new UnauthorizedException('All registration fields are required');
     }
@@ -92,6 +92,10 @@ export class AuthService {
     const apiKeyHash = hashApiKey(rawApiKey);
     const apiKeyMask = maskApiKey(rawApiKey);
 
+    // Validate role input
+    const validRoles = ['Owner', 'Administrator', 'Viewer'];
+    const userRole = validRoles.includes(role) ? role : 'Owner';
+
     const { user } = await this.prisma.$transaction(async (tx) => {
       const merchant = await tx.merchant.create({
         data: { name: trimmedCompany, apiKeyHash, apiKeyMask, tier: 'Starter', claimRatio: 0 }
@@ -104,7 +108,8 @@ export class AuthService {
           name: fullName.trim(),
           companyName: trimmedCompany,
           phone: formattedPhone,
-          merchantId: merchant.id
+          merchantId: merchant.id,
+          role: userRole
         }
       });
       return { user };

@@ -2,11 +2,19 @@ import { scryptSync, randomBytes, timingSafeEqual } from "crypto";
 import { SignJWT, jwtVerify } from "jose";
 
 export const SESSION_COOKIE_NAME = "codshield_session";
+export const SESSION_COOKIE_REFRESH = "codshield_refresh";
+export const ACCESS_TOKEN_TTL = "15m";   // B-15: short-lived
+export const REFRESH_TOKEN_TTL = "7d";   // B-15: long-lived, rotates on use
 export const SESSION_TTL_SHORT = "1d";
 export const SESSION_TTL_LONG = "30d";
 
 function getSecret(): Uint8Array {
   const secret = process.env.SESSION_SECRET || "codshield-dev-session-secret";
+  return new TextEncoder().encode(secret);
+}
+
+function getRefreshSecret(): Uint8Array {
+  const secret = (process.env.SESSION_SECRET || "codshield-dev-session-secret") + ":refresh";
   return new TextEncoder().encode(secret);
 }
 
@@ -37,7 +45,7 @@ export interface SessionPayload {
 
 export async function signSessionToken(
   payload: SessionPayload,
-  ttl: string = SESSION_TTL_LONG
+  ttl: string = ACCESS_TOKEN_TTL
 ): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
@@ -46,11 +54,31 @@ export async function signSessionToken(
     .sign(getSecret());
 }
 
+export async function signRefreshToken(payload: SessionPayload): Promise<string> {
+  return new SignJWT({ ...payload, tokenType: "refresh" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime(REFRESH_TOKEN_TTL)
+    .sign(getRefreshSecret());
+}
+
 export async function verifySessionToken(token: string): Promise<SessionPayload | null> {
   try {
     const { payload } = await jwtVerify(token, getSecret());
     if (!payload.sub || !payload.authType) return null;
     return payload as unknown as SessionPayload;
+  } catch {
+    return null;
+  }
+}
+
+export async function verifyRefreshToken(token: string): Promise<SessionPayload | null> {
+  try {
+    const { payload } = await jwtVerify(token, getRefreshSecret());
+    if (!payload.sub || !payload.authType || payload.tokenType !== "refresh") return null;
+    // Strip tokenType before returning
+    const { tokenType, ...rest } = payload as any;
+    return rest as SessionPayload;
   } catch {
     return null;
   }

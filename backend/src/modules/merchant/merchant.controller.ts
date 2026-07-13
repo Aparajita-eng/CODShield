@@ -16,6 +16,8 @@ import { ReqSession } from '../auth/session.decorator';
 import { resolveActiveMerchantId } from '../../lib/merchantAccess';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
+import { Roles } from '../auth/roles.decorator';
+
 @ApiTags('Merchant & Settings')
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
@@ -24,6 +26,7 @@ export class MerchantController {
   constructor(private readonly merchantService: MerchantService) {}
 
   @Patch('company')
+  @Roles('Owner', 'Administrator')
   @ApiOperation({ summary: 'Update company details' })
   async updateCompany(@ReqSession() session: any, @Body() body: any) {
     const scope = await resolveActiveMerchantId(session, body.merchantId);
@@ -42,6 +45,7 @@ export class MerchantController {
   }
 
   @Post('api-key/regenerate')
+  @Roles('Owner', 'Administrator')
   @ApiOperation({ summary: 'Regenerate merchant API Key' })
   async regenerateApiKey(@ReqSession() session: any, @Body() body: any) {
     const scope = await resolveActiveMerchantId(session, body.merchantId);
@@ -60,6 +64,7 @@ export class MerchantController {
   }
 
   @Post('password')
+  @Roles('Owner', 'Administrator')
   @ApiOperation({ summary: 'Change current user password' })
   async updatePassword(@ReqSession() session: any, @Body() body: any) {
     await this.merchantService.updatePassword(session, body);
@@ -104,6 +109,7 @@ export class MerchantController {
   }
 
   @Post('webhooks')
+  @Roles('Owner', 'Administrator')
   @ApiOperation({ summary: 'Save webhook configurations' })
   async updateWebhook(@ReqSession() session: any, @Body() body: any) {
     const scope = await resolveActiveMerchantId(session, body.merchantId);

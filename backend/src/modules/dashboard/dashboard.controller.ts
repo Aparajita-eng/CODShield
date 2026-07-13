@@ -11,6 +11,8 @@ import { AuthGuard } from '../auth/auth.guard';
 import { ReqSession } from '../auth/session.decorator';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
+import { Roles } from '../auth/roles.decorator';
+
 @ApiTags('Dashboard Metrics')
 @ApiBearerAuth()
 @UseGuards(AuthGuard)
@@ -28,6 +30,7 @@ export class DashboardController {
   }
 
   @Post('claim-submit')
+  @Roles('Owner', 'Administrator')
   @ApiOperation({ summary: 'Register a new insurance delivery refusal claim log' })
   async submitClaim(
     @ReqSession() session: any,

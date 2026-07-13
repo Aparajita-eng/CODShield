@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
+import { SESSION_COOKIE_NAME, REFRESH_COOKIE_NAME, verifySessionToken, sessionCookieOptions, refreshCookieOptions } from "@/lib/auth";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
 
@@ -12,25 +12,47 @@ export async function requireProxySession(): Promise<AuthResult> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
-  if (!token) {
-    return {
-      ok: false,
-      response: NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 }),
-    };
+  if (token) {
+    const session = await verifySessionToken(token);
+    if (session) {
+      return { ok: true, token };
+    }
   }
 
-  const session = await verifySessionToken(token);
-  if (!session) {
-    return {
-      ok: false,
-      response: NextResponse.json(
-        { success: false, message: "Invalid or expired session" },
-        { status: 401 }
-      ),
-    };
+  // Token is missing or expired. Let's attempt silent refresh.
+  const refreshToken = cookieStore.get(REFRESH_COOKIE_NAME)?.value;
+  if (refreshToken) {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && data.token) {
+          // Store new credentials in cookies
+          cookieStore.set(SESSION_COOKIE_NAME, data.token, sessionCookieOptions(true));
+          if (data.refreshToken) {
+            cookieStore.set(REFRESH_COOKIE_NAME, data.refreshToken, refreshCookieOptions());
+          }
+          return { ok: true, token: data.token };
+        }
+      }
+    } catch (err) {
+      console.error("Silent token refresh failed:", err);
+    }
   }
 
-  return { ok: true, token };
+  // Clear cookies if refresh failed to avoid infinite loop
+  cookieStore.delete(SESSION_COOKIE_NAME);
+  cookieStore.delete(REFRESH_COOKIE_NAME);
+
+  return {
+    ok: false,
+    response: NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 }),
+  };
 }
 
 export async function proxyBackend(

@@ -20,6 +20,8 @@ import { hashApiKey } from '../../lib/auth';
 import { PrismaService } from '../prisma/prisma.service';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 
+import { Roles } from '../auth/roles.decorator';
+
 @ApiTags('Orders')
 @Controller()
 export class OrderController {
@@ -100,6 +102,7 @@ export class OrderController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Patch('api/orders/bulk')
+  @Roles('Owner', 'Administrator')
   @ApiOperation({ summary: 'Bulk verify or cancel orders' })
   async bulkUpdate(@ReqSession() session: any, @Body() body: any) {
     const scope = await resolveActiveMerchantId(session, body.merchantId);

@@ -11,6 +11,10 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { SandboxModule } from './modules/sandbox/sandbox.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './modules/auth/roles.guard';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+
 @Module({
   imports: [
     PrismaModule,
@@ -24,6 +28,20 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     AnalyticsModule,
     SandboxModule,
     DashboardModule,
+    ThrottlerModule.forRoot([{
+      ttl: 60000,  // 1 minute window
+      limit: 5,    // max 5 requests per window
+    }]),
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,  // B-14: enforce rate limits globally
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,      // B-13: enforce roles globally
+    },
   ],
 })
 export class AppModule {}
