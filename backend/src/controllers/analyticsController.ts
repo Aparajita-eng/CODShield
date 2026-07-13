@@ -69,6 +69,8 @@ export async function getAnalyticsData(req: AuthenticatedRequest, res: Response)
     const revenueSaved = currentProtectedOrders.reduce((sum, o) => sum + o.value, 0);
 
     // OTP Success rate (current period)
+    // Formula: (Verified + Shipped + Delivered) / (Verified + Shipped + Delivered + Held + Failed) * 100
+    // "Verified", "Delivered", and "Shipped" statuses represent successful intent pass. "Held" and "Failed" represent blocked or pending verification.
     const currentVerified = currentOrders.filter(o => o.fulfillmentStatus === "Verified" || o.fulfillmentStatus === "Delivered" || o.fulfillmentStatus === "Shipped").length;
     const currentHeld = currentOrders.filter(o => o.protectionStatus === "Held" || o.protectionStatus === "Failed").length;
     const currentAttempts = currentVerified + currentHeld;
@@ -76,7 +78,8 @@ export async function getAnalyticsData(req: AuthenticatedRequest, res: Response)
 
     // RTO Reduction rate (current vs prior period)
     let currentRtoRate = 0;
-    let priorRtoRate = 12.5; // baseline pre-CODShield RTO rate of 12.5%
+    // baseline pre-CODShield RTO rate is 35.0% for consistency with the landing page stats
+    let priorRtoRate = 35.0;
 
     const currentDeliveredRto = currentOrders.filter(o => o.fulfillmentStatus === "Delivered" || o.fulfillmentStatus === "RTO");
     const currentRtoCount = currentDeliveredRto.filter(o => o.fulfillmentStatus === "RTO").length;
