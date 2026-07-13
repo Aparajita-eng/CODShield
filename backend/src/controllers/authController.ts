@@ -145,11 +145,24 @@ export async function registerAccount(req: Request, res: Response): Promise<any>
         });
       }
 
+      const trimmedCompany = companyName.trim();
+
+      const existingMerchant = await prisma.merchant.findFirst({
+        where: { name: trimmedCompany },
+      });
+      if (existingMerchant) {
+        return res.status(409).json({
+          success: false,
+          message:
+            "A merchant account with this company name already exists. Sign in or contact support to join your team.",
+        });
+      }
+
       const { user } = await prisma.$transaction(async (tx) => {
         const merchant = await tx.merchant.create({
           data: {
-            name: companyName.trim(),
-            apiKey: generateApiKey(companyName),
+            name: trimmedCompany,
+            apiKey: generateApiKey(trimmedCompany),
             tier: "Starter",
             claimRatio: 0,
           },
@@ -160,7 +173,7 @@ export async function registerAccount(req: Request, res: Response): Promise<any>
             email: normalizedEmail,
             passwordHash: hashPassword(password),
             name: fullName.trim(),
-            companyName: companyName.trim(),
+            companyName: trimmedCompany,
             merchantId: merchant.id,
           },
         });
