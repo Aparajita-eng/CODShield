@@ -176,6 +176,7 @@ export default function Dashboard() {
       });
       const data = await res.json();
       if (data.success) {
+        setClaimError("");
         void loadDashboardData(selectedMerchantId, false);
         confetti({ particleCount: 30, spread: 20, colors: ["#059669"] });
       } else {

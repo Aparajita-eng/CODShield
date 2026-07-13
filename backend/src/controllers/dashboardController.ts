@@ -1,6 +1,13 @@
 import { Request, Response } from "express";
-import { prisma } from "../lib/db";
-import { fetchMerchants, fetchMerchantById, fetchOrders } from "../lib/dataAccess";
+import {
+  createClaimForOrder,
+  fetchClaimByOrderId,
+  fetchClaimsForMerchant,
+  fetchMerchants,
+  fetchMerchantById,
+  fetchOrderById,
+  fetchOrders,
+} from "../lib/dataAccess";
 
 export async function getDashboardData(req: Request, res: Response): Promise<any> {
   try {
@@ -33,23 +40,7 @@ export async function getDashboardData(req: Request, res: Response): Promise<any
       orderBy: { createdAt: "desc" },
     });
 
-    // Fetch claims for this merchant's orders (empty in demo mode without DB)
-    let claims: Awaited<ReturnType<typeof prisma.claim.findMany>> = [];
-    try {
-      claims = await prisma.claim.findMany({
-        where: {
-          order: {
-            merchantId: selectedMerchantId,
-          },
-        },
-        include: {
-          order: true,
-        },
-        orderBy: { createdAt: "desc" },
-      });
-    } catch {
-      claims = [];
-    }
+    const claims = await fetchClaimsForMerchant(selectedMerchantId);
 
     // Calculate aggregated dashboard metrics
     const totalOrdersCount = orders.length;
@@ -96,10 +87,7 @@ export async function submitClaim(req: Request, res: Response): Promise<any> {
       });
     }
 
-    // Verify order exists
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-    });
+    const order = await fetchOrderById(orderId);
 
     if (!order) {
       return res.status(404).json({
@@ -108,10 +96,7 @@ export async function submitClaim(req: Request, res: Response): Promise<any> {
       });
     }
 
-    // Check if a claim already exists for this order
-    const existingClaim = await prisma.claim.findFirst({
-      where: { orderId },
-    });
+    const existingClaim = await fetchClaimByOrderId(orderId);
 
     if (existingClaim) {
       return res.json({
@@ -120,15 +105,10 @@ export async function submitClaim(req: Request, res: Response): Promise<any> {
       });
     }
 
-    // Create a new claim starting at step 1
-    const claim = await prisma.claim.create({
-      data: {
-        orderId,
-        proofUrl: proofUrl || "https://dispatch.courier/returns/proof-of-refusal.pdf",
-        status: "Pending",
-        step: 1,
-      },
-    });
+    const claim = await createClaimForOrder(
+      orderId,
+      proofUrl || "https://dispatch.courier/returns/proof-of-refusal.pdf"
+    );
 
     return res.json({
       success: true,

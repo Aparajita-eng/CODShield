@@ -1,4 +1,5 @@
-import type { Blacklist, Merchant, Order, PincodeRisk } from "@prisma/client";
+import { randomUUID } from "crypto";
+import type { Blacklist, Claim, Merchant, Order, PincodeRisk } from "@prisma/client";
 
 export const DEMO_MERCHANT_ACME_ID = "a0000000-0000-4000-8000-000000000001";
 export const DEMO_MERCHANT_BETA_ID = "a0000000-0000-4000-8000-000000000002";
@@ -244,6 +245,48 @@ export const demoOrders: Order[] = orderSeeds.map((order) => ({
   ...order,
   fraudFlagged: order.fraudFlagged ?? false,
 }));
+
+/** Mutable in-memory claims for demo mode only — lost on server restart, not a substitute for Postgres. */
+export const demoClaims: Claim[] = [];
+
+export type ClaimWithOrder = Claim & { order: Order };
+
+export function findDemoClaimByOrderId(orderId: string): Claim | null {
+  return demoClaims.find((c) => c.orderId === orderId) ?? null;
+}
+
+export function createDemoClaim(orderId: string, proofUrl: string): ClaimWithOrder {
+  const existing = findDemoClaimByOrderId(orderId);
+  if (existing) {
+    throw new Error("A claim has already been registered for this order");
+  }
+
+  const order = demoOrders.find((o) => o.id === orderId);
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  const claim: Claim = {
+    id: randomUUID(),
+    orderId,
+    proofUrl,
+    status: "Pending",
+    step: 1,
+    createdAt: new Date(),
+  };
+  demoClaims.push(claim);
+  return { ...claim, order };
+}
+
+export function listDemoClaimsForMerchant(merchantId: string): ClaimWithOrder[] {
+  return demoClaims
+    .map((claim) => {
+      const order = demoOrders.find((o) => o.id === claim.orderId);
+      return order && order.merchantId === merchantId ? { ...claim, order } : null;
+    })
+    .filter((c): c is ClaimWithOrder => c !== null)
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+}
 
 export function isDemoDataMode(): boolean {
   return !process.env.DATABASE_URL?.trim();

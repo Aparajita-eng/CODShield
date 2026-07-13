@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import apiRoutes from "./routes";
+import { isDemoDataMode } from "./lib/demoData";
 
 // Load environment variables from .env
 dotenv.config();
@@ -30,4 +31,9 @@ app.use("/api", apiRoutes);
 // Start listening
 app.listen(PORT, () => {
   console.log(`CODShield backend API server running on port ${PORT}`);
+  if (isDemoDataMode()) {
+    console.warn(
+      "DATABASE_URL not set — demo mode active. Merchants/orders use seed data; claims are stored in memory only and do not persist across server restarts."
+    );
+  }
 });
