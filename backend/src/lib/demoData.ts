@@ -4,6 +4,9 @@ import type { Blacklist, Claim, Merchant, Order, PincodeRisk } from "@prisma/cli
 export const DEMO_MERCHANT_BETA_ID = "a0000000-0000-4000-8000-000000000002";
 export const DEMO_MERCHANT_DELTA_ID = "a0000000-0000-4000-8000-000000000003";
 
+/** Cross-merchant auth test fixture — Beta merchant order; excluded from Acme-scoped dashboards. */
+export const DEMO_ORDER_BETA_FIXTURE_ID = "b0000000-0000-4000-8000-0000000000999";
+
 /**
  * Demo-only merchant UUID for the Acme Apparel seed account.
  * Demo sessions are bound to this merchant; override via DEMO_MERCHANT_ID in backend/.env.
@@ -24,7 +27,7 @@ export const demoMerchants: Merchant[] = [
   },
   {
     id: DEMO_MERCHANT_BETA_ID,
-    name: "Beta Electronics",
+    name: "Beta Test Co.",
     apiKey: "codshield_live_beta_starter_1294",
     tier: "Starter",
     claimRatio: 1.5,
@@ -244,6 +247,18 @@ const orderSeeds: OrderSeed[] = [
     fulfillmentStatus: "Pending",
     statusReason: "Multiple accounts linked to same device ID",
     createdAt: new Date("2026-03-05T07:15:00Z"),
+  },
+  {
+    id: DEMO_ORDER_BETA_FIXTURE_ID,
+    merchantId: DEMO_MERCHANT_BETA_ID,
+    phone: "9000000001",
+    pincode: "411001",
+    value: 1500.0,
+    riskScore: 35,
+    protectionStatus: "Held",
+    fulfillmentStatus: "Pending",
+    statusReason: "[fixture:beta-test-co] Cross-merchant auth test order — Beta Test Co. only",
+    createdAt: new Date("2026-03-01T10:00:00Z"),
   },
 ];
 

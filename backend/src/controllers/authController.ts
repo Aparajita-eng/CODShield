@@ -145,22 +145,27 @@ export async function registerAccount(req: Request, res: Response): Promise<any>
         });
       }
 
-      const user = await prisma.user.create({
-        data: {
-          email: normalizedEmail,
-          passwordHash: hashPassword(password),
-          name: fullName.trim(),
-          companyName: companyName.trim(),
-        },
-      });
+      const { user } = await prisma.$transaction(async (tx) => {
+        const merchant = await tx.merchant.create({
+          data: {
+            name: companyName.trim(),
+            apiKey: generateApiKey(companyName),
+            tier: "Starter",
+            claimRatio: 0,
+          },
+        });
 
-      await prisma.merchant.create({
-        data: {
-          name: companyName.trim(),
-          apiKey: generateApiKey(companyName),
-          tier: "Starter",
-          claimRatio: 0,
-        },
+        const user = await tx.user.create({
+          data: {
+            email: normalizedEmail,
+            passwordHash: hashPassword(password),
+            name: fullName.trim(),
+            companyName: companyName.trim(),
+            merchantId: merchant.id,
+          },
+        });
+
+        return { user };
       });
 
       const token = await issueSession(

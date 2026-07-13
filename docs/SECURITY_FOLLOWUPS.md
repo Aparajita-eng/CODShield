@@ -30,7 +30,7 @@ Dashboard UI calls these via same-origin Next.js proxy routes under `frontend/sr
 
 ## Schema follow-up
 
-Add explicit `User.merchantId` FK (or join table) instead of matching `companyName` → `Merchant.name`.
+~~Add explicit `User.merchantId` FK~~ — **done** (`20260713110000_init` + `20260713120000_add_user_merchant_id`). Demo user and new registrations use `User.merchantId`; demo-mode sessions still bind to `DEMO_MERCHANT_ACME_ID`.
 
 ## Dev CORS note
 

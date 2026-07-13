@@ -6,13 +6,13 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Starting seed database...");
 
-  // Clean existing data
+  // Clean existing data (users before merchants — User.merchantId FK)
   await prisma.claim.deleteMany();
   await prisma.order.deleteMany();
+  await prisma.user.deleteMany();
   await prisma.merchant.deleteMany();
   await prisma.pincodeRisk.deleteMany();
   await prisma.blacklist.deleteMany();
-  await prisma.user.deleteMany();
 
   // 1. Seed Merchants
   const merchants = [
@@ -23,7 +23,7 @@ async function main() {
       claimRatio: 4.0,
     },
     {
-      name: "Beta Electronics",
+      name: "Beta Test Co.",
       apiKey: "codshield_live_beta_starter_1294",
       tier: "Starter",
       claimRatio: 1.5,
@@ -45,7 +45,10 @@ async function main() {
   }
   console.log(`Seeded ${createdMerchants.length} merchants.`);
 
-  // Demo dashboard user (password: Demo@1234)
+  const acmeId = createdMerchants[0].id;
+  const betaId = createdMerchants[1].id;
+
+  // Demo dashboard user (password: Demo@1234) — linked to Acme via merchantId FK
   await prisma.user.create({
     data: {
       email: "demo@codshield.com",
@@ -53,11 +56,10 @@ async function main() {
       name: "Demo Merchant",
       companyName: "FastCommerce Inc.",
       phone: "+919876543210",
+      merchantId: acmeId,
     },
   });
-  console.log("Seeded demo user (demo@codshield.com / Demo@1234).");
-
-  const acmeId = createdMerchants[0].id;
+  console.log("Seeded demo user (demo@codshield.com / Demo@1234) → Acme Apparel.");
 
   // 2. Seed Pincodes Risk Weights
   const pincodes = [
@@ -266,7 +268,24 @@ async function main() {
       data: o,
     });
   }
-  console.log(`Seeded ${orders.length} initial orders.`);
+  console.log(`Seeded ${orders.length} Acme orders.`);
+
+  // Cross-merchant auth test fixture — Beta Test Co. only (not visible in Acme-scoped dashboards)
+  await prisma.order.create({
+    data: {
+      id: "b0000000-0000-4000-8000-0000000000999",
+      merchantId: betaId,
+      phone: "9000000001",
+      pincode: "411001",
+      value: 1500.0,
+      riskScore: 35,
+      protectionStatus: "Held",
+      fulfillmentStatus: "Pending",
+      statusReason: "[fixture:beta-test-co] Cross-merchant auth test order — Beta Test Co. only",
+      createdAt: new Date("2026-03-01T10:00:00Z"),
+    },
+  });
+  console.log("Seeded Beta Test Co. fixture order for cross-merchant auth tests.");
 
   console.log("Database seeded successfully.");
 }

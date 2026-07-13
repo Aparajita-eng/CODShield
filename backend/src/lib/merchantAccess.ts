@@ -1,6 +1,5 @@
 import type { SessionPayload } from "./auth";
 import { prisma } from "./db";
-import { fetchMerchants } from "./dataAccess";
 import { DEMO_MERCHANT_ACME_ID } from "./demoData";
 
 const DEMO_EMAIL = (process.env.DEMO_USER_EMAIL || "demo@codshield.com").toLowerCase();
@@ -11,7 +10,7 @@ function isDemoSession(session: SessionPayload): boolean {
 
 /**
  * Resolves merchant IDs the authenticated session may access.
- * Demo user → Acme only. Registered users → merchant(s) whose name matches user.companyName.
+ * Demo user → Acme only (in-memory). DB users → User.merchantId FK.
  */
 export async function getMerchantIdsForSession(session: SessionPayload): Promise<string[]> {
   if (isDemoSession(session)) {
@@ -19,11 +18,16 @@ export async function getMerchantIdsForSession(session: SessionPayload): Promise
   }
 
   try {
-    const user = await prisma.user.findUnique({ where: { id: session.sub } });
-    if (!user?.companyName) return [];
+    const user = await prisma.user.findUnique({
+      where: { id: session.sub },
+      select: { merchantId: true },
+    });
 
-    const merchants = await fetchMerchants();
-    return merchants.filter((m) => m.name === user.companyName).map((m) => m.id);
+    if (user?.merchantId) {
+      return [user.merchantId];
+    }
+
+    return [];
   } catch {
     return isDemoSession(session) ? [DEMO_MERCHANT_ACME_ID] : [];
   }

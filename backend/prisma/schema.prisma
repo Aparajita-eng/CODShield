@@ -9,13 +9,17 @@ generator client {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
+  id           String    @id @default(uuid())
+  email        String    @unique
   passwordHash String
   name         String
   companyName  String?
   phone        String?
-  createdAt    DateTime @default(now())
+  merchantId   String?
+  merchant     Merchant? @relation(fields: [merchantId], references: [id], onDelete: SetNull)
+  createdAt    DateTime  @default(now())
+
+  @@index([merchantId])
 }
 
 model Merchant {
@@ -25,6 +29,7 @@ model Merchant {
   tier       String   // Starter, Growth, Enterprise
   claimRatio Float    @default(0.0)
   orders     Order[]
+  users      User[]
   createdAt  DateTime @default(now())
 }
 
