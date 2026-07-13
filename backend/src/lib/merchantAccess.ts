@@ -18,10 +18,18 @@ export async function getMerchantIdsForSession(session: SessionPayload): Promise
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { id: session.sub },
-      select: { merchantId: true },
-    });
+    let user = null;
+    if (session.authType === "otp" && session.phone) {
+      user = await prisma.user.findFirst({
+        where: { phone: session.phone },
+        select: { merchantId: true },
+      });
+    } else {
+      user = await prisma.user.findUnique({
+        where: { id: session.sub },
+        select: { merchantId: true },
+      });
+    }
 
     if (user?.merchantId) {
       return [user.merchantId];

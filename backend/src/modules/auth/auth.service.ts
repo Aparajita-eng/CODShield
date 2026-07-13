@@ -53,13 +53,27 @@ export class AuthService {
   }
 
   async register(body: any) {
-    const { fullName, companyName, email, password } = body;
+    const { fullName, companyName, email, password, phone } = body;
     if (!fullName?.trim() || !companyName?.trim() || !email?.trim() || !password) {
       throw new UnauthorizedException('All registration fields are required');
     }
 
     const normalizedEmail = email.trim().toLowerCase();
     const trimmedCompany = companyName.trim();
+
+    let formattedPhone: string | undefined = undefined;
+    if (phone) {
+      const trimmed = phone.trim();
+      if (!trimmed.startsWith("+")) {
+        if (trimmed.length === 10) {
+          formattedPhone = `+91${trimmed}`;
+        } else {
+          formattedPhone = `+${trimmed}`;
+        }
+      } else {
+        formattedPhone = trimmed;
+      }
+    }
 
     const existingUser = await this.prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existingUser) {
@@ -89,6 +103,7 @@ export class AuthService {
           passwordHash: hashPassword(password),
           name: fullName.trim(),
           companyName: trimmedCompany,
+          phone: formattedPhone,
           merchantId: merchant.id
         }
       });

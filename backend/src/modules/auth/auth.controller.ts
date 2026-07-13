@@ -205,6 +205,17 @@ export class AuthController {
       };
     }
 
+    const submittedCode = code.trim();
+
+    // Dev/test bypass: if DEV_OTP_BYPASS is set in env and the submitted code matches, always accept.
+    const bypassCode = process.env.DEV_OTP_BYPASS;
+    if (bypassCode && submittedCode === bypassCode) {
+      return {
+        success: true,
+        message: "Phone number verified (bypass mode)."
+      };
+    }
+
     const record = otpStore.get(phone.trim());
 
     if (!record) {
@@ -222,7 +233,7 @@ export class AuthController {
       };
     }
 
-    if (record.code !== code.trim()) {
+    if (record.code !== submittedCode) {
       return {
         success: false,
         message: "Invalid verification code"

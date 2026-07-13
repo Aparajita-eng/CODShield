@@ -13,6 +13,7 @@ interface FormErrors {
   password?: string;
   confirmPassword?: string;
   terms?: string;
+  phone?: string;
 }
 
 type PasswordStrength = "weak" | "medium" | "strong" | null;
@@ -28,6 +29,7 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -66,6 +68,10 @@ export default function RegisterPage() {
       newErrors.email = "Invalid email address";
 
     if (!companyName.trim()) newErrors.companyName = "Company name is required";
+    if (!phone.trim()) newErrors.phone = "Phone number is required";
+    else if (!/^\+?[1-9]\d{1,14}$/.test(phone.trim().replace(/\s/g, "")))
+      newErrors.phone = "Invalid phone number format (use E.164 / 10 digits)";
+
     if (!password) newErrors.password = "Password is required";
     else if (password.length < 8)
       newErrors.password = "Password must be at least 8 characters";
@@ -90,7 +96,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName, email, companyName, password }),
+        body: JSON.stringify({ fullName, email, companyName, password, phone }),
       });
       const data = await res.json();
       if (data.success) {
@@ -189,6 +195,27 @@ export default function RegisterPage() {
                 <p className="text-xs text-negative flex items-center gap-1">
                   <AlertCircle className="w-3.5 h-3.5" />
                   {errors.email}
+                </p>
+              ) : null}
+            </div>
+
+            {/* Phone Number */}
+            <div className="space-y-1.5">
+              <label htmlFor="phone" className="block text-xs font-semibold text-ink-primary">
+                Phone number
+              </label>
+              <input
+                id="phone"
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className={`w-full px-4 py-2.5 rounded-lg border ${errors.phone ? "border-negative bg-negative/5" : "border-border-default bg-bg-raised"} text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent`}
+                placeholder="+91 98765 43210"
+              />
+              {errors.phone ? (
+                <p className="text-xs text-negative flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  {errors.phone}
                 </p>
               ) : null}
             </div>
