@@ -44,7 +44,34 @@ export class OrderController {
       throw new BadRequestException(scope.message);
     }
 
-    return this.orderService.listOrders(scope.merchantId, query);
+    const result = await this.orderService.listOrders(scope.merchantId, query);
+
+    // Normalise to the shape the frontend Order interface expects
+    const orders = result.orders.map((o: any) => ({
+      id: o.id,
+      merchantId: o.merchantId,
+      customerName: o.customerName ?? `Customer ${o.phone?.slice(-4) ?? ''}`,
+      phone: o.phone,
+      pincode: o.pincode,
+      value: o.value,
+      riskScore: o.riskScore,
+      status: o.fulfillmentStatus ?? o.status ?? 'Pending',
+      protectionStatus: o.protectionStatus,
+      orderDate: o.createdAt ?? o.orderDate,
+      riskFactors: o.riskFactors ?? [],
+      otpVerified: o.fulfillmentStatus === 'Verified' || o.otpVerified === true,
+      fraudFlagged: o.fraudFlagged ?? false,
+      timeline: o.timeline ?? [],
+    }));
+
+    return {
+      success: true,
+      orders,
+      total: result.total,
+      page: result.page,
+      totalPages: result.totalPages,
+      selectedMerchantId: scope.merchantId,
+    };
   }
 
   @ApiBearerAuth()

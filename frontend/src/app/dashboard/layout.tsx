@@ -51,6 +51,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [searchQuery, setSearchQuery] = useState("");
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
+  // Real merchant data
+  const [merchantName, setMerchantName] = useState("");
+  const [merchantTier, setMerchantTier] = useState("");
+
+  useEffect(() => {
+    fetch("/api/dashboard/data")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.selectedMerchant) {
+          setMerchantName(d.selectedMerchant.name);
+          setMerchantTier(d.selectedMerchant.tier);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   const closeMobileSidebar = () => {
     if (!isDesktop) setIsSidebarOpen(false);
   };
@@ -259,11 +275,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-bg-raised transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-accent-muted border border-accent/20 flex items-center justify-center text-accent font-semibold text-xs">
-                FC
+                {merchantName ? merchantName.slice(0, 2).toUpperCase() : "??"}
               </div>
               <div className="hidden sm:flex flex-col items-start">
-                <span className="text-xs font-semibold text-ink-primary">FastCommerce Inc.</span>
-                <span className="text-[10px] text-ink-tertiary">Enterprise</span>
+                <span className="text-xs font-semibold text-ink-primary">{merchantName || "Loading..."}</span>
+                <span className="text-[10px] text-ink-tertiary">{merchantTier}</span>
               </div>
               <ChevronDown className="w-3.5 h-3.5 text-ink-tertiary hidden sm:block" />
             </button>
