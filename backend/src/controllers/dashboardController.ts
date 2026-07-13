@@ -67,10 +67,13 @@ export async function getDashboardData(req: AuthenticatedRequest, res: Response)
     const holdRatio = totalOrdersCount > 0 ? (heldOrdersCount / totalOrdersCount) * 100 : 0;
     const protectionRatio = totalOrdersCount > 0 ? (protectedOrdersCount / totalOrdersCount) * 100 : 0;
 
+    const sanitizedMerchants = merchants.map(({ apiKeyHash, apiKeyMask, ...rest }) => rest);
+    const { apiKeyHash, apiKeyMask, ...selectedMerchantRest } = selectedMerchant;
+
     return res.json({
       success: true,
-      merchants,
-      selectedMerchant,
+      merchants: sanitizedMerchants,
+      selectedMerchant: selectedMerchantRest,
       orders,
       claims,
       metrics: {
@@ -80,7 +83,7 @@ export async function getDashboardData(req: AuthenticatedRequest, res: Response)
         failedOrders: failedOrdersCount,
         holdRatio: parseFloat(holdRatio.toFixed(1)),
         protectionRatio: parseFloat(protectionRatio.toFixed(1)),
-        claimRatio: selectedMerchant.claimRatio,
+        claimRatio: selectedMerchantRest.claimRatio,
       },
     });
   } catch (error) {

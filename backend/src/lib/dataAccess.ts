@@ -263,3 +263,56 @@ export async function bulkUpdateOrdersByIds(
     throw error;
   }
 }
+
+export async function updateMerchantName(id: string, name: string): Promise<Merchant | null> {
+  const updateInDemo = () => {
+    const merchant = demoMerchants.find(m => m.id === id);
+    if (merchant) {
+      merchant.name = name;
+    }
+    return merchant ?? null;
+  };
+  if (isDemoDataMode()) {
+    return updateInDemo();
+  }
+  try {
+    return await prisma.merchant.update({
+      where: { id },
+      data: { name },
+    });
+  } catch (error) {
+    if (isPrismaInitError(error)) {
+      return updateInDemo();
+    }
+    throw error;
+  }
+}
+
+export async function updateMerchantApiKey(
+  id: string,
+  apiKeyHash: string,
+  apiKeyMask: string
+): Promise<Merchant | null> {
+  const updateInDemo = () => {
+    const merchant = demoMerchants.find(m => m.id === id);
+    if (merchant) {
+      merchant.apiKeyHash = apiKeyHash;
+      merchant.apiKeyMask = apiKeyMask;
+    }
+    return merchant ?? null;
+  };
+  if (isDemoDataMode()) {
+    return updateInDemo();
+  }
+  try {
+    return await prisma.merchant.update({
+      where: { id },
+      data: { apiKeyHash, apiKeyMask },
+    });
+  } catch (error) {
+    if (isPrismaInitError(error)) {
+      return updateInDemo();
+    }
+    throw error;
+  }
+}

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/db";
 import { calculateRisk } from "../lib/risk";
+import { hashApiKey } from "../lib/auth";
 
 export async function checkOrderRisk(req: Request, res: Response): Promise<any> {
   try {
@@ -14,7 +15,7 @@ export async function checkOrderRisk(req: Request, res: Response): Promise<any> 
     }
 
     const merchant = await prisma.merchant.findUnique({
-      where: { apiKey },
+      where: { apiKeyHash: hashApiKey(apiKey) },
     });
 
     if (!merchant) {

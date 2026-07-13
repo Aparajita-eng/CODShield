@@ -13,7 +13,7 @@ const DASHBOARD_API = "/api/dashboard";
 interface Merchant {
   id: string;
   name: string;
-  apiKey: string;
+  apiKeyMask: string;
   tier: string;
   claimRatio: number;
   createdAt: string;
@@ -132,7 +132,7 @@ export default function Dashboard() {
 
   const handleCopyKey = () => {
     if (selectedMerchant) {
-      navigator.clipboard.writeText(selectedMerchant.apiKey);
+      navigator.clipboard.writeText(selectedMerchant.apiKeyMask);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -144,13 +144,13 @@ export default function Dashboard() {
     setSimLoading(true);
     setSimFeedback("");
     try {
-      const res = await fetch(`${BACKEND_URL}/api/v1/orders/risk-check`, {
+      const res = await fetch("/api/sandbox/orders/risk-check", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-api-key": selectedMerchant.apiKey,
         },
         body: JSON.stringify({
+          merchantId: selectedMerchant.id,
           phone: simPhone,
           pincode: simPincode,
           value: simValue,
@@ -436,7 +436,7 @@ export default function Dashboard() {
                 <span className="text-ink-secondary block uppercase text-[9px] font-mono font-semibold">Private Webhook Key</span>
                 <div className="flex items-center gap-2 bg-bg-base border border-border-default p-2.5 rounded justify-between font-mono text-xs text-ink-primary">
                   <span className="break-all select-all">
-                    {showApiKey ? selectedMerchant.apiKey : "••••••••••••••••••••••••••••••••"}
+                    {showApiKey ? selectedMerchant.apiKeyMask : "••••••••••••••••••••••••••••••••"}
                   </span>
                   <div className="flex gap-2 shrink-0">
                     <button

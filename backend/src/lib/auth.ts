@@ -55,3 +55,15 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
     return null;
   }
 }
+
+export function hashApiKey(apiKey: string): string {
+  const { createHash } = require("crypto");
+  return createHash("sha256").update(apiKey).digest("hex");
+}
+
+export function maskApiKey(apiKey: string): string {
+  const parts = apiKey.split("_");
+  const suffix = parts[parts.length - 1] || "";
+  const slug = parts[parts.length - 2] || "key";
+  return `codshield_live_${slug}_••••••••_${suffix}`;
+}

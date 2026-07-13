@@ -7,6 +7,8 @@ import {
   verifyPassword,
   SESSION_TTL_LONG,
   SESSION_TTL_SHORT,
+  hashApiKey,
+  maskApiKey,
 } from "../lib/auth";
 import { passwordResetStore } from "../lib/passwordResetStore";
 
@@ -159,10 +161,12 @@ export async function registerAccount(req: Request, res: Response): Promise<any>
       }
 
       const { user } = await prisma.$transaction(async (tx) => {
+        const rawApiKey = generateApiKey(trimmedCompany);
         const merchant = await tx.merchant.create({
           data: {
             name: trimmedCompany,
-            apiKey: generateApiKey(trimmedCompany),
+            apiKeyHash: hashApiKey(rawApiKey),
+            apiKeyMask: maskApiKey(rawApiKey),
             tier: "Starter",
             claimRatio: 0,
           },

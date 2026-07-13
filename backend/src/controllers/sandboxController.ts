@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import { prisma } from "../lib/db";
 import { calculateRisk } from "../lib/risk";
 import { fetchPincodeRisk, fetchBlacklistByPhone } from "../lib/dataAccess";
+import { isDemoDataMode, demoOrders } from "../lib/demoData";
+import { resolveActiveMerchantId } from "../lib/merchantAccess";
+import { AuthenticatedRequest } from "../middleware/requireSession";
 
 function hashStr(str: string): number {
   let h = 0;
@@ -273,5 +276,86 @@ export async function processSimulatedClaim(req: Request, res: Response): Promis
       success: false,
       message: "Failed to process simulated claim"
     });
+  }
+}
+
+export async function createSandboxOrderRiskCheck(req: AuthenticatedRequest, res: Response): Promise<any> {
+  try {
+    const scope = await resolveActiveMerchantId(req.session!, req.body.merchantId);
+    if (!scope.ok) {
+      return res.status(scope.status).json({ success: false, message: scope.message });
+    }
+
+    const { phone, pincode, value } = req.body;
+    if (!phone || !pincode || value === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Required fields missing: phone, pincode, and value are required"
+      });
+    }
+
+    const orderValue = parseFloat(value);
+    if (isNaN(orderValue) || orderValue < 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Valid numeric order value is required"
+      });
+    }
+
+    const assessment = await calculateRisk(phone.trim(), pincode.trim(), orderValue);
+
+    let protectionStatus = "Protected";
+    if (assessment.action === "OTP_REQUIRED") {
+      protectionStatus = "Held";
+    } else if (assessment.action === "PREPAID_ONLY" || assessment.action === "REJECT_ORDER") {
+      protectionStatus = "Failed";
+    }
+
+    const saveOrder = async () => {
+      if (isDemoDataMode()) {
+        const order = {
+          id: `b0000000-0000-4000-8000-${Math.floor(100000000000 + Math.random() * 900000000000)}`,
+          merchantId: scope.merchantId,
+          phone: phone.trim(),
+          pincode: pincode.trim(),
+          value: orderValue,
+          riskScore: assessment.score,
+          protectionStatus,
+          fulfillmentStatus: "Pending",
+          fraudFlagged: false,
+          statusReason: assessment.reasons.slice(0, 3).join(", "),
+          createdAt: new Date(),
+        };
+        demoOrders.unshift(order);
+        return order;
+      }
+      return prisma.order.create({
+        data: {
+          merchantId: scope.merchantId,
+          phone: phone.trim(),
+          pincode: pincode.trim(),
+          value: orderValue,
+          riskScore: assessment.score,
+          protectionStatus,
+          statusReason: assessment.reasons.slice(0, 3).join(", "),
+        },
+      });
+    };
+
+    const order = await saveOrder();
+
+    return res.json({
+      success: true,
+      orderId: order.id,
+      riskAssessment: {
+        score: assessment.score,
+        action: assessment.action,
+        reasons: assessment.reasons,
+      },
+    });
+
+  } catch (error) {
+    console.error("Sandbox order risk check error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 }

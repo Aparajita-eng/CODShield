@@ -25,9 +25,11 @@ export async function listClaims(req: AuthenticatedRequest, res: Response): Prom
     const claims = await fetchClaimsForMerchant(scope.merchantId);
     const items = mapClaimsForMerchant(claims, merchants, scope.merchantId);
 
+    const sanitizedMerchants = merchants.map(({ apiKeyHash, apiKeyMask, ...rest }) => rest);
+
     return res.json({
       success: true,
-      merchants,
+      merchants: sanitizedMerchants,
       selectedMerchantId: scope.merchantId,
       claims: items,
     });

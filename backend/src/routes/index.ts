@@ -13,8 +13,17 @@ import {
   checkPincode,
   checkFraudHistory,
   checkMerchantRatio,
-  processSimulatedClaim
+  processSimulatedClaim,
+  createSandboxOrderRiskCheck,
 } from "../controllers/sandboxController";
+import {
+  updateCompanySettings,
+  regenerateApiKey,
+  updatePassword,
+  listTeamMembers,
+  getWebhookSettings,
+  updateWebhookSettings,
+} from "../controllers/settingsController";
 import { getDashboardData, submitClaim } from "../controllers/dashboardController";
 import { listClaims, updateClaimNotes } from "../controllers/claimsController";
 import { getFraudTrustGraph } from "../controllers/trustGraphController";
@@ -63,6 +72,17 @@ router.post("/sandbox/pincode", checkPincode);
 router.post("/sandbox/fraud-history", checkFraudHistory);
 router.post("/sandbox/merchant-ratio", checkMerchantRatio);
 router.post("/sandbox/claim", processSimulatedClaim);
+
+// Settings (session required)
+router.patch("/settings/company", requireSession, updateCompanySettings);
+router.post("/settings/api-key/regenerate", requireSession, regenerateApiKey);
+router.post("/settings/password", requireSession, updatePassword);
+router.get("/settings/team", requireSession, listTeamMembers);
+router.get("/settings/webhooks", requireSession, getWebhookSettings);
+router.post("/settings/webhooks", requireSession, updateWebhookSettings);
+
+// Sandbox simulator risk-check (session required)
+router.post("/sandbox/orders/risk-check", requireSession, createSandboxOrderRiskCheck);
 
 // Dashboard data endpoints (session required)
 router.get("/dashboard/data", requireSession, getDashboardData);

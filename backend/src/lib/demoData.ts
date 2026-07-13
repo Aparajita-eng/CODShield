@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { hashApiKey } from "./auth";
 import type { Blacklist, Claim, Merchant, Order, PincodeRisk } from "@prisma/client";
 
 export const DEMO_MERCHANT_BETA_ID = "a0000000-0000-4000-8000-000000000002";
@@ -10,6 +11,7 @@ export const DEMO_ORDER_BETA_FIXTURE_ID = "b0000000-0000-4000-8000-0000000000999
 /**
  * Demo-only merchant UUID for the Acme Apparel seed account.
  * Demo sessions are bound to this merchant; override via DEMO_MERCHANT_ID in backend/.env.
+ *
  */
 export const DEMO_MERCHANT_ACME_ID =
   process.env.DEMO_MERCHANT_ID || "a0000000-0000-4000-8000-000000000001";
@@ -20,7 +22,8 @@ export const demoMerchants: Merchant[] = [
   {
     id: DEMO_MERCHANT_ACME_ID,
     name: "Acme Apparel",
-    apiKey: "codshield_live_acme_growth_9843",
+    apiKeyHash: hashApiKey("codshield_live_acme_growth_9843"),
+    apiKeyMask: "codshield_live_acme_••••••••_9843",
     tier: "Growth",
     claimRatio: 4.0,
     createdAt: merchantCreatedAt,
@@ -28,7 +31,8 @@ export const demoMerchants: Merchant[] = [
   {
     id: DEMO_MERCHANT_BETA_ID,
     name: "Beta Test Co.",
-    apiKey: "codshield_live_beta_starter_1294",
+    apiKeyHash: hashApiKey("codshield_live_beta_starter_1294"),
+    apiKeyMask: "codshield_live_beta_••••••••_1294",
     tier: "Starter",
     claimRatio: 1.5,
     createdAt: merchantCreatedAt,
@@ -36,7 +40,8 @@ export const demoMerchants: Merchant[] = [
   {
     id: DEMO_MERCHANT_DELTA_ID,
     name: "Delta Direct",
-    apiKey: "codshield_live_delta_enterprise_0481",
+    apiKeyHash: hashApiKey("codshield_live_delta_enterprise_0481"),
+    apiKeyMask: "codshield_live_delta_••••••••_0481",
     tier: "Enterprise",
     claimRatio: 9.5,
     createdAt: merchantCreatedAt,

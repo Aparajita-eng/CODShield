@@ -25,7 +25,8 @@ model User {
 model Merchant {
   id         String   @id @default(uuid())
   name       String
-  apiKey     String   @unique
+  apiKeyHash String   @unique
+  apiKeyMask String
   tier       String   // Starter, Growth, Enterprise
   claimRatio Float    @default(0.0)
   orders     Order[]

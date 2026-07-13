@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { hashPassword } from "../src/lib/auth";
+import { hashPassword, hashApiKey } from "../src/lib/auth";
 import {
   DEMO_MERCHANT_ACME_ID,
   DEMO_MERCHANT_BETA_ID,
@@ -24,21 +24,24 @@ async function main() {
     {
       id: DEMO_MERCHANT_ACME_ID,
       name: "Acme Apparel",
-      apiKey: "codshield_live_acme_growth_9843",
+      apiKeyHash: hashApiKey("codshield_live_acme_growth_9843"),
+      apiKeyMask: "codshield_live_acme_••••••••_9843",
       tier: "Growth",
       claimRatio: 4.0,
     },
     {
       id: DEMO_MERCHANT_BETA_ID,
       name: "Beta Test Co.",
-      apiKey: "codshield_live_beta_starter_1294",
+      apiKeyHash: hashApiKey("codshield_live_beta_starter_1294"),
+      apiKeyMask: "codshield_live_beta_••••••••_1294",
       tier: "Starter",
       claimRatio: 1.5,
     },
     {
       id: DEMO_MERCHANT_DELTA_ID,
       name: "Delta Direct",
-      apiKey: "codshield_live_delta_enterprise_0481",
+      apiKeyHash: hashApiKey("codshield_live_delta_enterprise_0481"),
+      apiKeyMask: "codshield_live_delta_••••••••_0481",
       tier: "Enterprise",
       claimRatio: 9.5,
     },
