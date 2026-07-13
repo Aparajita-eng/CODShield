@@ -68,5 +68,6 @@ model Claim {
   proofUrl  String
   status    String   // Pending, Approved, Rejected
   step      Int      // 1: Upload, 2: Courier, 3: AI Check, 4: Payout
+  notes     String?
   createdAt DateTime @default(now())
 }

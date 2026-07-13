@@ -16,6 +16,7 @@ import {
   processSimulatedClaim
 } from "../controllers/sandboxController";
 import { getDashboardData, submitClaim } from "../controllers/dashboardController";
+import { listClaims, updateClaimNotes } from "../controllers/claimsController";
 import { getFraudTrustGraph } from "../controllers/trustGraphController";
 import { getPincodeIntelligence, getPincodeDetail } from "../controllers/pincodeController";
 import { listFraudEvents } from "../controllers/fraudEventsController";
@@ -65,6 +66,10 @@ router.post("/sandbox/claim", processSimulatedClaim);
 // Dashboard data endpoints (session required)
 router.get("/dashboard/data", requireSession, getDashboardData);
 router.post("/dashboard/claim-submit", requireSession, submitClaim);
+
+// Claims (session required)
+router.get("/claims", requireSession, listClaims);
+router.post("/claims/:claimId/notes", requireSession, updateClaimNotes);
 
 // Public versioned APIs (Merchant checkouts)
 router.post("/v1/orders/risk-check", checkOrderRisk);

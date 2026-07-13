@@ -4,6 +4,7 @@ import {
   bulkUpdateDemoOrders,
   createDemoClaim,
   demoBlacklists,
+  demoClaims,
   demoMerchants,
   demoOrders,
   demoPincodeRisks,
@@ -142,6 +143,47 @@ export async function fetchClaimByOrderId(orderId: string): Promise<Claim | null
     () => prisma.claim.findFirst({ where: { orderId } }),
     () => findDemoClaimByOrderId(orderId)
   );
+}
+
+export async function fetchClaimById(id: string): Promise<ClaimWithOrder | null> {
+  return withData(
+    () =>
+      prisma.claim.findUnique({
+        where: { id },
+        include: { order: true },
+      }),
+    () => {
+      const c = demoClaims.find((claim) => claim.id === id);
+      if (!c) return null;
+      const order = demoOrders.find((o) => o.id === c.orderId);
+      if (!order) return null;
+      return { ...c, order };
+    }
+  );
+}
+
+export async function updateClaimNotesInDb(id: string, notes: string): Promise<Claim | null> {
+  const updateInDemo = () => {
+    const claim = demoClaims.find((c) => c.id === id);
+    if (claim) {
+      claim.notes = notes;
+    }
+    return claim ?? null;
+  };
+  if (isDemoDataMode()) {
+    return updateInDemo();
+  }
+  try {
+    return await prisma.claim.update({
+      where: { id },
+      data: { notes },
+    });
+  } catch (error) {
+    if (isPrismaInitError(error)) {
+      return updateInDemo();
+    }
+    throw error;
+  }
 }
 
 /**

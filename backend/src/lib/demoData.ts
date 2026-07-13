@@ -268,7 +268,62 @@ export const demoOrders: Order[] = orderSeeds.map((order) => ({
 }));
 
 /** Mutable in-memory claims for demo mode only — lost on server restart, not a substitute for Postgres. */
-export const demoClaims: Claim[] = [];
+export const demoClaims: Claim[] = [
+  {
+    id: "c0000000-0000-4000-8000-000000000001",
+    orderId: "b0000000-0000-4000-8000-000000000006",
+    proofUrl: "https://dispatch.courier/returns/pod-refusal-006.pdf",
+    status: "Pending",
+    step: 1,
+    notes: "Awaiting POD response from courier partner.",
+    createdAt: new Date("2026-02-20T10:00:00Z"),
+  },
+  {
+    id: "c0000000-0000-4000-8000-000000000002",
+    orderId: "b0000000-0000-4000-8000-000000000007",
+    proofUrl: "https://dispatch.courier/returns/delivery-failure-007.pdf",
+    status: "Under Review",
+    step: 2,
+    notes: "Logistics partner reported delivery address could not be located.",
+    createdAt: new Date("2025-10-20T09:30:00Z"),
+  },
+  {
+    id: "c0000000-0000-4000-8000-000000000003",
+    orderId: "b0000000-0000-4000-8000-000000000008",
+    proofUrl: "https://dispatch.courier/returns/rto-proof-008.pdf",
+    status: "Approved",
+    step: 3,
+    notes: "RTO confirmed. Reimbursement processed to merchant wallet.",
+    createdAt: new Date("2026-02-01T14:15:00Z"),
+  },
+  {
+    id: "c0000000-0000-4000-8000-000000000004",
+    orderId: "b0000000-0000-4000-8000-000000000010",
+    proofUrl: "https://dispatch.courier/returns/address-mismatch-010.pdf",
+    status: "Rejected",
+    step: 3,
+    notes: "Claim rejected due to matching customer phone geolocation history.",
+    createdAt: new Date("2025-09-10T11:00:00Z"),
+  },
+  {
+    id: "c0000000-0000-4000-8000-000000000005",
+    orderId: "b0000000-0000-4000-8000-000000000003",
+    proofUrl: "https://dispatch.courier/returns/payout-claim-003.pdf",
+    status: "Paid",
+    step: 4,
+    notes: "Payout verified. INR 890 credited to account bank balance.",
+    createdAt: new Date("2025-10-01T08:00:00Z"),
+  },
+  {
+    id: "c0000000-0000-4000-8000-000000000999",
+    orderId: "b0000000-0000-4000-8000-0000000000999",
+    proofUrl: "https://dispatch.courier/returns/beta-refusal.pdf",
+    status: "Pending",
+    step: 1,
+    notes: "Beta Test Co. private claim notes.",
+    createdAt: new Date("2026-03-02T10:00:00Z"),
+  },
+];
 
 export type ClaimWithOrder = Claim & { order: Order };
 
@@ -293,6 +348,7 @@ export function createDemoClaim(orderId: string, proofUrl: string): ClaimWithOrd
     proofUrl,
     status: "Pending",
     step: 1,
+    notes: null,
     createdAt: new Date(),
   };
   demoClaims.push(claim);

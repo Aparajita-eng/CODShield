@@ -1,5 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { hashPassword } from "../src/lib/auth";
+import {
+  DEMO_MERCHANT_ACME_ID,
+  DEMO_MERCHANT_BETA_ID,
+  DEMO_MERCHANT_DELTA_ID,
+} from "../src/lib/demoData";
 
 const prisma = new PrismaClient();
 
@@ -17,18 +22,21 @@ async function main() {
   // 1. Seed Merchants
   const merchants = [
     {
+      id: DEMO_MERCHANT_ACME_ID,
       name: "Acme Apparel",
       apiKey: "codshield_live_acme_growth_9843",
       tier: "Growth",
       claimRatio: 4.0,
     },
     {
+      id: DEMO_MERCHANT_BETA_ID,
       name: "Beta Test Co.",
       apiKey: "codshield_live_beta_starter_1294",
       tier: "Starter",
       claimRatio: 1.5,
     },
     {
+      id: DEMO_MERCHANT_DELTA_ID,
       name: "Delta Direct",
       apiKey: "codshield_live_delta_enterprise_0481",
       tier: "Enterprise",
@@ -270,6 +278,93 @@ async function main() {
   }
   console.log(`Seeded ${orders.length} Acme orders.`);
 
+  // Claims linked to RTO orders (indices match demoData claim seeds)
+  const rtoOrders = await prisma.order.findMany({
+    where: { merchantId: acmeId, fulfillmentStatus: "RTO" },
+    orderBy: { createdAt: "asc" },
+    take: 4,
+  });
+  const paidOrder = await prisma.order.findFirst({
+    where: {
+      merchantId: acmeId,
+      fulfillmentStatus: "Delivered",
+      value: 890,
+    },
+  });
+
+  const claimSeeds: Array<{
+    id: string;
+    orderId: string;
+    proofUrl: string;
+    status: string;
+    step: number;
+    notes?: string | null;
+    createdAt: Date;
+  }> = [];
+
+  if (rtoOrders[0]) {
+    claimSeeds.push({
+      id: "c0000000-0000-4000-8000-000000000001",
+      orderId: rtoOrders[0].id,
+      proofUrl: "https://dispatch.courier/returns/pod-refusal.pdf",
+      status: "Pending",
+      step: 1,
+      notes: "Awaiting POD response from courier partner.",
+      createdAt: new Date("2026-02-20T10:00:00Z"),
+    });
+  }
+  if (rtoOrders[1]) {
+    claimSeeds.push({
+      id: "c0000000-0000-4000-8000-000000000002",
+      orderId: rtoOrders[1].id,
+      proofUrl: "https://dispatch.courier/returns/delivery-failure.pdf",
+      status: "Under Review",
+      step: 2,
+      notes: "Logistics partner reported delivery address could not be located.",
+      createdAt: new Date("2025-10-20T09:30:00Z"),
+    });
+  }
+  if (rtoOrders[2]) {
+    claimSeeds.push({
+      id: "c0000000-0000-4000-8000-000000000003",
+      orderId: rtoOrders[2].id,
+      proofUrl: "https://dispatch.courier/returns/rto-proof.pdf",
+      status: "Approved",
+      step: 3,
+      notes: "RTO confirmed. Reimbursement processed to merchant wallet.",
+      createdAt: new Date("2026-02-01T14:15:00Z"),
+    });
+  }
+  if (rtoOrders[3]) {
+    claimSeeds.push({
+      id: "c0000000-0000-4000-8000-000000000004",
+      orderId: rtoOrders[3].id,
+      proofUrl: "https://dispatch.courier/returns/address-mismatch.pdf",
+      status: "Rejected",
+      step: 3,
+      notes: "Claim rejected due to matching customer phone geolocation history.",
+      createdAt: new Date("2025-09-10T11:00:00Z"),
+    });
+  }
+  if (paidOrder) {
+    claimSeeds.push({
+      id: "c0000000-0000-4000-8000-000000000005",
+      orderId: paidOrder.id,
+      proofUrl: "https://dispatch.courier/returns/payout-claim.pdf",
+      status: "Paid",
+      step: 4,
+      notes: "Payout verified. INR 890 credited to account bank balance.",
+      createdAt: new Date("2025-10-01T08:00:00Z"),
+    });
+  }
+
+  for (const claim of claimSeeds) {
+    await prisma.claim.create({ data: claim });
+  }
+  if (claimSeeds.length) {
+    console.log(`Seeded ${claimSeeds.length} Acme claims.`);
+  }
+
   // Cross-merchant auth test fixture — Beta Test Co. only (not visible in Acme-scoped dashboards)
   await prisma.order.create({
     data: {
@@ -286,6 +381,20 @@ async function main() {
     },
   });
   console.log("Seeded Beta Test Co. fixture order for cross-merchant auth tests.");
+
+  // Seed a claim for the Beta Test Co. order to test cross-merchant auth boundary
+  await prisma.claim.create({
+    data: {
+      id: "c0000000-0000-4000-8000-000000000999",
+      orderId: "b0000000-0000-4000-8000-0000000000999",
+      proofUrl: "https://dispatch.courier/returns/beta-refusal.pdf",
+      status: "Pending",
+      step: 1,
+      notes: "Beta Test Co. private claim notes.",
+      createdAt: new Date("2026-03-02T10:00:00Z"),
+    },
+  });
+  console.log("Seeded Beta Test Co. claim fixture for cross-merchant auth tests.");
 
   console.log("Database seeded successfully.");
 }
