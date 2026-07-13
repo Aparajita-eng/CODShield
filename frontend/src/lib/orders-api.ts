@@ -59,18 +59,10 @@ export interface OrderDetail extends Omit<Order, "timeline"> {
   paymentMethod: string;
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
-
-export function getRiskLevelFromScore(score: number): RiskLevel {
-  if (score <= 30) return "Low";
-  if (score <= 70) return "Medium";
-  return "High";
-}
+const ORDERS_API = "/api/orders";
 
 export async function fetchOrders(merchantId?: string) {
-  const url = merchantId
-    ? `${BACKEND_URL}/api/orders?merchantId=${merchantId}`
-    : `${BACKEND_URL}/api/orders`;
+  const url = merchantId ? `${ORDERS_API}?merchantId=${merchantId}` : ORDERS_API;
   const res = await fetch(url);
   return res.json() as Promise<{
     success: boolean;
@@ -81,13 +73,19 @@ export async function fetchOrders(merchantId?: string) {
   }>;
 }
 
+export function getRiskLevelFromScore(score: number): RiskLevel {
+  if (score <= 30) return "Low";
+  if (score <= 70) return "Medium";
+  return "High";
+}
+
 export async function fetchOrderById(orderId: string) {
-  const res = await fetch(`${BACKEND_URL}/api/orders/${orderId}`);
+  const res = await fetch(`${ORDERS_API}/${orderId}`);
   return res.json() as Promise<{ success: boolean; order?: OrderDetail; message?: string }>;
 }
 
 export async function bulkUpdateOrders(orderIds: string[], action: "verify" | "flag_fraud") {
-  const res = await fetch(`${BACKEND_URL}/api/orders/bulk`, {
+  const res = await fetch(`${ORDERS_API}/bulk`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ orderIds, action }),

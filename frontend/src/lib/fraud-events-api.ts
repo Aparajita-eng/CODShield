@@ -37,7 +37,7 @@ export interface FraudEventsFilters {
   endDate?: string;
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+const FRAUD_EVENTS_API = "/api/fraud/events";
 
 function buildQuery(filters: FraudEventsFilters): string {
   const params = new URLSearchParams();
@@ -52,7 +52,7 @@ function buildQuery(filters: FraudEventsFilters): string {
 }
 
 export async function fetchFraudEvents(filters: FraudEventsFilters = {}) {
-  const res = await fetch(`${BACKEND_URL}/api/fraud/events${buildQuery(filters)}`);
+  const res = await fetch(`${FRAUD_EVENTS_API}${buildQuery(filters)}`);
   return res.json() as Promise<{
     success: boolean;
     events: FraudEvent[];

@@ -1,5 +1,7 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { fetchOrders, fetchBlacklists } from "../lib/dataAccess";
+import { resolveActiveMerchantId } from "../lib/merchantAccess";
+import { AuthenticatedRequest } from "../middleware/requireSession";
 import {
   buildFraudEvents,
   filterFraudEvents,
@@ -16,8 +18,17 @@ function parseList<T extends string>(raw: string | undefined, allowed: readonly 
   return values.length ? values : undefined;
 }
 
-export async function listFraudEvents(req: Request, res: Response): Promise<void> {
+export async function listFraudEvents(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
+    const scope = await resolveActiveMerchantId(
+      req.session!,
+      req.query.merchantId as string | undefined
+    );
+    if (!scope.ok) {
+      res.status(scope.status).json({ success: false, message: scope.message });
+      return;
+    }
+
     const severities = parseList(req.query.severities as string | undefined, [
       "Low",
       "Medium",
@@ -35,7 +46,10 @@ export async function listFraudEvents(req: Request, res: Response): Promise<void
     const startDate = req.query.startDate as string | undefined;
     const endDate = req.query.endDate as string | undefined;
 
-    const orders = await fetchOrders({ orderBy: { createdAt: "desc" } });
+    const orders = await fetchOrders({
+      where: { merchantId: scope.merchantId },
+      orderBy: { createdAt: "desc" },
+    });
     const phones = [...new Set(orders.map((o) => o.phone))];
     const blacklists = await fetchBlacklists({ phones });
 

@@ -1,6 +1,11 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { prisma } from "../lib/db";
 import { fetchMerchants, fetchOrders, fetchOrderById, fetchPincodeRisk } from "../lib/dataAccess";
+import {
+  assertSessionMerchantAccess,
+  resolveActiveMerchantId,
+} from "../lib/merchantAccess";
+import { AuthenticatedRequest } from "../middleware/requireSession";
 import { Claim, Order, PincodeRisk } from "@prisma/client";
 
 type OrderStatus = "Pending" | "Verified" | "Shipped" | "Delivered" | "RTO" | "Cancelled";
@@ -199,25 +204,28 @@ function buildOrderDetail(
   };
 }
 
-export async function listOrders(req: Request, res: Response): Promise<any> {
+export async function listOrders(req: AuthenticatedRequest, res: Response): Promise<any> {
   try {
-    const merchantId = req.query.merchantId as string | undefined;
-
-    const merchants = await fetchMerchants();
-    if (!merchants.length) {
-      return res.json({ success: true, orders: [], merchants: [] });
+    const scope = await resolveActiveMerchantId(
+      req.session!,
+      req.query.merchantId as string | undefined
+    );
+    if (!scope.ok) {
+      return res.status(scope.status).json({ success: false, message: scope.message });
     }
 
-    const selectedMerchantId = merchantId || merchants[0].id;
+    const allMerchants = await fetchMerchants();
+    const merchants = allMerchants.filter((m) => scope.allowedIds.includes(m.id));
+
     const orders = await fetchOrders({
-      where: { merchantId: selectedMerchantId },
+      where: { merchantId: scope.merchantId },
       orderBy: { createdAt: "desc" },
     });
 
     return res.json({
       success: true,
       merchants,
-      selectedMerchantId,
+      selectedMerchantId: scope.merchantId,
       orders: orders.map(mapOrderListItem),
     });
   } catch (error) {
@@ -226,13 +234,18 @@ export async function listOrders(req: Request, res: Response): Promise<any> {
   }
 }
 
-export async function getOrderById(req: Request, res: Response): Promise<any> {
+export async function getOrderById(req: AuthenticatedRequest, res: Response): Promise<any> {
   try {
     const { orderId } = req.params;
 
     const order = await fetchOrderById(orderId);
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
+    }
+
+    const access = await assertSessionMerchantAccess(req.session!, order.merchantId);
+    if (!access.ok) {
+      return res.status(access.status).json({ success: false, message: access.message });
     }
 
     const [pincodeRisk, claim] = await Promise.all([
@@ -250,7 +263,7 @@ export async function getOrderById(req: Request, res: Response): Promise<any> {
   }
 }
 
-export async function bulkUpdateOrders(req: Request, res: Response): Promise<any> {
+export async function bulkUpdateOrders(req: AuthenticatedRequest, res: Response): Promise<any> {
   try {
     const { orderIds, action } = req.body as { orderIds?: string[]; action?: string };
 
@@ -259,6 +272,22 @@ export async function bulkUpdateOrders(req: Request, res: Response): Promise<any
         success: false,
         message: "orderIds and action are required",
       });
+    }
+
+    const scope = await resolveActiveMerchantId(req.session!);
+    if (!scope.ok) {
+      return res.status(scope.status).json({ success: false, message: scope.message });
+    }
+
+    for (const orderId of orderIds) {
+      const order = await fetchOrderById(orderId);
+      if (!order) {
+        return res.status(404).json({ success: false, message: `Order not found: ${orderId}` });
+      }
+      const access = await assertSessionMerchantAccess(req.session!, order.merchantId);
+      if (!access.ok) {
+        return res.status(access.status).json({ success: false, message: access.message });
+      }
     }
 
     if (action === "verify") {

@@ -1,5 +1,7 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { fetchOrders } from "../lib/dataAccess";
+import { resolveActiveMerchantId } from "../lib/merchantAccess";
+import { AuthenticatedRequest } from "../middleware/requireSession";
 import { listKnownStates } from "../lib/pincodeLookup";
 import {
   buildPincodeMetrics,
@@ -31,8 +33,17 @@ function buildDateWhere(startDate?: string, endDate?: string) {
   return Object.keys(where).length ? where : undefined;
 }
 
-export async function getPincodeIntelligence(req: Request, res: Response): Promise<void> {
+export async function getPincodeIntelligence(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
+    const scope = await resolveActiveMerchantId(
+      req.session!,
+      req.query.merchantId as string | undefined
+    );
+    if (!scope.ok) {
+      res.status(scope.status).json({ success: false, message: scope.message });
+      return;
+    }
+
     const riskLevels = parseRiskLevels(req.query.riskLevels as string | undefined);
     const state = (req.query.state as string) || undefined;
     const minVolume = Math.max(1, parseInt((req.query.minVolume as string) || "1", 10) || 1);
@@ -40,7 +51,10 @@ export async function getPincodeIntelligence(req: Request, res: Response): Promi
     const endDate = req.query.endDate as string | undefined;
 
     const orders = await fetchOrders({
-      where: buildDateWhere(startDate, endDate),
+      where: {
+        merchantId: scope.merchantId,
+        ...buildDateWhere(startDate, endDate),
+      },
       orderBy: { createdAt: "desc" },
     });
 
@@ -91,8 +105,17 @@ export async function getPincodeIntelligence(req: Request, res: Response): Promi
   }
 }
 
-export async function getPincodeDetail(req: Request, res: Response): Promise<void> {
+export async function getPincodeDetail(req: AuthenticatedRequest, res: Response): Promise<void> {
   try {
+    const scope = await resolveActiveMerchantId(
+      req.session!,
+      req.query.merchantId as string | undefined
+    );
+    if (!scope.ok) {
+      res.status(scope.status).json({ success: false, message: scope.message });
+      return;
+    }
+
     const pincode = (req.params.pincode || "").trim();
     if (!/^\d{6}$/.test(pincode)) {
       res.status(400).json({ success: false, message: "Valid 6-digit pincode required" });
@@ -104,6 +127,7 @@ export async function getPincodeDetail(req: Request, res: Response): Promise<voi
 
     const orders = await fetchOrders({
       where: {
+        merchantId: scope.merchantId,
         pincode,
         ...buildDateWhere(startDate, endDate),
       },

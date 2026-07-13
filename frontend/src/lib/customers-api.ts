@@ -49,10 +49,10 @@ export interface CustomerProfile {
   }[];
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+const CUSTOMERS_API = "/api/customers";
 
 export async function fetchRecentCustomers() {
-  const res = await fetch(`${BACKEND_URL}/api/customers`);
+  const res = await fetch(`${CUSTOMERS_API}`);
   return res.json() as Promise<{
     success: boolean;
     customers: CustomerSummary[];
@@ -61,9 +61,7 @@ export async function fetchRecentCustomers() {
 }
 
 export async function searchCustomers(query: string) {
-  const res = await fetch(
-    `${BACKEND_URL}/api/customers/search?q=${encodeURIComponent(query)}`
-  );
+  const res = await fetch(`${CUSTOMERS_API}/search?q=${encodeURIComponent(query)}`);
   return res.json() as Promise<{
     success: boolean;
     customers: CustomerSummary[];
@@ -73,7 +71,7 @@ export async function searchCustomers(query: string) {
 
 export async function fetchCustomerProfile(phone: string) {
   const res = await fetch(
-    `${BACKEND_URL}/api/customers/profile?phone=${encodeURIComponent(phone)}`
+    `${CUSTOMERS_API}/profile?phone=${encodeURIComponent(phone)}`
   );
   return res.json() as Promise<{
     success: boolean;

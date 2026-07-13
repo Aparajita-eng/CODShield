@@ -45,3 +45,26 @@ export async function assertSessionMerchantAccess(
 
   return { ok: true };
 }
+
+/** Resolve the active merchant for this request; optional merchantId must be in the session's allowed set. */
+export async function resolveActiveMerchantId(
+  session: SessionPayload,
+  requestedMerchantId?: string
+): Promise<
+  | { ok: true; merchantId: string; allowedIds: string[] }
+  | { ok: false; status: number; message: string }
+> {
+  const allowedIds = await getMerchantIdsForSession(session);
+
+  if (!allowedIds.length) {
+    return { ok: false, status: 403, message: "No merchant account linked to this user" };
+  }
+
+  const merchantId = requestedMerchantId?.trim() || allowedIds[0];
+
+  if (!allowedIds.includes(merchantId)) {
+    return { ok: false, status: 403, message: "You do not have access to this merchant account" };
+  }
+
+  return { ok: true, merchantId, allowedIds };
+}

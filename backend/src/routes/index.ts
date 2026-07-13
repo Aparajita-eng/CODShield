@@ -34,22 +34,22 @@ router.post("/auth/register", registerAccount);
 router.post("/auth/forgot-password", forgotPassword);
 router.post("/auth/otp-session", createOtpSession);
 
-// Orders endpoints
-router.get("/orders", listOrders);
-router.get("/orders/:orderId", getOrderById);
-router.patch("/orders/bulk", bulkUpdateOrders);
+// Orders (session required)
+router.get("/orders", requireSession, listOrders);
+router.get("/orders/:orderId", requireSession, getOrderById);
+router.patch("/orders/bulk", requireSession, bulkUpdateOrders);
 
-// Customer intelligence endpoints
-router.get("/customers", listCustomers);
-router.get("/customers/search", searchCustomers);
-router.get("/customers/profile", getCustomerProfile);
+// Customer intelligence (session required)
+router.get("/customers", requireSession, listCustomers);
+router.get("/customers/search", requireSession, searchCustomers);
+router.get("/customers/profile", requireSession, getCustomerProfile);
 
-// Pincode intelligence
-router.get("/pincodes/intelligence", getPincodeIntelligence);
-router.get("/pincodes/:pincode/detail", getPincodeDetail);
+// Pincode intelligence (session required)
+router.get("/pincodes/intelligence", requireSession, getPincodeIntelligence);
+router.get("/pincodes/:pincode/detail", requireSession, getPincodeDetail);
 
-// Fraud events
-router.get("/fraud/events", listFraudEvents);
+// Fraud events (session required)
+router.get("/fraud/events", requireSession, listFraudEvents);
 
 // Fraud / trust graph (session required)
 router.get("/fraud/trust-graph", requireSession, getFraudTrustGraph);
@@ -62,11 +62,9 @@ router.post("/sandbox/fraud-history", checkFraudHistory);
 router.post("/sandbox/merchant-ratio", checkMerchantRatio);
 router.post("/sandbox/claim", processSimulatedClaim);
 
-// Dashboard data endpoints (session required — see docs/SECURITY_FOLLOWUPS.md for other routes)
+// Dashboard data endpoints (session required)
 router.get("/dashboard/data", requireSession, getDashboardData);
 router.post("/dashboard/claim-submit", requireSession, submitClaim);
-
-// TODO(security): protect orders, customers, pincode, and fraud/events routes — see docs/SECURITY_FOLLOWUPS.md
 
 // Public versioned APIs (Merchant checkouts)
 router.post("/v1/orders/risk-check", checkOrderRisk);

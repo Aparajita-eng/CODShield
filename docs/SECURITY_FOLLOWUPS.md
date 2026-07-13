@@ -1,22 +1,23 @@
 # Security follow-ups
 
-Tracked items identified during dashboard auth hardening (not yet addressed).
+## Fixed (session + merchant binding)
 
-## Unauthenticated API routes (require session or API-key auth)
+| Route | Auth | Merchant scope |
+|-------|------|----------------|
+| `GET /api/dashboard/data` | `requireSession` | `resolveActiveMerchantId` |
+| `POST /api/dashboard/claim-submit` | `requireSession` | order `merchantId` check |
+| `GET /api/orders` | `requireSession` | `?merchantId=` validated |
+| `GET /api/orders/:orderId` | `requireSession` | order ownership |
+| `PATCH /api/orders/bulk` | `requireSession` | all `orderIds` ownership |
+| `GET /api/customers` | `requireSession` | orders scoped to merchant |
+| `GET /api/customers/search` | `requireSession` | orders scoped to merchant |
+| `GET /api/customers/profile` | `requireSession` | orders scoped to merchant |
+| `GET /api/pincodes/intelligence` | `requireSession` | orders scoped to merchant |
+| `GET /api/pincodes/:pincode/detail` | `requireSession` | orders scoped to merchant |
+| `GET /api/fraud/events` | `requireSession` | orders scoped to merchant |
+| `GET /api/fraud/trust-graph` | `requireSession` | (existing) |
 
-These Express endpoints are currently **public** — any caller can hit them without a session:
-
-| Route | Controller | Suggested fix |
-|-------|------------|---------------|
-| `GET /api/orders` | `ordersController.listOrders` | `requireSession` + merchant access check |
-| `GET /api/orders/:orderId` | `ordersController.getOrderById` | `requireSession` + order ownership |
-| `PATCH /api/orders/bulk` | `ordersController.bulkUpdateOrders` | `requireSession` + merchant access |
-| `GET /api/customers` | `customersController.listCustomers` | `requireSession` |
-| `GET /api/customers/search` | `customersController.searchCustomers` | `requireSession` |
-| `GET /api/customers/profile` | `customersController.getCustomerProfile` | `requireSession` |
-| `GET /api/pincodes/intelligence` | `pincodeController` | `requireSession` |
-| `GET /api/pincodes/:pincode/detail` | `pincodeController` | `requireSession` |
-| `GET /api/fraud/events` | `fraudEventsController` | `requireSession` |
+Dashboard UI calls these via same-origin Next.js proxy routes under `frontend/src/app/api/`.
 
 ## Intentionally public (keep as-is or use dedicated auth)
 
@@ -27,13 +28,10 @@ These Express endpoints are currently **public** — any caller can hit them wit
 | `POST /api/v1/orders/risk-check` | Merchant `x-api-key` header |
 | `POST /api/sandbox/*` | Dev/demo sandbox (consider gating in production) |
 
-## Authorization gaps (authenticated but not merchant-scoped)
-
-| Area | Issue |
-|------|--------|
-| `GET /api/dashboard/data` | Session required; merchant list filtered to user's merchants (fixed). |
-| `POST /api/dashboard/claim-submit` | Session required; order `merchantId` must match user's merchant (fixed). |
-
 ## Schema follow-up
 
 Add explicit `User.merchantId` FK (or join table) instead of matching `companyName` → `Merchant.name`.
+
+## Dev CORS note
+
+`FRONTEND_URL` is documented in `backend/.env.example` and copied into `backend/.env` during README setup (`cp backend/.env.example backend/.env`). If `backend/.env` is never created, CORS falls back to permissive `origin: true` in development only.

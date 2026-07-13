@@ -1,10 +1,12 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { Blacklist, Order } from "@prisma/client";
 import {
   fetchOrders,
   fetchBlacklists,
   fetchBlacklistByPhone,
 } from "../lib/dataAccess";
+import { resolveActiveMerchantId, assertSessionMerchantAccess } from "../lib/merchantAccess";
+import { AuthenticatedRequest } from "../middleware/requireSession";
 
 type TrustLabel = "Low" | "Medium" | "High";
 type Severity = "Low" | "Medium" | "High";
@@ -338,11 +340,12 @@ function buildMonthlyTrend(orders: Order[]) {
   return months;
 }
 
-async function groupOrdersByPhone(phoneFilter?: string) {
+async function groupOrdersByPhone(merchantId: string, phoneFilter?: string) {
   const normalizedFilter = phoneFilter ? normalizePhone(phoneFilter) : undefined;
-  const where = normalizedFilter
-    ? { phone: { contains: normalizedFilter } }
-    : undefined;
+  const where: { merchantId: string; phone?: { contains: string } } = { merchantId };
+  if (normalizedFilter) {
+    where.phone = { contains: normalizedFilter };
+  }
 
   const orders = await fetchOrders({
     where,
@@ -359,9 +362,17 @@ async function groupOrdersByPhone(phoneFilter?: string) {
   return grouped;
 }
 
-export async function listCustomers(req: Request, res: Response): Promise<any> {
+export async function listCustomers(req: AuthenticatedRequest, res: Response): Promise<any> {
   try {
-    const grouped = await groupOrdersByPhone();
+    const scope = await resolveActiveMerchantId(
+      req.session!,
+      req.query.merchantId as string | undefined
+    );
+    if (!scope.ok) {
+      return res.status(scope.status).json({ success: false, message: scope.message });
+    }
+
+    const grouped = await groupOrdersByPhone(scope.merchantId);
     const phones = Array.from(grouped.keys());
 
     const blacklists = await fetchBlacklists({ phones });
@@ -384,14 +395,22 @@ export async function listCustomers(req: Request, res: Response): Promise<any> {
   }
 }
 
-export async function searchCustomers(req: Request, res: Response): Promise<any> {
+export async function searchCustomers(req: AuthenticatedRequest, res: Response): Promise<any> {
   try {
+    const scope = await resolveActiveMerchantId(
+      req.session!,
+      req.query.merchantId as string | undefined
+    );
+    if (!scope.ok) {
+      return res.status(scope.status).json({ success: false, message: scope.message });
+    }
+
     const query = normalizePhone((req.query.q as string) || "");
     if (!query) {
       return res.json({ success: true, customers: [] });
     }
 
-    const grouped = await groupOrdersByPhone(query);
+    const grouped = await groupOrdersByPhone(scope.merchantId, query);
     const phones = Array.from(grouped.keys()).filter((phone) =>
       normalizePhone(phone).includes(query)
     );
@@ -412,8 +431,16 @@ export async function searchCustomers(req: Request, res: Response): Promise<any>
   }
 }
 
-export async function getCustomerProfile(req: Request, res: Response): Promise<any> {
+export async function getCustomerProfile(req: AuthenticatedRequest, res: Response): Promise<any> {
   try {
+    const scope = await resolveActiveMerchantId(
+      req.session!,
+      req.query.merchantId as string | undefined
+    );
+    if (!scope.ok) {
+      return res.status(scope.status).json({ success: false, message: scope.message });
+    }
+
     const phoneParam = (req.query.phone as string) || req.params.phone || "";
     const normalized = normalizePhone(phoneParam);
 
@@ -422,7 +449,7 @@ export async function getCustomerProfile(req: Request, res: Response): Promise<a
     }
 
     const orders = await fetchOrders({
-      where: { phone: { contains: normalized } },
+      where: { merchantId: scope.merchantId, phone: { contains: normalized } },
       orderBy: { createdAt: "desc" },
     });
 
@@ -430,6 +457,16 @@ export async function getCustomerProfile(req: Request, res: Response): Promise<a
 
     if (!exactOrders.length) {
       return res.status(404).json({ success: false, message: "Customer not found" });
+    }
+
+    const crossMerchantCheck = await assertSessionMerchantAccess(
+      req.session!,
+      exactOrders[0].merchantId
+    );
+    if (!crossMerchantCheck.ok) {
+      return res
+        .status(crossMerchantCheck.status)
+        .json({ success: false, message: crossMerchantCheck.message });
     }
 
     const phone = exactOrders[0].phone;

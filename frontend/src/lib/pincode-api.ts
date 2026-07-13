@@ -67,7 +67,7 @@ export interface PincodeDetailResponse {
   message?: string;
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+const PINCODE_API = "/api/pincodes";
 
 function buildQuery(filters: PincodeIntelligenceFilters): string {
   const params = new URLSearchParams();
@@ -81,7 +81,7 @@ function buildQuery(filters: PincodeIntelligenceFilters): string {
 }
 
 export async function fetchPincodeIntelligence(filters: PincodeIntelligenceFilters = {}) {
-  const res = await fetch(`${BACKEND_URL}/api/pincodes/intelligence${buildQuery(filters)}`);
+  const res = await fetch(`${PINCODE_API}/intelligence${buildQuery(filters)}`);
   return res.json() as Promise<PincodeIntelligenceResponse>;
 }
 
@@ -93,6 +93,6 @@ export async function fetchPincodeDetail(
   if (filters.startDate) params.set("startDate", filters.startDate);
   if (filters.endDate) params.set("endDate", filters.endDate);
   const qs = params.toString();
-  const res = await fetch(`${BACKEND_URL}/api/pincodes/${pincode}/detail${qs ? `?${qs}` : ""}`);
+  const res = await fetch(`${PINCODE_API}/${pincode}/detail${qs ? `?${qs}` : ""}`);
   return res.json() as Promise<PincodeDetailResponse>;
 }

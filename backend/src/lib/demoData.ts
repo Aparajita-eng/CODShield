@@ -1,9 +1,15 @@
 import { randomUUID } from "crypto";
 import type { Blacklist, Claim, Merchant, Order, PincodeRisk } from "@prisma/client";
 
-export const DEMO_MERCHANT_ACME_ID = "a0000000-0000-4000-8000-000000000001";
 export const DEMO_MERCHANT_BETA_ID = "a0000000-0000-4000-8000-000000000002";
 export const DEMO_MERCHANT_DELTA_ID = "a0000000-0000-4000-8000-000000000003";
+
+/**
+ * Demo-only merchant UUID for the Acme Apparel seed account.
+ * Demo sessions are bound to this merchant; override via DEMO_MERCHANT_ID in backend/.env.
+ */
+export const DEMO_MERCHANT_ACME_ID =
+  process.env.DEMO_MERCHANT_ID || "a0000000-0000-4000-8000-000000000001";
 
 const merchantCreatedAt = new Date("2025-06-01T00:00:00Z");
 

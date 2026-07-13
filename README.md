@@ -32,14 +32,16 @@ npm install          # installs all dependencies for all workspaces (backend + f
 ### 2. Configure environment variables
 
 ```bash
-# Backend — PostgreSQL + SMS gateway
+# Backend — PostgreSQL, SMS gateway, CORS (FRONTEND_URL=http://localhost:3000 is pre-set)
 cp backend/.env.example backend/.env
 
 # Frontend — backend URL
 cp frontend/.env.example frontend/.env.local
 ```
 
-Edit `backend/.env` with your database URL and SMS provider keys.
+`backend/.env.example` includes `FRONTEND_URL=http://localhost:3000` for CORS — copying it to `backend/.env` (above) sets an explicit allowed origin in dev. Without `backend/.env`, the server uses permissive dev CORS (`origin: true`).
+
+Edit `backend/.env` with your database URL and SMS provider keys when using Postgres.
 
 ### 3. Set up the database
 
