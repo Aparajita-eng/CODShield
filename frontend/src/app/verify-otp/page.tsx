@@ -90,6 +90,8 @@ function VerifyOtpContent() {
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
+
     const otpCode = otp.join("");
     if (otpCode.length !== 6) return;
 

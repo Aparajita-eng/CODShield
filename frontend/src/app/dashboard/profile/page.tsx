@@ -27,9 +27,13 @@ export default function ProfilePage() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (!merchant?.id) return;
 
     // Get user email from session via auth endpoint
-    fetch("/api/settings/team")
+    fetch(`/api/settings/team?merchantId=${merchant.id}`)
       .then((r) => r.json())
       .then((d) => {
         if (d.success && d.team?.length) {
@@ -37,7 +41,7 @@ export default function ProfilePage() {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [merchant?.id]);
 
   return (
     <DashboardModuleShell
