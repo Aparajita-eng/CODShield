@@ -22,6 +22,7 @@ import { getPincodeIntelligence, getPincodeDetail } from "../controllers/pincode
 import { listFraudEvents } from "../controllers/fraudEventsController";
 import { requireSession } from "../middleware/requireSession";
 import { checkOrderRisk } from "../controllers/v1Controller";
+import { getAnalyticsData } from "../controllers/analyticsController";
 
 const router = Router();
 
@@ -70,6 +71,9 @@ router.post("/dashboard/claim-submit", requireSession, submitClaim);
 // Claims (session required)
 router.get("/claims", requireSession, listClaims);
 router.post("/claims/:claimId/notes", requireSession, updateClaimNotes);
+
+// Analytics (session required)
+router.get("/analytics", requireSession, getAnalyticsData);
 
 // Public versioned APIs (Merchant checkouts)
 router.post("/v1/orders/risk-check", checkOrderRisk);
