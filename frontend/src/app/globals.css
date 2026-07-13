@@ -107,3 +107,44 @@ input[type="range"]::-webkit-slider-thumb {
   cursor: pointer;
   box-shadow: 0 0 0 1px var(--border-default);
 }
+
+/* Table pattern — mirrors design-system/components.css using app tokens */
+.table-shell {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border-default);
+}
+
+.table-shell table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  min-width: 640px;
+}
+
+.table-shell th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-tertiary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.875rem 1.25rem;
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.table-shell td {
+  padding: 0.875rem 1.25rem;
+  color: var(--ink-primary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.table-shell tr:last-child td {
+  border-bottom: none;
+}
+
+.table-shell tbody tr:hover td {
+  background: var(--bg-raised);
+}
