@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import {
   createClaimForOrder,
   fetchClaimByOrderId,
@@ -8,33 +8,50 @@ import {
   fetchOrderById,
   fetchOrders,
 } from "../lib/dataAccess";
+import {
+  assertSessionMerchantAccess,
+  getMerchantIdsForSession,
+} from "../lib/merchantAccess";
+import { AuthenticatedRequest } from "../middleware/requireSession";
 
-export async function getDashboardData(req: Request, res: Response): Promise<any> {
+export async function getDashboardData(req: AuthenticatedRequest, res: Response): Promise<any> {
   try {
-    const merchantId = req.query.merchantId as string | undefined;
+    const session = req.session!;
+    const requestedMerchantId = req.query.merchantId as string | undefined;
+    const allowedMerchantIds = await getMerchantIdsForSession(session);
 
-    // Fetch all merchants to populate selection dropdown
-    const merchants = await fetchMerchants();
+    if (!allowedMerchantIds.length) {
+      return res.status(403).json({
+        success: false,
+        message: "No merchant account linked to this user",
+      });
+    }
+
+    const allMerchants = await fetchMerchants();
+    const merchants = allMerchants.filter((m) => allowedMerchantIds.includes(m.id));
 
     if (!merchants.length) {
       return res.json({
         success: false,
-        message: "No merchants found in database. Run seeds first."
+        message: "No merchants found for this account.",
       });
     }
 
-    // Default to the first merchant if none specified
-    const selectedMerchantId = merchantId || merchants[0].id;
+    const selectedMerchantId = requestedMerchantId || allowedMerchantIds[0];
+    const access = await assertSessionMerchantAccess(session, selectedMerchantId);
+    if (!access.ok) {
+      return res.status(access.status).json({ success: false, message: access.message });
+    }
+
     const selectedMerchant = await fetchMerchantById(selectedMerchantId);
 
     if (!selectedMerchant) {
       return res.status(404).json({
         success: false,
-        message: "Selected merchant not found"
+        message: "Selected merchant not found",
       });
     }
 
-    // Fetch orders for this merchant
     const orders = await fetchOrders({
       where: { merchantId: selectedMerchantId },
       orderBy: { createdAt: "desc" },
@@ -42,7 +59,6 @@ export async function getDashboardData(req: Request, res: Response): Promise<any
 
     const claims = await fetchClaimsForMerchant(selectedMerchantId);
 
-    // Calculate aggregated dashboard metrics
     const totalOrdersCount = orders.length;
     const protectedOrdersCount = orders.filter((o) => o.protectionStatus === "Protected").length;
     const heldOrdersCount = orders.filter((o) => o.protectionStatus === "Held").length;
@@ -71,19 +87,20 @@ export async function getDashboardData(req: Request, res: Response): Promise<any
     console.error("Dashboard data API error:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal server error occurred"
+      message: "Internal server error occurred",
     });
   }
 }
 
-export async function submitClaim(req: Request, res: Response): Promise<any> {
+export async function submitClaim(req: AuthenticatedRequest, res: Response): Promise<any> {
   try {
+    const session = req.session!;
     const { orderId, proofUrl } = req.body;
 
     if (!orderId) {
       return res.status(400).json({
         success: false,
-        message: "Order ID is required to submit a claim"
+        message: "Order ID is required to submit a claim",
       });
     }
 
@@ -92,8 +109,13 @@ export async function submitClaim(req: Request, res: Response): Promise<any> {
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: "Associated order not found in logs"
+        message: "Associated order not found in logs",
       });
+    }
+
+    const access = await assertSessionMerchantAccess(session, order.merchantId);
+    if (!access.ok) {
+      return res.status(access.status).json({ success: false, message: access.message });
     }
 
     const existingClaim = await fetchClaimByOrderId(orderId);
@@ -119,7 +141,7 @@ export async function submitClaim(req: Request, res: Response): Promise<any> {
     console.error("Dashboard claim submit error:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal server error occurred"
+      message: "Internal server error occurred",
     });
   }
 }

@@ -10,10 +10,26 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Configure CORS to allow Next.js client request origins (port 3000)
+function getAllowedOrigins(): string[] | boolean {
+  const configured = process.env.FRONTEND_URL?.split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  if (configured?.length) {
+    return configured;
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    return false;
+  }
+
+  // Dev: allow any origin; session-protected routes expect Bearer from the Next.js proxy.
+  return true;
+}
+
 app.use(
   cors({
-    origin: "*", // Or specific address, e.g. "http://localhost:3000"
+    origin: getAllowedOrigins(),
     credentials: true,
   })
 );

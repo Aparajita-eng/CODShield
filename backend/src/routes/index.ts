@@ -62,9 +62,11 @@ router.post("/sandbox/fraud-history", checkFraudHistory);
 router.post("/sandbox/merchant-ratio", checkMerchantRatio);
 router.post("/sandbox/claim", processSimulatedClaim);
 
-// Dashboard data endpoints
-router.get("/dashboard/data", getDashboardData);
-router.post("/dashboard/claim-submit", submitClaim);
+// Dashboard data endpoints (session required — see docs/SECURITY_FOLLOWUPS.md for other routes)
+router.get("/dashboard/data", requireSession, getDashboardData);
+router.post("/dashboard/claim-submit", requireSession, submitClaim);
+
+// TODO(security): protect orders, customers, pincode, and fraud/events routes — see docs/SECURITY_FOLLOWUPS.md
 
 // Public versioned APIs (Merchant checkouts)
 router.post("/v1/orders/risk-check", checkOrderRisk);

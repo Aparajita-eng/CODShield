@@ -6,6 +6,9 @@ import confetti from "canvas-confetti";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
 
+/** Session-protected dashboard APIs — proxied via Next.js so the httpOnly cookie is not sent cross-origin. */
+const DASHBOARD_API = "/api/dashboard";
+
 /** Matches the Prisma Merchant model returned by GET /api/dashboard/data */
 interface Merchant {
   id: string;
@@ -76,7 +79,9 @@ export default function Dashboard() {
   const loadDashboardData = async (merchantId: string = "", showLoading = true) => {
     if (showLoading) setLoading(true);
     try {
-      const url = merchantId ? `${BACKEND_URL}/api/dashboard/data?merchantId=${merchantId}` : `${BACKEND_URL}/api/dashboard/data`;
+      const url = merchantId
+        ? `${DASHBOARD_API}/data?merchantId=${merchantId}`
+        : `${DASHBOARD_API}/data`;
       const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
@@ -98,7 +103,7 @@ export default function Dashboard() {
     let active = true;
     (async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/api/dashboard/data`);
+        const res = await fetch(`${DASHBOARD_API}/data`);
         const data = await res.json();
         if (!active) return;
         if (data.success) {
@@ -169,7 +174,7 @@ export default function Dashboard() {
   const handleSubmitClaim = async (orderId: string) => {
     setClaimError("");
     try {
-      const res = await fetch(`${BACKEND_URL}/api/dashboard/claim-submit`, {
+      const res = await fetch(`${DASHBOARD_API}/claim-submit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId }),
