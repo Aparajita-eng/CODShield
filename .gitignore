@@ -31,3 +31,6 @@ frontend/.env.production
 .idea/
 *.swp
 *.swo
+
+# Local Render blueprint (not committed)
+render.yaml
