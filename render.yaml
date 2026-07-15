@@ -39,6 +39,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      # Set these in the Render dashboard:
-      # NEXT_PUBLIC_BACKEND_URL  →  https://codshield-backend.onrender.com
-      # SESSION_SECRET           →  (same value as backend SESSION_SECRET)
+      - key: NEXT_PUBLIC_BACKEND_URL
+        value: https://codshield-backend.onrender.com
+      - key: SESSION_SECRET
+        value: 81e9d25d967e6e542f359925d20025b07cbec07aab2cccf2d6643448080fe6e10387515a420d4a48ce8e015beef9b6a3a52e1f32c3d61230f76aa910c35aef57
