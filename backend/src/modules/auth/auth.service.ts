@@ -146,8 +146,11 @@ export class AuthService {
       throw new ConflictException('A user with this email address is already registered.');
     }
 
-    const existingMerchant = await this.prisma.merchant.findFirst({ where: { name: trimmedCompany } });
-    if (existingMerchant) {
+    const existingMerchant = await this.prisma.merchant.findFirst({
+      where: { name: trimmedCompany },
+      include: { users: { take: 1 } }
+    });
+    if (existingMerchant && existingMerchant.users.length > 0) {
       throw new ConflictException('A merchant account with this company name already exists.');
     }
 
@@ -163,9 +166,11 @@ export class AuthService {
     const userRole = validRoles.includes(role) ? role : 'Owner';
 
     const { user } = await this.prisma.$transaction(async (tx) => {
-      const merchant = await tx.merchant.create({
-        data: { name: trimmedCompany, apiKeyHash, apiKeyMask, tier: 'Starter', claimRatio: 0 }
-      });
+      const merchant = existingMerchant
+        ? existingMerchant
+        : await tx.merchant.create({
+            data: { name: trimmedCompany, apiKeyHash, apiKeyMask, tier: 'Starter', claimRatio: 0 }
+          });
 
       const user = await tx.user.create({
         data: {
