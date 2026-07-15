@@ -62,9 +62,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         if (d.success && d.selectedMerchant) {
           setMerchantName(d.selectedMerchant.name);
           setMerchantTier(d.selectedMerchant.tier);
+        } else {
+          setMerchantName("Guest");
+          setMerchantTier("Unregistered");
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        setMerchantName("Guest");
+        setMerchantTier("Unregistered");
+      });
   }, []);
 
   const closeMobileSidebar = () => {

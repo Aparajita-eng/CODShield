@@ -11,6 +11,7 @@ function VerifyOtpContent() {
   const router = useRouter();
   const phoneFromQuery = searchParams.get("phone") || "+91 9876543210";
   const codeFromQuery = searchParams.get("code") || "";
+  const rememberFromQuery = searchParams.get("remember") === "true";
   const [otp, setOtp] = useState<string[]>(() => {
     const digits = codeFromQuery.replace(/\D/g, "").slice(0, 6).split("");
     return digits.length === 6 ? digits : ["", "", "", "", "", ""];
@@ -106,7 +107,7 @@ function VerifyOtpContent() {
       const res = await fetch("/api/otp/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: phoneFromQuery, code: otpCode }),
+        body: JSON.stringify({ phone: phoneFromQuery, code: otpCode, rememberMe: rememberFromQuery }),
       });
       const data = await res.json();
 

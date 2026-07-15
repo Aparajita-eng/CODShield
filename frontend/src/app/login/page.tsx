@@ -64,8 +64,8 @@ export default function LoginPage() {
         const data = await res.json();
         if (data.success) {
           const nextUrl = data.simulated && data.code
-            ? `/verify-otp?phone=${encodeURIComponent(phone)}&code=${encodeURIComponent(data.code)}`
-            : `/verify-otp?phone=${encodeURIComponent(phone)}`;
+            ? `/verify-otp?phone=${encodeURIComponent(phone)}&code=${encodeURIComponent(data.code)}&remember=${rememberMe}`
+            : `/verify-otp?phone=${encodeURIComponent(phone)}&remember=${rememberMe}`;
           router.push(nextUrl);
         } else {
           setErrors({ phone: data.message || "Failed to send OTP" });
@@ -205,18 +205,7 @@ export default function LoginPage() {
                   ) : null}
                 </div>
 
-                {/* Remember Me */}
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-border-default text-accent focus:ring-accent bg-bg-raised"
-                    />
-                    <span className="text-xs text-ink-secondary">Remember me</span>
-                  </label>
-                </div>
+
               </>
             ) : (
               <>
@@ -245,6 +234,19 @@ export default function LoginPage() {
                 </div>
               </>
             )}
+
+            {/* Remember Me */}
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded border-border-default text-accent focus:ring-accent bg-bg-raised"
+                />
+                <span className="text-xs text-ink-secondary">Remember me</span>
+              </label>
+            </div>
 
             {/* Primary Button */}
             <button
