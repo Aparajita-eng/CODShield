@@ -14,8 +14,20 @@ services:
       # Set these in the Render dashboard (sensitive values):
       # DATABASE_URL, JWT_SECRET, REFRESH_SECRET, SESSION_SECRET,
       # TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER,
-      # SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS,
-      # FRONTEND_URL
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: 465
+      - key: SMTP_SECURE
+        value: true
+      - key: SMTP_USER
+        value: info@veritonaitechnologies.com
+      - key: SMTP_PASS
+        value: SpokenPro1@123
+      - key: BOOKING_EMAIL
+        value: info@veritonaitechnologies.com
+      - key: BOOKING_EMAIL_FROM
+        value: "CODShield <info@veritonaitechnologies.com>"
 
   # ─── Frontend (Next.js) ─────────────────────────────────────────────────────
   - type: web
