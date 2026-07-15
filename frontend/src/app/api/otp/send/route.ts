@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     
     const data = await res.json();
     return Response.json(data, { status: res.status });
-  } catch (error) {
+  } catch {
     return Response.json(
       { success: false, message: "Failed to reach backend" },
       { status: 500 }

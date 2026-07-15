@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   Bar,
@@ -63,29 +63,48 @@ export default function ClaimsPage() {
   const [savingNotes, setSavingNotes] = useState(false);
   const [saveNotesSuccess, setSaveNotesSuccess] = useState(false);
 
-  const loadClaims = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const data = await fetchClaims();
-      if (!data.success || !data.claims) {
-        setError(data.message || "Failed to load claims");
-        setClaims([]);
-        return;
-      }
-      setClaims(data.claims);
-      setSelectedId((prev) => prev ?? data.claims![0]?.id ?? null);
-    } catch {
-      setError("Network error loading claims");
-      setClaims([]);
-    } finally {
-      setLoading(false);
+  const handleSelectClaim = (claimId: string) => {
+    setSelectedId(claimId);
+    const claim = claims.find((c) => c.id === claimId);
+    if (claim) {
+      setEditingNotes(claim.notes ?? "");
+      setSaveNotesSuccess(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
-    loadClaims();
-  }, [loadClaims]);
+    let active = true;
+    async function initClaims() {
+      try {
+        const data = await fetchClaims();
+        if (!active) return;
+        if (!data.success || !data.claims) {
+          setError(data.message || "Failed to load claims");
+          setClaims([]);
+          return;
+        }
+        setClaims(data.claims);
+        const selId = data.claims[0]?.id ?? null;
+        setSelectedId(selId);
+        if (selId) {
+          const claim = data.claims.find((c) => c.id === selId);
+          if (claim) {
+            setEditingNotes(claim.notes ?? "");
+          }
+        }
+      } catch {
+        if (!active) return;
+        setError("Network error loading claims");
+        setClaims([]);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    initClaims();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const filteredClaims = useMemo(
     () =>
@@ -101,15 +120,6 @@ export default function ClaimsPage() {
     () => filteredClaims.find((c) => c.id === selectedId) ?? filteredClaims[0] ?? null,
     [filteredClaims, selectedId]
   );
-
-  useEffect(() => {
-    if (selectedClaim) {
-      setEditingNotes(selectedClaim.notes ?? "");
-      setSaveNotesSuccess(false);
-    } else {
-      setEditingNotes("");
-    }
-  }, [selectedClaim]);
 
   const statusChartData = useMemo(
     () => claimsByStatusChartData(filteredClaims),
@@ -157,9 +167,15 @@ export default function ClaimsPage() {
             </span>
             <select
               value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(e.target.value as (typeof CLAIM_STATUS_OPTIONS)[number])
-              }
+              onChange={(e) => {
+                const newFilter = e.target.value as (typeof CLAIM_STATUS_OPTIONS)[number];
+                setStatusFilter(newFilter);
+                const nextFiltered = filterClaims(claims, { status: newFilter, timeline: timelineFilter, search });
+                const nextClaim = nextFiltered[0] ?? null;
+                setSelectedId(nextClaim?.id ?? null);
+                setEditingNotes(nextClaim?.notes ?? "");
+                setSaveNotesSuccess(false);
+              }}
               className="h-9 rounded-lg border border-border-default bg-bg-base px-3 text-xs text-ink-primary focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             >
               {CLAIM_STATUS_OPTIONS.map((opt) => (
@@ -179,23 +195,39 @@ export default function ClaimsPage() {
               <input
                 type="search"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Order ID or customer phone"
-                className="w-full h-9 pl-9 pr-3 rounded-lg border border-border-default bg-bg-base text-xs text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
-              />
-            </div>
+                onChange={(e) => {
+                const newSearch = e.target.value;
+                setSearch(newSearch);
+                const nextFiltered = filterClaims(claims, { status: statusFilter, timeline: timelineFilter, search: newSearch });
+                const nextClaim = nextFiltered[0] ?? null;
+                setSelectedId(nextClaim?.id ?? null);
+                setEditingNotes(nextClaim?.notes ?? "");
+                setSaveNotesSuccess(false);
+              }}
+              placeholder="Order ID or customer phone"
+              className="w-full h-9 pl-9 pr-3 rounded-lg border border-border-default bg-bg-base text-xs text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+            />
           </div>
+        </div>
 
-          <div className="flex flex-col gap-1.5">
-            <span className="text-[11px] font-semibold text-ink-tertiary uppercase tracking-wide">
-              Submitted
-            </span>
-            <div className="flex flex-wrap gap-1.5">
-              {TIMELINE_OPTIONS.map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setTimelineFilter(opt.value)}
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[11px] font-semibold text-ink-tertiary uppercase tracking-wide">
+            Submitted
+          </span>
+          <div className="flex flex-wrap gap-1.5">
+            {TIMELINE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  const newTimeline = opt.value;
+                  setTimelineFilter(newTimeline);
+                  const nextFiltered = filterClaims(claims, { status: statusFilter, timeline: newTimeline, search });
+                  const nextClaim = nextFiltered[0] ?? null;
+                  setSelectedId(nextClaim?.id ?? null);
+                  setEditingNotes(nextClaim?.notes ?? "");
+                  setSaveNotesSuccess(false);
+                }}
                   className={`px-2.5 py-1.5 rounded-md text-xs font-semibold border transition-colors ${
                     timelineFilter === opt.value
                       ? "bg-accent-muted border-accent/30 text-accent"
@@ -319,7 +351,7 @@ export default function ClaimsPage() {
                     {filteredClaims.map((claim) => (
                       <tr
                         key={claim.id}
-                        onClick={() => setSelectedId(claim.id)}
+                        onClick={() => handleSelectClaim(claim.id)}
                         className={`cursor-pointer ${
                           selectedClaim?.id === claim.id ? "bg-accent-muted/40" : ""
                         }`}

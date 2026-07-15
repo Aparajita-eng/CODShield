@@ -4,7 +4,7 @@
   "description": "CODShield — COD Trust Infrastructure for E-Commerce. Monorepo containing backend API server and Next.js frontend.",
   "private": true,
   "scripts": {
-    "dev": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\" \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "dev": "concurrently --names \"BACKEND,FRONTEND\" --prefix-colors \"blue,green\" \"npm run dev --prefix backend\" \"cd frontend && npm run dev\"",
     "dev:backend": "npm run dev --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
     "install:all": "npm install",
@@ -21,5 +21,9 @@
   "workspaces": [
     "backend",
     "frontend"
-  ]
+  ],
+  "overrides": {
+    "postcss": "^8.5.10",
+    "d3-color": "^3.1.0"
+  }
 }

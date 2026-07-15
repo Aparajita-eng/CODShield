@@ -7,7 +7,13 @@ export const SESSION_MAX_AGE_LONG = 60 * 60 * 24 * 30;   // 30 days
 export const REFRESH_MAX_AGE = 60 * 60 * 24 * 7;         // 7 days
 
 function getSecret(): Uint8Array {
-  const secret = process.env.SESSION_SECRET || process.env.NEXT_PUBLIC_SESSION_SECRET || "codshield-dev-session-secret";
+  if (typeof window !== "undefined") {
+    throw new Error("Security Error: JWT secret retrieval attempted on client-side.");
+  }
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    throw new Error("Missing SESSION_SECRET environment variable.");
+  }
   return new TextEncoder().encode(secret);
 }
 

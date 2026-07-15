@@ -22,6 +22,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiHeader } from '@nestjs/swagger';
 
 import { Roles } from '../auth/roles.decorator';
+import { Public } from '../auth/public.decorator';
 
 @ApiTags('Orders')
 @Controller()
@@ -121,6 +122,7 @@ export class OrderController {
   }
 
   @Post('api/v1/orders/risk-check')
+  @Public()  // Uses x-api-key header auth, not session token
   @ApiOperation({ summary: 'Evaluate checkout risk assessment' })
   @ApiHeader({ name: 'x-api-key', description: 'Merchant public API Key', required: true })
   async processRiskCheck(

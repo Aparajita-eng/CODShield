@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, ChevronRight, Mail, Phone, Lock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, ChevronRight, Phone, Lock, AlertCircle } from "lucide-react";
 
 interface FormErrors {
   email?: string;
@@ -63,7 +63,10 @@ export default function LoginPage() {
         });
         const data = await res.json();
         if (data.success) {
-          router.push(`/verify-otp?phone=${encodeURIComponent(phone)}`);
+          const nextUrl = data.simulated && data.code
+            ? `/verify-otp?phone=${encodeURIComponent(phone)}&code=${encodeURIComponent(data.code)}`
+            : `/verify-otp?phone=${encodeURIComponent(phone)}`;
+          router.push(nextUrl);
         } else {
           setErrors({ phone: data.message || "Failed to send OTP" });
         }

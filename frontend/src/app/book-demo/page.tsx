@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 
 interface FormErrors {
   name?: string;
@@ -76,7 +76,7 @@ export default function BookDemoPage() {
       } else {
         setSuccess(true);
         setFormMessage(
-          "Your demo booking request has been received. A confirmation email will be sent to you and info@veritonaitechnologies.com."
+          "Your demo booking request has been received. Confirmation emails have been sent to you and to the company team."
         );
         setName("");
         setEmail("");
@@ -85,7 +85,7 @@ export default function BookDemoPage() {
         setPreferredTime("");
         setMessage("");
       }
-    } catch (error) {
+    } catch {
       setFormMessage("Network error. Please try again in a few moments.");
       setSuccess(false);
     } finally {

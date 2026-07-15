@@ -402,5 +402,5 @@ export function bulkUpdateDemoOrders(orderIds: string[], action: BulkOrderAction
 }
 
 export function isDemoDataMode(): boolean {
-  return process.env.CODSHIELD_DEMO_MODE === 'true' || !process.env.DATABASE_URL?.trim();
+  return process.env.CODSHIELD_DEMO_MODE === 'true';
 }

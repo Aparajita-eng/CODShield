@@ -10,7 +10,11 @@ function VerifyOtpContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const phoneFromQuery = searchParams.get("phone") || "+91 9876543210";
-  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
+  const codeFromQuery = searchParams.get("code") || "";
+  const [otp, setOtp] = useState<string[]>(() => {
+    const digits = codeFromQuery.replace(/\D/g, "").slice(0, 6).split("");
+    return digits.length === 6 ? digits : ["", "", "", "", "", ""];
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [countdown, setCountdown] = useState(30);
   const [showError, setShowError] = useState(false);
@@ -197,7 +201,6 @@ function VerifyOtpContent() {
                 <p className="text-sm text-ink-secondary mb-6">
                   We&apos;ve sent a 6-digit code to <span className="font-semibold text-ink-primary">{maskedPhone(phoneFromQuery)}</span>.
                 </p>
-
                 <form onSubmit={handleVerify} className="space-y-4">
                   {/* OTP Inputs */}
                   <div className="space-y-2">

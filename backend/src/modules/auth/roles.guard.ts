@@ -1,6 +1,7 @@
-import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PrismaService } from '../prisma/prisma.service';
+import { IS_PUBLIC_KEY } from './public.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -10,17 +11,30 @@ export class RolesGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    // Skip on @Public() routes — AuthGuard already allowed them through
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (isPublic) {
+      return true;
+    }
+
     const requiredRoles = this.reflector.getAllAndOverride<string[]>('roles', [
       context.getHandler(),
       context.getClass(),
     ]);
     if (!requiredRoles) {
+      // No role restriction beyond authentication (which AuthGuard already enforced)
       return true;
     }
+
+    // AuthGuard runs first and attaches the verified session — read it directly
     const request = context.switchToHttp().getRequest();
     const session = request.session;
     if (!session) {
-      return false;
+      // Should not reach here in normal flow; AuthGuard would have blocked first
+      throw new UnauthorizedException('Unauthorized: Authentication required');
     }
 
     let role = 'Viewer'; // default fallback
@@ -49,4 +63,6 @@ export class RolesGuard implements CanActivate {
     }
     return true;
   }
+
 }
+

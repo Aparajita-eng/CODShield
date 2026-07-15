@@ -8,13 +8,25 @@ export const SESSION_TTL_SHORT = "1d";
 export const SESSION_TTL_LONG = "30d";
 
 function getSecret(): Uint8Array {
-  const secret = process.env.SESSION_SECRET || "codshield-dev-session-secret";
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    if (process.env.CODSHIELD_DEMO_MODE === 'true') {
+      return new TextEncoder().encode("codshield-dev-session-secret");
+    }
+    throw new Error("Missing SESSION_SECRET environment variable in production mode.");
+  }
   return new TextEncoder().encode(secret);
 }
 
 function getRefreshSecret(): Uint8Array {
-  const secret = (process.env.SESSION_SECRET || "codshield-dev-session-secret") + ":refresh";
-  return new TextEncoder().encode(secret);
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    if (process.env.CODSHIELD_DEMO_MODE === 'true') {
+      return new TextEncoder().encode("codshield-dev-session-secret:refresh");
+    }
+    throw new Error("Missing SESSION_SECRET environment variable in production mode.");
+  }
+  return new TextEncoder().encode(secret + ":refresh");
 }
 
 export function hashPassword(password: string): string {

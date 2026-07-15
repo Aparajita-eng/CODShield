@@ -15,33 +15,54 @@ export class BookDemoService {
     }
 
     const normalizedEmail = email.trim().toLowerCase();
-    const recipients = [this.targetEmail, normalizedEmail];
 
-    const html = `
-      <div style="font-family: system-ui, sans-serif; color: #111827;">
+    const userHtml = `
+      <div style="font-family: system-ui, sans-serif; color: #111827; line-height: 1.6;">
+        <h2>Your CODShield demo booking is confirmed</h2>
+        <p>Hi ${this.escapeHtml(name)},</p>
+        <p>Thanks for booking a live demo with CODShield. We’ve received your request and scheduled it for:</p>
+        <p style="font-size: 16px; font-weight: 700; margin: 16px 0;">${this.escapeHtml(preferredTime)}</p>
+        <p><strong>Company:</strong> ${this.escapeHtml(company || '—')}</p>
+        <p><strong>Phone:</strong> ${this.escapeHtml(phone || '—')}</p>
+        <p><strong>Notes:</strong> ${this.escapeHtml(message || 'None')}</p>
+        <p>Our team will review the slot and contact you if any adjustment is needed.</p>
+      </div>
+    `;
+
+    const companyHtml = `
+      <div style="font-family: system-ui, sans-serif; color: #111827; line-height: 1.6;">
         <h2>New Demo Booking Request</h2>
+        <p>A new live demo request has been submitted.</p>
         <p><strong>Name:</strong> ${this.escapeHtml(name)}</p>
         <p><strong>Email:</strong> ${this.escapeHtml(normalizedEmail)}</p>
         <p><strong>Company:</strong> ${this.escapeHtml(company || '—')}</p>
         <p><strong>Phone:</strong> ${this.escapeHtml(phone || '—')}</p>
         <p><strong>Preferred time slot:</strong> ${this.escapeHtml(preferredTime)}</p>
         <p><strong>Notes:</strong> ${this.escapeHtml(message || 'None')}</p>
-        <p>
-          This request was sent to both the customer and ${this.escapeHtml(this.targetEmail)}.
-        </p>
       </div>
     `;
 
     try {
-      const mailResult = await sendMail({
-        from: this.fromEmail,
-        to: recipients,
-        subject: `Demo booking request from ${name}`,
-        html,
-      });
+      const [userMailResult, companyMailResult] = await Promise.all([
+        sendMail({
+          from: this.fromEmail,
+          to: normalizedEmail,
+          subject: `Your CODShield demo is scheduled for ${preferredTime}`,
+          html: userHtml,
+        }),
+        sendMail({
+          from: this.fromEmail,
+          to: this.targetEmail,
+          subject: `Demo booking request from ${name} (${preferredTime})`,
+          html: companyHtml,
+        }),
+      ]);
 
-      if (!mailResult || (mailResult as any).success !== true) {
-        console.error('Book demo mailer error:', mailResult);
+      const userSuccess = (userMailResult as any)?.success === true;
+      const companySuccess = (companyMailResult as any)?.success === true;
+
+      if (!userSuccess || !companySuccess) {
+        console.error('Book demo mailer error:', { userMailResult, companyMailResult });
         throw new InternalServerErrorException('Failed to send booking email');
       }
 

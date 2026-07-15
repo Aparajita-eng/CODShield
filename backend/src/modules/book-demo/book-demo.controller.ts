@@ -1,6 +1,8 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { BookDemoService } from './book-demo.service';
+import { Public } from '../auth/public.decorator';
 
+@Public()
 @Controller('api/book-demo')
 export class BookDemoController {
   constructor(private readonly bookDemoService: BookDemoService) {}

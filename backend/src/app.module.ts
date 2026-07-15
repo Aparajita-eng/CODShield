@@ -13,6 +13,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { BookDemoModule } from './modules/book-demo/book-demo.module';
 
 import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './modules/auth/auth.guard';
 import { RolesGuard } from './modules/auth/roles.guard';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
@@ -38,11 +39,15 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
   providers: [
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,  // B-14: enforce rate limits globally
+      useClass: ThrottlerGuard,  // Rate limits globally
     },
     {
       provide: APP_GUARD,
-      useClass: RolesGuard,      // B-13: enforce roles globally
+      useClass: AuthGuard,       // Authentication globally; @Public() bypasses
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,      // Role enforcement globally; @Public() bypasses
     },
   ],
 })

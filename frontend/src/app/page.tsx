@@ -98,11 +98,7 @@ export default function Home() {
     return "text-red-600 stroke-red-600 bg-red-50 border-red-100";
   };
 
-  const getRiskBadgeColor = (score: number) => {
-    if (score < 30) return "bg-emerald-100 text-emerald-800 border-emerald-200";
-    if (score < 60) return "bg-amber-100 text-amber-800 border-amber-200";
-    return "bg-red-100 text-red-800 border-red-200";
-  };
+
 
   return (
     <>

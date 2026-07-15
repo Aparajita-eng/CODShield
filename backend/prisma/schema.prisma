@@ -73,3 +73,21 @@ model Claim {
   notes     String?
   createdAt DateTime @default(now())
 }
+
+model VerifiedPhone {
+  phone     String   @id
+  expiresAt DateTime
+}
+
+model OtpAttempt {
+  phone          String   @id
+  attempts       Int      @default(0)
+  firstAttemptAt DateTime @default(now())
+}
+
+model PasswordResetToken {
+  tokenHash String   @id
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

@@ -17,6 +17,7 @@ import {
   EyeOff,
   CheckCircle,
   AlertTriangle,
+  type LucideIcon,
 } from "lucide-react";
 import DashboardModuleShell from "@/components/DashboardModuleShell";
 import {
@@ -44,7 +45,7 @@ type TabId =
 interface TabOption {
   id: TabId;
   label: string;
-  icon: any;
+  icon: LucideIcon;
 }
 
 const TAB_OPTIONS: TabOption[] = [
@@ -66,7 +67,6 @@ export default function SettingsPage() {
   const [errorMsg, setErrorMsg] = useState("");
 
   // Shared loaded state (from /api/dashboard/data)
-  const [merchantName, setMerchantName] = useState("");
   const [merchantTier, setMerchantTier] = useState("Starter");
   const [apiKeyMask, setApiKeyMask] = useState("");
   const [selectedMerchantId, setSelectedMerchantId] = useState("");
@@ -97,6 +97,12 @@ export default function SettingsPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const handleTabChange = (tabId: TabId) => {
+    setActiveTab(tabId);
+    setSuccessMsg("");
+    setErrorMsg("");
+  };
+
   // Load initial merchant data
   useEffect(() => {
     async function loadInitialData() {
@@ -105,7 +111,6 @@ export default function SettingsPage() {
         const json = await res.json();
         if (json.success && json.selectedMerchant) {
           const m = json.selectedMerchant;
-          setMerchantName(m.name);
           setCompanyName(m.name);
           setMerchantTier(m.tier);
           setApiKeyMask(m.apiKeyMask);
@@ -120,37 +125,29 @@ export default function SettingsPage() {
 
   // Fetch webhooks & team on tab changes
   useEffect(() => {
+    let active = true;
     if (activeTab === "team" && selectedMerchantId) {
-      void loadTeam();
+      fetchTeam(selectedMerchantId)
+        .then((res) => {
+          if (active && res.success && res.team) {
+            setTeamMembers(res.team);
+          }
+        })
+        .catch(console.error);
     } else if (activeTab === "webhooks" && selectedMerchantId) {
-      void loadWebhookConfig();
+      fetchWebhooks(selectedMerchantId)
+        .then((res) => {
+          if (active && res.success && res.webhook) {
+            setWebhookUrl(res.webhook.url);
+            setWebhookEvents(res.webhook.events);
+          }
+        })
+        .catch(console.error);
     }
-    setSuccessMsg("");
-    setErrorMsg("");
+    return () => {
+      active = false;
+    };
   }, [activeTab, selectedMerchantId]);
-
-  const loadTeam = async () => {
-    try {
-      const res = await fetchTeam(selectedMerchantId);
-      if (res.success && res.team) {
-        setTeamMembers(res.team);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const loadWebhookConfig = async () => {
-    try {
-      const res = await fetchWebhooks(selectedMerchantId);
-      if (res.success && res.webhook) {
-        setWebhookUrl(res.webhook.url);
-        setWebhookEvents(res.webhook.events);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   // Actions
   const handleSaveCompany = async (e: React.FormEvent) => {
@@ -168,7 +165,7 @@ export default function SettingsPage() {
       if (res.success) {
         setSuccessMsg(res.message);
         if (res.merchant) {
-          setMerchantName(res.merchant.name);
+          setCompanyName(res.merchant.name);
         }
       } else {
         setErrorMsg(res.message);
@@ -280,7 +277,7 @@ export default function SettingsPage() {
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors shrink-0 ${
                   activeTab === tab.id
                     ? "bg-accent-muted text-accent border-l-2 border-accent"

@@ -6,6 +6,28 @@ import { isDemoDataMode } from '../../lib/demoData';
 const DEMO_EMAIL = (process.env.DEMO_USER_EMAIL || "demo@codshield.com").toLowerCase();
 const DEMO_PASSWORD = process.env.DEMO_USER_PASSWORD || "Demo@1234";
 
+interface DemoUser {
+  id: string;
+  email: string;
+  name: string;
+  companyName: string;
+  passwordHash: string;
+  phone?: string;
+  role: string;
+}
+
+export const demoUsers = new Map<string, DemoUser>();
+
+// Pre-populate with default demo user
+demoUsers.set(DEMO_EMAIL, {
+  id: 'demo-user',
+  email: DEMO_EMAIL,
+  name: 'Demo Merchant',
+  companyName: 'FastCommerce Inc.',
+  passwordHash: hashPassword(DEMO_PASSWORD),
+  role: 'Owner'
+});
+
 @Injectable()
 export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
@@ -18,17 +40,21 @@ export class AuthService {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    if (normalizedEmail === DEMO_EMAIL && password === DEMO_PASSWORD) {
-      const sessionPayload = { sub: 'demo-user', email: DEMO_EMAIL, name: 'Demo Merchant', authType: 'password' as const };
-      const token = await signSessionToken(sessionPayload);
-      const refreshToken = await signRefreshToken(sessionPayload);
-      return {
-        success: true,
-        message: "Logged in successfully",
-        token,
-        refreshToken,
-        user: { id: 'demo-user', email: DEMO_EMAIL, name: 'Demo Merchant', companyName: 'FastCommerce Inc.' }
-      };
+    // Check in-memory demo users first if in demo mode
+    if (isDemoDataMode()) {
+      const demoUser = demoUsers.get(normalizedEmail);
+      if (demoUser && verifyPassword(password, demoUser.passwordHash)) {
+        const sessionPayload = { sub: demoUser.id, email: demoUser.email, name: demoUser.name, authType: 'password' as const };
+        const token = await signSessionToken(sessionPayload);
+        const refreshToken = await signRefreshToken(sessionPayload);
+        return {
+          success: true,
+          message: "Logged in successfully",
+          token,
+          refreshToken,
+          user: { id: demoUser.id, email: demoUser.email, name: demoUser.name, companyName: demoUser.companyName }
+        };
+      }
     }
 
     try {
@@ -73,6 +99,46 @@ export class AuthService {
       } else {
         formattedPhone = trimmed;
       }
+    }
+
+    // Demo Mode registration bypass
+    if (isDemoDataMode()) {
+      if (demoUsers.has(normalizedEmail)) {
+        throw new ConflictException('A user with this email address is already registered.');
+      }
+
+      const companyExists = Array.from(demoUsers.values()).some(
+        (u) => u.companyName.toLowerCase() === trimmedCompany.toLowerCase()
+      );
+      if (companyExists) {
+        throw new ConflictException('A merchant account with this company name already exists.');
+      }
+
+      const mockUserId = `demo_user_${Date.now()}`;
+      const validRoles = ['Owner', 'Administrator', 'Viewer'];
+      const userRole = validRoles.includes(role) ? role : 'Owner';
+
+      demoUsers.set(normalizedEmail, {
+        id: mockUserId,
+        email: normalizedEmail,
+        name: fullName.trim(),
+        companyName: trimmedCompany,
+        passwordHash: hashPassword(password),
+        phone: formattedPhone,
+        role: userRole
+      });
+
+      const token = await signSessionToken(
+        { sub: mockUserId, email: normalizedEmail, name: fullName.trim(), authType: 'password' },
+        '1d'
+      );
+
+      return {
+        success: true,
+        message: "Account created successfully",
+        token,
+        user: { id: mockUserId, email: normalizedEmail, name: fullName.trim(), companyName: trimmedCompany }
+      };
     }
 
     const existingUser = await this.prisma.user.findUnique({ where: { email: normalizedEmail } });
@@ -126,5 +192,28 @@ export class AuthService {
       token,
       user: { id: user.id, email: user.email, name: user.name, companyName: user.companyName }
     };
+  }
+
+  async resetPassword(email: string, newPassword: string) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (isDemoDataMode()) {
+      const demoUser = demoUsers.get(normalizedEmail);
+      if (!demoUser) {
+        throw new ConflictException("User not found");
+      }
+      demoUser.passwordHash = hashPassword(newPassword);
+      return;
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { email: normalizedEmail } });
+    if (!user) {
+      throw new ConflictException("User not found");
+    }
+
+    await this.prisma.user.update({
+      where: { email: normalizedEmail },
+      data: { passwordHash: hashPassword(newPassword) }
+    });
   }
 }

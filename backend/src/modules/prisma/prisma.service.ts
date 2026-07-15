@@ -7,8 +7,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
     try {
       await this.$connect();
     } catch (error) {
-      process.env.CODSHIELD_DEMO_MODE = 'true';
-      console.warn('Prisma connection failed, will use demo data:', error);
+      if (process.env.CODSHIELD_DEMO_MODE === 'true') {
+        console.warn('Prisma connection failed, running in demo data mode:', error);
+      } else {
+        console.error('Database connection failed in production mode. System halting.', error);
+        throw error;
+      }
     }
   }
 }
