@@ -112,7 +112,7 @@ export class AuthController {
     let emailSent = false;
     try {
       const result = await sendMail({
-        from: process.env.RESET_EMAIL_FROM || 'CODShield <noreply@codshield.com>',
+        from: process.env.RESET_EMAIL_FROM || process.env.BOOKING_EMAIL_FROM || `CODShield <${process.env.SMTP_USER || 'noreply@codshield.com'}>`,
         to: normalizedEmail,
         subject: 'Reset your CODShield password',
         html: `<p>Click <a href="${resetLink}">here</a> to reset your password. This link expires in 30 minutes.</p>`,
