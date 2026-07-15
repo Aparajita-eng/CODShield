@@ -53,20 +53,29 @@ function ForgotPasswordContent() {
   const sendResetRequest = async () => {
     setIsLoading(true);
     setErrors({});
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
       const data = await res.json();
       if (data.success) {
         setStep("confirmation");
       } else {
         setErrors({ general: data.message || "Failed to send reset link" });
       }
-    } catch {
-      setErrors({ general: "Network error, please try again" });
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      if (err?.name === "AbortError") {
+        setErrors({ general: "Request timed out. Please try again." });
+      } else {
+        setErrors({ general: "Network error, please try again" });
+      }
     } finally {
       setIsLoading(false);
     }

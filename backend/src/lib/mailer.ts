@@ -30,6 +30,9 @@ export async function sendMail(options: MailOptions) {
           pass: process.env.SMTP_PASS,
         }
       : undefined,
+    connectionTimeout: 8000,
+    greetingTimeout: 8000,
+    socketTimeout: 10000,
   });
 
   const info = await transporter.sendMail({
