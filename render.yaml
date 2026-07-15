@@ -28,6 +28,20 @@ services:
         value: info@veritonaitechnologies.com
       - key: BOOKING_EMAIL_FROM
         value: "CODShield <info@veritonaitechnologies.com>"
+      - key: FRONTEND_URL
+        value: https://codshield-frontend.onrender.com
+      - key: SESSION_SECRET
+        value: 81e9d25d967e6e542f359925d20025b07cbec07aab2cccf2d6643448080fe6e10387515a420d4a48ce8e015beef9b6a3a52e1f32c3d61230f76aa910c35aef57
+      - key: DATABASE_URL
+        value: "postgresql://postgres.rjndvotnxrrmzphkkoyp:SpokenPro1%40123@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true&sslmode=require"
+      - key: DIRECT_URL
+        value: "postgresql://postgres:SpokenPro1%40123@db.rjndvotnxrrmzphkkoyp.supabase.co:5432/postgres"
+      - key: CODSHIELD_DEMO_MODE
+        value: false
+      - key: TWOFACTOR_API_KEY
+        value: 401ff8db-7aaf-11f1-803e-0200cd936042
+      - key: DEV_OTP_BYPASS
+        value: "123456"
 
   # ─── Frontend (Next.js) ─────────────────────────────────────────────────────
   - type: web
