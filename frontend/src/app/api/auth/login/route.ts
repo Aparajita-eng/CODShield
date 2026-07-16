@@ -33,7 +33,8 @@ export async function POST(request: Request) {
     }
 
     return response;
-  } catch {
+  } catch (error) {
+    console.error("Login fetch error details:", error);
     return NextResponse.json(
       { success: false, message: "Failed to reach backend" },
       { status: 500 }
