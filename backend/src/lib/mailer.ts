@@ -6,10 +6,11 @@ type MailOptions = {
   subject: string;
   html?: string;
   text?: string;
+  attachments?: any[];
 };
 
 export async function sendMail(options: MailOptions) {
-  const { from, to, subject, html, text } = options;
+  const { from, to, subject, html, text, attachments } = options;
 
   const smtpHost = process.env.SMTP_HOST;
   if (!smtpHost) {
@@ -41,9 +42,11 @@ export async function sendMail(options: MailOptions) {
     subject,
     html,
     text,
+    attachments,
   });
 
   return { success: true, info };
 }
 
 export default sendMail;
+
