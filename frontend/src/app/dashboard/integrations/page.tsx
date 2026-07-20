@@ -289,7 +289,7 @@ function IntegrationCard({ integration, onSync, onDisconnect, syncing }: {
   const isConnected = integration.status === "CONNECTED";
   const [copied, setCopied] = useState(false);
 
-  const webhookEndpoint = `${typeof window !== "undefined" ? window.location.origin.replace("3000", "5001") : "http://localhost:5001"}/api/sandbox/orders/risk-check`;
+  const webhookEndpoint = `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001"}/api/sandbox/orders/risk-check`;
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);

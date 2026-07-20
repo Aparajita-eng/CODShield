@@ -3,7 +3,8 @@ import { cookies } from "next/headers";
 import { SESSION_COOKIE_NAME, REFRESH_COOKIE_NAME, sessionCookieOptions, refreshCookieOptions } from "@/lib/auth";
 import { requireProxySession } from "@/lib/backend-proxy";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+import { BACKEND_BASE_URL } from "@/lib/config";
+const BACKEND_URL = BACKEND_BASE_URL;
 
 export async function POST(request: Request) {
   // 1. Ensure the user has an active session before proxying

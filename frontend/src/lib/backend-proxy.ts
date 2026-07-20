@@ -1,8 +1,9 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME, REFRESH_COOKIE_NAME, verifySessionToken, sessionCookieOptions, refreshCookieOptions } from "@/lib/auth";
+import { BACKEND_BASE_URL } from "@/lib/config";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+const BACKEND_URL = BACKEND_BASE_URL;
 
 type AuthResult =
   | { ok: true; token: string }

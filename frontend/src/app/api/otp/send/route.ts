@@ -1,6 +1,9 @@
+import { BACKEND_BASE_URL } from "@/lib/config";
+
+const backendUrl = BACKEND_BASE_URL;
+
 export async function POST(request: Request) {
   const body = await request.json();
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
   
   try {
     const res = await fetch(`${backendUrl}/api/otp/send`, {

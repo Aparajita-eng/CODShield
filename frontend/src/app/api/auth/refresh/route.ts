@@ -8,7 +8,8 @@ import {
   refreshCookieOptions,
 } from "@/lib/auth";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001";
+import { BACKEND_BASE_URL } from "@/lib/config";
+const BACKEND_URL = BACKEND_BASE_URL;
 
 export async function POST() {
   const cookieStore = await cookies();
