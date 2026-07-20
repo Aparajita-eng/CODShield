@@ -369,7 +369,7 @@ export class AuthController {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
-    const sessionPayload = { sub: payload.sub, email: payload.email, phone: payload.phone, name: payload.name, authType: payload.authType };
+    const sessionPayload = { sub: payload.sub, email: payload.email, phone: payload.phone, name: payload.name, authType: payload.authType, sessionKeyVerified: payload.sessionKeyVerified };
     const newAccessToken = await signSessionToken(sessionPayload);
     const newRefreshToken = await signRefreshToken(sessionPayload);
 

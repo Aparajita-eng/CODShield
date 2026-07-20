@@ -15,7 +15,7 @@ import {
 import { OrderService } from './order.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { ReqSession } from '../auth/session.decorator';
-import { resolveActiveMerchantId } from '../../lib/merchantAccess';
+import { resolveActiveMerchantId, handleMerchantScopeError } from '../../lib/merchantAccess';
 import { hashApiKey } from '../../lib/auth';
 import { fetchMerchantById, fetchMerchantByApiKeyHash } from '../../lib/dataAccess';
 import { PrismaService } from '../prisma/prisma.service';
@@ -43,9 +43,7 @@ export class OrderController {
   ) {
     const scope = await resolveActiveMerchantId(session, queryMerchantId);
     if (!scope.ok) {
-      if (scope.status === 403) throw new ForbiddenException(scope.message);
-      if (scope.status === 401) throw new UnauthorizedException(scope.message);
-      throw new BadRequestException(scope.message);
+      handleMerchantScopeError(scope);
     }
 
     const result = await this.orderService.listOrders(scope.merchantId, query);
@@ -89,9 +87,7 @@ export class OrderController {
   ) {
     const scope = await resolveActiveMerchantId(session, queryMerchantId);
     if (!scope.ok) {
-      if (scope.status === 403) throw new ForbiddenException(scope.message);
-      if (scope.status === 401) throw new UnauthorizedException(scope.message);
-      throw new BadRequestException(scope.message);
+      handleMerchantScopeError(scope);
     }
 
     const order = await this.orderService.getOrderDetails(scope.merchantId, id);
@@ -109,9 +105,7 @@ export class OrderController {
   async bulkUpdate(@ReqSession() session: any, @Body() body: any) {
     const scope = await resolveActiveMerchantId(session, body.merchantId);
     if (!scope.ok) {
-      if (scope.status === 403) throw new ForbiddenException(scope.message);
-      if (scope.status === 401) throw new UnauthorizedException(scope.message);
-      throw new BadRequestException(scope.message);
+      handleMerchantScopeError(scope);
     }
 
     const orders = await this.orderService.bulkUpdate(scope.merchantId, body);

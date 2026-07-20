@@ -62,14 +62,17 @@ export interface OrderDetail extends Omit<Order, "timeline"> {
 const ORDERS_API = "/api/orders";
 
 export async function fetchOrders(merchantId?: string) {
-  const url = merchantId ? `${ORDERS_API}?merchantId=${merchantId}` : ORDERS_API;
+  const buster = `_cb=${Date.now()}`;
+  const base = merchantId ? `${ORDERS_API}?merchantId=${merchantId}` : ORDERS_API;
+  const url = `${base}${base.includes("?") ? "&" : "?"}${buster}`;
   const res = await fetch(url);
   return res.json() as Promise<{
     success: boolean;
-    orders: Order[];
-    merchants: { id: string; name: string }[];
-    selectedMerchantId: string;
+    orders?: Order[];
+    merchants?: { id: string; name: string }[];
+    selectedMerchantId?: string;
     message?: string;
+    code?: string;
   }>;
 }
 

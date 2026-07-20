@@ -109,8 +109,8 @@ export class PincodeService {
       date: o.createdAt.toISOString(),
       value: o.value,
       status: o.fulfillmentStatus,
-      riskScore: o.riskScore,
-      riskLevel: getRiskLevel(o.riskScore),
+      riskScore: o.riskScore ?? 0,
+      riskLevel: getRiskLevel(o.riskScore ?? 0),
       fraudFlagged: o.fraudFlagged,
     }));
 

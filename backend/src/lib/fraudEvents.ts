@@ -1,5 +1,27 @@
 import { Blacklist, Order } from "@prisma/client";
 
+// Legacy-compatible view of Order: these fields are nullable in V4 schema
+// but the fraud analysis layer was written assuming they are always present.
+// Use ?? fallbacks at access sites to keep this file working without rewrites.
+type LegacyOrder = Omit<Order, 'phone'|'pincode'|'riskScore'|'statusReason'|'fulfillmentStatus'> & {
+  phone: string;
+  pincode: string;
+  riskScore: number;
+  statusReason: string;
+  fulfillmentStatus: string;
+};
+
+function toLegacy(o: Order): LegacyOrder {
+  return {
+    ...o,
+    phone: o.phone ?? "",
+    pincode: o.pincode ?? "",
+    riskScore: o.riskScore ?? 0,
+    statusReason: o.statusReason ?? "",
+    fulfillmentStatus: o.fulfillmentStatus ?? "",
+  };
+}
+
 export type FraudSeverity = "Low" | "Medium" | "High";
 export type InvestigationStatus =
   | "Open"
@@ -32,7 +54,7 @@ export interface FraudEvent {
 
 const FRAUD_CLUSTER_RE = /\[cluster:([^\]]+)\]/i;
 
-function extractClusterId(order: Order): string | null {
+function extractClusterId(order: LegacyOrder): string | null {
   const match = order.statusReason.match(FRAUD_CLUSTER_RE);
   return match ? match[1].trim() : null;
 }
@@ -47,7 +69,7 @@ function severityFromScore(score: number): FraudSeverity {
   return "High";
 }
 
-function mapOrder(order: Order): LinkedOrderSummary {
+function mapOrder(order: LegacyOrder): LinkedOrderSummary {
   return {
     id: order.id,
     phone: order.phone,
@@ -59,7 +81,7 @@ function mapOrder(order: Order): LinkedOrderSummary {
   };
 }
 
-function deriveInvestigationStatus(orders: Order[]): InvestigationStatus {
+function deriveInvestigationStatus(orders: LegacyOrder[]): InvestigationStatus {
   if (!orders.length) return "Monitoring";
 
   const anyFraud = orders.some((o) => o.fraudFlagged);
@@ -87,8 +109,8 @@ function clusterLabel(clusterId: string): string {
     .join(" ");
 }
 
-function groupOrdersByPhone(orders: Order[]): Map<string, Order[]> {
-  const map = new Map<string, Order[]>();
+function groupOrdersByPhone(orders: LegacyOrder[]): Map<string, LegacyOrder[]> {
+  const map = new Map<string, LegacyOrder[]>();
   for (const order of orders) {
     const list = map.get(order.phone) ?? [];
     list.push(order);
@@ -97,13 +119,14 @@ function groupOrdersByPhone(orders: Order[]): Map<string, Order[]> {
   return map;
 }
 
-export function buildFraudEvents(orders: Order[], blacklists: Blacklist[]): FraudEvent[] {
+export function buildFraudEvents(rawOrders: Order[], blacklists: Blacklist[]): FraudEvent[] {
+  const orders = rawOrders.map(toLegacy);
   const events: FraudEvent[] = [];
   const ordersByPhone = groupOrdersByPhone(orders);
   const ordersInCluster = new Set<string>();
 
   // Documented fraud-cluster links (Trust Graph investigation output)
-  const byCluster = new Map<string, Order[]>();
+  const byCluster = new Map<string, LegacyOrder[]>();
   for (const order of orders) {
     const clusterId = extractClusterId(order);
     if (!clusterId) continue;

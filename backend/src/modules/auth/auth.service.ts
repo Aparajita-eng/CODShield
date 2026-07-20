@@ -44,7 +44,7 @@ export class AuthService {
     if (isDemoDataMode()) {
       const demoUser = demoUsers.get(normalizedEmail);
       if (demoUser && verifyPassword(password, demoUser.passwordHash)) {
-        const sessionPayload = { sub: demoUser.id, email: demoUser.email, name: demoUser.name, authType: 'password' as const };
+        const sessionPayload = { sub: demoUser.id, email: demoUser.email, name: demoUser.name, authType: 'password' as const, sessionKeyVerified: true };
         const token = await signSessionToken(sessionPayload);
         const refreshToken = await signRefreshToken(sessionPayload);
         return {
@@ -129,7 +129,7 @@ export class AuthService {
       });
 
       const token = await signSessionToken(
-        { sub: mockUserId, email: normalizedEmail, name: fullName.trim(), authType: 'password' },
+        { sub: mockUserId, email: normalizedEmail, name: fullName.trim(), authType: 'password', sessionKeyVerified: true },
         '1d'
       );
 

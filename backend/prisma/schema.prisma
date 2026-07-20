@@ -8,6 +8,75 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum IntegrationProvider {
+  SHOPIFY
+  WOOCOMMERCE
+  MAGENTO
+  CUSTOM_API
+  DEMO
+}
+
+enum IntegrationStatus {
+  CONNECTED
+  DISCONNECTED
+  SYNCING
+  ERROR
+}
+
+enum IntegrationSyncMode {
+  PULL
+  WEBHOOK
+  MANUAL
+  PUSH
+}
+
+enum PaymentMode {
+  COD
+  PREPAID
+}
+
+enum WorkflowStage {
+  IMPORTED
+  PINCODE
+  TRUST_SCORE
+  FRAUD_CHECK
+  WHATSAPP
+  AI_CALL
+  DECISION
+  COMPLETED
+}
+
+enum OverallStatus {
+  IN_PROGRESS
+  PROTECTED
+  HELD
+  FAILED
+  CANCELLED
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  MANUAL_REVIEW
+}
+
+enum JobStatus {
+  QUEUED
+  PROCESSING
+  SUCCESS
+  FAILED
+}
+
+enum RiskDecision {
+  ALLOW_COD
+  OTP_REQUIRED
+  AI_CALL_REQUIRED
+  PREPAID_ONLY
+  BLOCK_ORDER
+  MANUAL_REVIEW
+}
+
 model User {
   id           String    @id @default(uuid())
   email        String    @unique
@@ -33,22 +102,223 @@ model Merchant {
   orders     Order[]
   users      User[]
   createdAt  DateTime @default(now())
+
+  // New Integration Scoping
+  integrations Integration[]
+  apiKeys      ApiKey[]
 }
 
+// Normalized Buyer
+model Buyer {
+  id                   String    @id @default(uuid())
+  phone                String    @unique
+  email                String?
+  name                 String
+  trustScore           Int       @default(100) // 0-100
+  totalOrders          Int       @default(0)
+  successfulDeliveries Int       @default(0)
+  rtoCount             Int       @default(0)
+  fraudCount           Int       @default(0)
+  lastOrderDate        DateTime?
+  deletedAt            DateTime?
+
+  orders               Order[]
+}
+
+// Normalized & Extended Order
 model Order {
-  id               String   @id @default(uuid())
-  merchantId       String
-  merchant         Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
-  phone            String
-  pincode          String
-  value            Float
-  riskScore        Int
-  protectionStatus String   // Protected, Held, Failed
-  fulfillmentStatus String @default("Pending") // Pending, Verified, Shipped, Delivered, RTO, Cancelled
-  fraudFlagged     Boolean  @default(false)
-  statusReason     String
-  createdAt        DateTime @default(now())
-  claims           Claim[]
+  id                 String             @id @default(uuid())
+  merchantId         String
+  merchant           Merchant           @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  buyerId            String
+  buyer              Buyer              @relation(fields: [buyerId], references: [id])
+  value              Float
+  paymentMode        PaymentMode        @default(COD)
+  currentStage       WorkflowStage      @default(IMPORTED)
+  overallStatus      OverallStatus      @default(IN_PROGRESS)
+  verificationStatus VerificationStatus @default(PENDING)
+  
+  // Integration mapping fields
+  externalOrderId    String             @default("")
+  providerOrderId    String?
+  provider           IntegrationProvider @default(DEMO)
+  integrationId      String?
+  integration        Integration?       @relation(fields: [integrationId], references: [id], onDelete: SetNull)
+
+  // Legacy compatibility fields (kept for existing service layer)
+  phone              String?
+  pincode            String?
+  riskScore          Int?
+  protectionStatus   String?
+  fulfillmentStatus  String?
+  statusReason       String?
+  fraudFlagged       Boolean            @default(false)
+  
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  deletedAt          DateTime?
+
+  // Relations
+  claims             Claim[]
+  events             OrderEvent[]
+  riskAssessments    RiskAssessment[]
+  verificationJobs   VerificationJob[]
+  items              OrderItem[]
+  shippingAddress    ShippingAddress?
+  decisions          MerchantDecision[]
+  notifications      NotificationLog[]
+}
+
+// Shipping Address Table
+model ShippingAddress {
+  id        String   @id @default(uuid())
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  name      String
+  phone     String
+  line1     String
+  line2     String?
+  city      String
+  state     String
+  country   String   @default("IN")
+  pincode   String
+}
+
+// Order Items
+model OrderItem {
+  id          String @id @default(uuid())
+  orderId     String
+  order       Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  sku         String?
+  productName String
+  quantity    Int
+  price       Float
+}
+
+// Risk Assessment Table
+model RiskAssessment {
+  id            String       @id @default(uuid())
+  orderId       String
+  order         Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  buyerScore    Int
+  pincodeScore  Int
+  velocityScore Int
+  deviceScore   Int
+  fraudScore    Int
+  decision      RiskDecision
+  createdAt     DateTime     @default(now())
+}
+
+// Order events
+model OrderEvent {
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  eventName   String   // "Imported", "WhatsApp Sent", "OTP Verified", "AI Call Failed", etc.
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+// Verification Job Queue
+model VerificationJob {
+  id          String    @id @default(uuid())
+  orderId     String
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type        String    // "WHATSAPP", "AI_CALL"
+  status      JobStatus @default(QUEUED)
+  retryCount  Int       @default(0)
+  scheduledAt DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Webhook events logger
+model WebhookEvent {
+  id          String              @id @default(uuid())
+  provider    IntegrationProvider
+  payload     String              @db.Text
+  signature   String?
+  processed   Boolean             @default(false)
+  receivedAt  DateTime            @default(now())
+}
+
+// Integration configurations
+model Integration {
+  id            String              @id @default(uuid())
+  merchantId    String
+  merchant      Merchant            @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  provider      IntegrationProvider
+  status        IntegrationStatus   @default(DISCONNECTED)
+  syncMode      IntegrationSyncMode
+  apiKey        String?
+  accessToken   String?
+  refreshToken  String?
+  storeUrl      String?
+  webhookSecret String?
+  lastSync      DateTime?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  deletedAt     DateTime?
+  
+  syncLogs      SyncLog[]
+  orders        Order[]
+
+  @@index([merchantId])
+}
+
+// Sync execution log tracking
+model SyncLog {
+  id            String      @id @default(uuid())
+  integrationId String
+  integration   Integration @relation(fields: [integrationId], references: [id], onDelete: Cascade)
+  startedAt     DateTime    @default(now())
+  completedAt   DateTime?
+  importedCount Int         @default(0)
+  skippedCount  Int         @default(0)
+  failedCount   Int         @default(0)
+  status        String      // SUCCESS, FAILED
+  durationMs    Int?
+}
+
+// Custom API key configs
+model ApiKey {
+  id          String    @id @default(uuid())
+  merchantId  String
+  merchant    Merchant  @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  name        String
+  keyHash     String    @unique
+  keyMask     String
+  prefix      String
+  lastFour    String
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  status      String    @default("ACTIVE")
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+}
+
+// Merchant Decisions
+model MerchantDecision {
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  merchantId  String
+  decision    String   // APPROVE, REJECT, HOLD, FORCE_DELIVER
+  reason      String?
+  createdAt   DateTime @default(now())
+  createdBy   String?
+}
+
+// Notification log history
+model NotificationLog {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type      String   // WHATSAPP, SMS, EMAIL, AICALL
+  provider  String   // TWILIO, 2FACTOR, MAIL
+  status    String   // SENT, DELIVERED, FAILED
+  response  String?  @db.Text
+  createdAt DateTime @default(now())
 }
 
 model PincodeRisk {
@@ -116,4 +386,3 @@ model DemoBooking {
   @@index([status])
   @@index([createdAt])
 }
-

@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   useReactTable,
   getCoreRowModel,
@@ -30,6 +30,8 @@ import {
   Calendar,
   ArrowUpDown,
   CheckCircle2,
+  Lock,
+  Key,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -93,6 +95,7 @@ const formatCurrency = (amount: number) => {
 
 function OrdersPageContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const initialSearch = searchParams.get("search") || "";
 
   const [data, setData] = useState<Order[]>([]);
@@ -109,26 +112,43 @@ function OrdersPageContent() {
   const [endDate, setEndDate] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const result = await fetchOrders();
-        if (!active) return;
-        if (result.success) {
-          setData(result.orders);
+  // Key linking states
+  const [isKeyLinkedRequired, setIsKeyLinkedRequired] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [isLinking, setIsLinking] = useState(false);
+  const [linkError, setLinkError] = useState("");
+  const [linkedMerchant, setLinkedMerchant] = useState<{ name: string; tier: string } | null>(null);
+
+  const loadOrders = async () => {
+    try {
+      setLoading(true);
+      const result = await fetchOrders();
+      if (result.success) {
+        setData(result.orders || []);
+        setIsKeyLinkedRequired(false);
+      } else {
+        // Show the API key linking overlay for:
+        // 1. Explicit KEY_NOT_LINKED code (has merchantId but sessionKeyVerified=false)
+        // 2. Plain 403 "No merchant account" (new user with no merchantId yet)
+        const needsLink =
+          result.code === "KEY_NOT_LINKED" ||
+          result.message === "No merchant account linked to this user" ||
+          result.message === "API key verification required. Please link your API key.";
+        if (needsLink) {
+          setIsKeyLinkedRequired(true);
         } else {
           setLoadError(result.message || "Failed to load orders");
         }
-      } catch {
-        if (active) setLoadError("Failed to load orders");
-      } finally {
-        if (active) setLoading(false);
       }
-    })();
-    return () => {
-      active = false;
-    };
+    } catch {
+      setLoadError("Failed to load orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadOrders();
   }, []);
 
   useEffect(() => {
@@ -141,9 +161,9 @@ function OrdersPageContent() {
       // Global search
       const matchesSearch =
         debouncedFilter === "" ||
-        order.id.toLowerCase().includes(debouncedFilter.toLowerCase()) ||
-        order.customerName.toLowerCase().includes(debouncedFilter.toLowerCase()) ||
-        order.phone.toLowerCase().includes(debouncedFilter.toLowerCase());
+        (order.id || "").toLowerCase().includes(debouncedFilter.toLowerCase()) ||
+        (order.customerName || "").toLowerCase().includes(debouncedFilter.toLowerCase()) ||
+        (order.phone || "").toLowerCase().includes(debouncedFilter.toLowerCase());
 
       // Status filter
       const matchesStatus =
@@ -506,7 +526,7 @@ function OrdersPageContent() {
     setEndDate("");
   };
 
-  // --- Keydown Handler for Drawer ---
+  // --- keydown Handler for Drawer ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -516,6 +536,101 @@ function OrdersPageContent() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  const handleLinkKeySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!apiKey.trim()) return;
+    setIsLinking(true);
+    setLinkError("");
+    try {
+      const res = await fetch("/api/merchant/link-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiKey: apiKey.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setLinkedMerchant({ name: data.merchantName, tier: data.tier });
+        setTimeout(() => {
+          setIsKeyLinkedRequired(false);
+          loadOrders();
+          router.refresh();
+        }, 2000);
+      } else {
+        setLinkError(data.message || "Key not recognized. Please check your credentials.");
+      }
+    } catch {
+      setLinkError("Failed to connect to the server. Please try again.");
+    } finally {
+      setIsLinking(false);
+    }
+  };
+
+  if (isKeyLinkedRequired) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="w-full max-w-md bg-bg-raised border border-border-default rounded-xl p-8 shadow-lg text-center space-y-6"
+        >
+          {linkedMerchant ? (
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              className="space-y-4"
+            >
+              <div className="mx-auto w-12 h-12 rounded-full bg-positive/10 flex items-center justify-center text-positive" style={{ backgroundColor: 'rgba(var(--positive-rgb, 16, 185, 129), 0.1)', color: 'var(--positive)' }}>
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-ink-primary">Verification Successful!</h3>
+              <p className="text-sm text-ink-secondary">
+                Successfully linked to <span className="font-semibold text-ink-primary">{linkedMerchant.name}</span> ({linkedMerchant.tier} Tier).
+              </p>
+              <p className="text-xs text-ink-tertiary">Loading your orders...</p>
+            </motion.div>
+          ) : (
+            <>
+              <div className="mx-auto w-12 h-12 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(var(--accent-rgb, 99, 102, 241), 0.1)', color: 'var(--accent)' }}>
+                <Lock className="w-6 h-6" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold text-ink-primary">Link Your Merchant Account</h3>
+                <p className="text-sm text-ink-secondary">
+                  Please paste your API key to verify account possession and unlock order management access.
+                </p>
+              </div>
+              <form onSubmit={handleLinkKeySubmit} className="space-y-4">
+                <div className="relative">
+                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-tertiary" />
+                  <input
+                    type="password"
+                    placeholder="codshield_live_..."
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    disabled={isLinking}
+                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border-default bg-bg-base text-sm text-ink-primary placeholder:text-ink-tertiary focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent"
+                  />
+                </div>
+                {linkError && (
+                  <p className="text-xs text-negative font-medium" style={{ color: 'var(--negative)' }}>{linkError}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={isLinking || !apiKey.trim()}
+                  className="w-full py-2.5 rounded-lg text-white active:scale-95 disabled:opacity-50 disabled:pointer-events-none transition-all text-sm font-semibold flex items-center justify-center gap-2 cursor-pointer"
+                  style={{ backgroundColor: 'var(--accent)' }}
+                >
+                  {isLinking ? "Verifying..." : "Link API Key"}
+                </button>
+              </form>
+            </>
+          )}
+        </motion.div>
+      </div>
+    );
+  }
 
   // --- Render ---
   return (

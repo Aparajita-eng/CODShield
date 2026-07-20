@@ -207,9 +207,10 @@ export class SandboxService {
 
     const saveOrder = async () => {
       if (isDemoDataMode()) {
-        const order = {
+        const order: any = {
           id: `b0000000-0000-4000-8000-${Math.floor(100000000000 + Math.random() * 900000000000)}`,
           merchantId,
+          buyerId: 'demo-stub',
           phone: phone.trim(),
           pincode: pincode.trim(),
           value: orderValue,
@@ -218,20 +219,37 @@ export class SandboxService {
           fulfillmentStatus: "Pending",
           fraudFlagged: false,
           statusReason: assessment.reasons.slice(0, 3).join(", "),
+          paymentMode: 'COD',
+          currentStage: 'IMPORTED',
+          overallStatus: 'IN_PROGRESS',
+          verificationStatus: 'PENDING',
+          externalOrderId: `sandbox-${Date.now()}`,
+          provider: 'DEMO',
+          integrationId: null,
+          providerOrderId: null,
+          deletedAt: null,
           createdAt: new Date(),
+          updatedAt: new Date(),
         };
         demoOrders.unshift(order);
         return order;
       }
+      const stubBuyer = await prisma.buyer.upsert({
+        where: { phone: phone.trim() },
+        create: { phone: phone.trim(), name: 'Unknown' },
+        update: {},
+      });
       return prisma.order.create({
         data: {
           merchantId,
+          buyerId: stubBuyer.id,
           phone: phone.trim(),
           pincode: pincode.trim(),
           value: orderValue,
           riskScore: assessment.score,
           protectionStatus,
           statusReason: assessment.reasons.slice(0, 3).join(", "),
+          externalOrderId: `sandbox-${Date.now()}`,
         },
       });
     };

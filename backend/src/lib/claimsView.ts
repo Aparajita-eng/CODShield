@@ -249,7 +249,7 @@ export function mapClaimToListItem(
     orderId: claim.orderId,
     merchantId: claim.order.merchantId,
     merchantName,
-    phone: claim.order.phone,
+    phone: claim.order.phone ?? "",
     amount: claim.order.value,
     status: displayStatus,
     submittedAt: claim.createdAt.toISOString(),

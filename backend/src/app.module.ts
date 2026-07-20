@@ -33,7 +33,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
     BookDemoModule,
     ThrottlerModule.forRoot([{
       ttl: 60000,  // 1 minute window
-      limit: 5,    // max 5 requests per window
+      limit: 100,  // max 100 requests per window to avoid local dev bottlenecks
     }]),
   ],
   providers: [

@@ -61,16 +61,16 @@ export class OrderService {
         items = items.filter(o => o.protectionStatus === status || o.fulfillmentStatus === status);
       }
       if (risk) {
-        if (risk === 'HIGH') items = items.filter(o => o.riskScore >= 75);
-        else if (risk === 'MEDIUM') items = items.filter(o => o.riskScore >= 40 && o.riskScore < 75);
-        else if (risk === 'LOW') items = items.filter(o => o.riskScore < 40);
+        if (risk === 'HIGH') items = items.filter(o => (o.riskScore ?? 0) >= 75);
+        else if (risk === 'MEDIUM') items = items.filter(o => (o.riskScore ?? 0) >= 40 && (o.riskScore ?? 0) < 75);
+        else if (risk === 'LOW') items = items.filter(o => (o.riskScore ?? 0) < 40);
       }
       if (search) {
         const s = search.toLowerCase();
-        items = items.filter(o => 
-          o.id.toLowerCase().includes(s) || 
-          o.phone.includes(s) || 
-          o.pincode.includes(s)
+        items = items.filter(o =>
+          o.id.toLowerCase().includes(s) ||
+          (o.phone ?? '').includes(s) ||
+          (o.pincode ?? '').includes(s)
         );
       }
 
@@ -197,15 +197,24 @@ export class OrderService {
       };
       demoOrders.unshift(savedOrder);
     } else {
+      // For risk-check orders without a known buyer, use a stub buyerId
+      // In production this would resolve/create a Buyer record first
+      const stubBuyer = await this.prisma.buyer.upsert({
+        where: { phone: phone.trim() },
+        create: { phone: phone.trim(), name: "Unknown" },
+        update: {},
+      });
       savedOrder = await this.prisma.order.create({
         data: {
           merchantId: merchant.id,
+          buyerId: stubBuyer.id,
           phone: phone.trim(),
           pincode: pincode.trim(),
           value: orderValue,
           riskScore: assessment.score,
           protectionStatus,
           statusReason: assessment.reasons.slice(0, 3).join(", "),
+          externalOrderId: `risk-${Date.now()}`,
         },
       });
     }

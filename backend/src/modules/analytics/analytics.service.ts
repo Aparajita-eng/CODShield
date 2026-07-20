@@ -106,9 +106,9 @@ export class AnalyticsService {
 
     // Risk level band sizes
     const riskLevels = [
-      { name: "Low", value: currentOrders.filter(o => o.riskScore < 40).length, color: "var(--positive)" },
-      { name: "Medium", value: currentOrders.filter(o => o.riskScore >= 40 && o.riskScore < 75).length, color: "var(--warning)" },
-      { name: "High", value: currentOrders.filter(o => o.riskScore >= 75).length, color: "var(--negative)" },
+      { name: "Low", value: currentOrders.filter(o => (o.riskScore ?? 0) < 40).length, color: "var(--positive)" },
+      { name: "Medium", value: currentOrders.filter(o => (o.riskScore ?? 0) >= 40 && (o.riskScore ?? 0) < 75).length, color: "var(--warning)" },
+      { name: "High", value: currentOrders.filter(o => (o.riskScore ?? 0) >= 75).length, color: "var(--negative)" },
     ];
 
     // Trends mapping

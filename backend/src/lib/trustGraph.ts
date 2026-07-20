@@ -1,5 +1,24 @@
 import { Blacklist, Order } from "@prisma/client";
 
+type LegacyOrder = Omit<Order, 'phone'|'pincode'|'riskScore'|'statusReason'|'fulfillmentStatus'> & {
+  phone: string;
+  pincode: string;
+  riskScore: number;
+  statusReason: string;
+  fulfillmentStatus: string;
+};
+
+function toLegacy(o: Order): LegacyOrder {
+  return {
+    ...o,
+    phone: o.phone ?? "",
+    pincode: o.pincode ?? "",
+    riskScore: o.riskScore ?? 0,
+    statusReason: o.statusReason ?? "",
+    fulfillmentStatus: o.fulfillmentStatus ?? "",
+  };
+}
+
 export type GraphRiskLevel = "Low" | "Medium" | "High";
 export type GraphNodeType = "phone" | "pincode" | "session";
 
@@ -61,7 +80,7 @@ function derivePincodeNodeId(phone: string, pincode: string): string {
  * Checkout-session proxy scoped to a single phone.
  * Same merchant + phone + 15-minute window — not device fingerprinting.
  */
-function deriveSessionClusterId(order: Order): string {
+function deriveSessionClusterId(order: LegacyOrder): string {
   const d = order.createdAt;
   const minuteBucket = Math.floor(d.getUTCMinutes() / 15);
   const windowKey = `${d.toISOString().slice(0, 13)}:${minuteBucket}`;
@@ -72,7 +91,7 @@ function deriveSessionNodeId(phone: string, sessionClusterId: string): string {
   return `session:${phone}:${sessionClusterId}`;
 }
 
-function extractFraudClusterId(order: Order): string | null {
+function extractFraudClusterId(order: LegacyOrder): string | null {
   const match = order.statusReason.match(FRAUD_CLUSTER_RE);
   return match ? match[1].trim() : null;
 }
@@ -89,7 +108,7 @@ function trustLabel(score: number): "Low" | "Medium" | "High" {
   return "Low";
 }
 
-function buyerTrustScore(orders: Order[], blacklist: Blacklist | null): number {
+function buyerTrustScore(orders: LegacyOrder[], blacklist: Blacklist | null): number {
   if (!orders.length) return 50;
   const total = orders.length;
   const delivered = orders.filter((o) => o.fulfillmentStatus === "Delivered").length;
@@ -119,7 +138,7 @@ interface OrderIdentifiers {
   pincode: string;
 }
 
-function extractIdentifiers(order: Order): OrderIdentifiers {
+function extractIdentifiers(order: LegacyOrder): OrderIdentifiers {
   const sessionClusterId = deriveSessionClusterId(order);
   return {
     orderId: order.id,
@@ -139,7 +158,7 @@ function edgeKey(a: string, b: string): string {
 }
 
 /** Focus expansion: same phone or documented fraud-cluster link only — not shared pincode/session. */
-function expandClusterOrders(orders: Order[], focusPhone?: string): Order[] {
+function expandClusterOrders(orders: LegacyOrder[], focusPhone?: string): LegacyOrder[] {
   if (!focusPhone) return orders;
 
   const seedOrders = orders.filter((o) => o.phone === focusPhone);
@@ -165,10 +184,11 @@ function expandClusterOrders(orders: Order[], focusPhone?: string): Order[] {
 }
 
 export function buildTrustGraphFromOrders(
-  orders: Order[],
+  rawOrders: Order[],
   blacklists: Blacklist[],
   focusPhone?: string
 ): TrustGraphResult {
+  const orders = rawOrders.map(toLegacy);
   const scopedOrders = expandClusterOrders(orders, focusPhone);
   if (!scopedOrders.length) {
     return { nodes: [], edges: [], isEmpty: true, orderCount: 0 };

@@ -61,12 +61,12 @@ export class CustomerService {
       orderBy: { createdAt: "desc" },
     });
 
-    const exactOrders = orders.filter((o) => this.normalizePhone(o.phone) === normalized);
+    const exactOrders = orders.filter((o) => this.normalizePhone(o.phone ?? "") === normalized);
     if (!exactOrders.length) {
       throw new NotFoundException("Customer not found");
     }
 
-    const phone = exactOrders[0].phone;
+    const phone = exactOrders[0].phone ?? "";
     const blacklist = await fetchBlacklistByPhone(phone);
     const { score, label } = this.calculateBuyerTrustScore(exactOrders, blacklist);
 
@@ -114,9 +114,9 @@ export class CustomerService {
 
     const grouped = new Map<string, Order[]>();
     for (const order of orders) {
-      const existing = grouped.get(order.phone) ?? [];
+      const existing = grouped.get(order.phone ?? "") ?? [];
       existing.push(order);
-      grouped.set(order.phone, existing);
+      grouped.set(order.phone ?? "", existing);
     }
     return grouped;
   }
@@ -147,7 +147,7 @@ export class CustomerService {
     const delivered = orders.filter((o) => o.fulfillmentStatus === "Delivered").length;
     const rto = orders.filter((o) => o.fulfillmentStatus === "RTO").length;
     const fraudFlagged = orders.filter((o) => o.fraudFlagged).length;
-    const avgRisk = orders.reduce((sum, o) => sum + o.riskScore, 0) / total;
+    const avgRisk = orders.reduce((sum, o) => sum + (o.riskScore ?? 0), 0) / total;
     const refusalCount = blacklist?.refusalCount ?? 0;
 
     const deliveryRate = delivered / total;
@@ -224,14 +224,14 @@ export class CustomerService {
         id: `fraud-${order.id}`,
         type: order.statusReason || "Order flagged as fraud",
         date: order.createdAt.toISOString(),
-        severity: order.riskScore <= 30 ? "Low" : order.riskScore <= 70 ? "Medium" : "High",
+        severity: (order.riskScore ?? 0) <= 30 ? "Low" : (order.riskScore ?? 0) <= 70 ? "Medium" : "High",
         orderId: order.id,
       });
     }
 
     const uniquePincodes = new Set(orders.map((o) => o.pincode));
     const rtoCount = orders.filter((o) => o.fulfillmentStatus === "RTO").length;
-    const avgRisk = orders.reduce((sum, o) => sum + o.riskScore, 0) / orders.length;
+    const avgRisk = orders.reduce((sum, o) => sum + (o.riskScore ?? 0), 0) / orders.length;
     if (uniquePincodes.size >= 3 && orders.length >= 3 && (rtoCount >= 1 || avgRisk > 50)) {
       flags.push({
         id: `addr-${orders[0].phone}`,

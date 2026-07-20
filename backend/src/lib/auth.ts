@@ -52,6 +52,7 @@ export interface SessionPayload {
   phone?: string;
   name?: string;
   authType: "password" | "otp";
+  sessionKeyVerified?: boolean;
 }
 
 export async function signSessionToken(

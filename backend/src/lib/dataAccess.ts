@@ -54,7 +54,7 @@ function filterOrders(orders: Order[], where?: Prisma.OrderWhereInput): Order[] 
     if (typeof where.phone === "string" && order.phone !== where.phone) return false;
     if (where.phone && typeof where.phone === "object" && "contains" in where.phone) {
       const needle = String(where.phone.contains ?? "");
-      if (!order.phone.includes(needle)) return false;
+      if (!(order.phone ?? "").includes(needle)) return false;
     }
     if (where.id && order.id !== where.id) return false;
     if (where.createdAt && typeof where.createdAt === "object" && !(where.createdAt instanceof Date)) {

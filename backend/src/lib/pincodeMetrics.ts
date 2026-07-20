@@ -1,6 +1,23 @@
 import { Order } from "@prisma/client";
 import { resolvePincodeRegion } from "./pincodeLookup";
 
+type LegacyOrder = Omit<Order, 'phone'|'pincode'|'riskScore'|'fulfillmentStatus'> & {
+  phone: string;
+  pincode: string;
+  riskScore: number;
+  fulfillmentStatus: string;
+};
+
+function toLegacy(o: Order): LegacyOrder {
+  return {
+    ...o,
+    phone: o.phone ?? "",
+    pincode: o.pincode ?? "",
+    riskScore: o.riskScore ?? 0,
+    fulfillmentStatus: o.fulfillmentStatus ?? "",
+  };
+}
+
 export type RiskLevel = "Low" | "Medium" | "High";
 
 export interface PincodeMetrics {
@@ -39,8 +56,9 @@ function isSuccessful(order: Order): boolean {
   return order.fulfillmentStatus === "Delivered";
 }
 
-export function buildPincodeMetrics(orders: Order[]): PincodeMetrics[] {
-  const groups = new Map<string, Order[]>();
+export function buildPincodeMetrics(rawOrders: Order[]): PincodeMetrics[] {
+  const orders = rawOrders.map(toLegacy);
+  const groups = new Map<string, LegacyOrder[]>();
 
   for (const order of orders) {
     const list = groups.get(order.pincode) ?? [];

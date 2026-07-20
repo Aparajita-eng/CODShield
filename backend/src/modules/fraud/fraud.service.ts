@@ -19,7 +19,7 @@ export class FraudService {
       where: { merchantId },
       orderBy: { createdAt: "desc" },
     });
-    const phones = [...new Set(orders.map((o) => o.phone))];
+    const phones = [...new Set(orders.map((o) => o.phone).filter((p): p is string => p !== null))];
     const blacklists = await fetchBlacklists({ phones });
 
     const allEvents = buildFraudEvents(orders, blacklists);
@@ -68,13 +68,13 @@ export class FraudService {
       orderBy: { createdAt: "desc" },
     });
 
-    const phones = [...new Set(orders.map((o) => o.phone))];
+    const phones = [...new Set(orders.map((o) => o.phone).filter((p): p is string => p !== null))];
     const blacklists = await fetchBlacklistsDataAccess({ phones });
 
     let resolvedPhone: string | undefined;
     if (focusPhone) {
-      const match = orders.find((o) => this.normalizePhone(o.phone) === focusPhone);
-      resolvedPhone = match?.phone;
+      const match = orders.find((o) => o.phone !== null && this.normalizePhone(o.phone) === focusPhone);
+      resolvedPhone = match?.phone ?? undefined;
     }
 
     const graph = this.trustGraphService.buildGraph(orders, blacklists, resolvedPhone);
