@@ -45,7 +45,7 @@ export default function RegisterPage() {
           signal: AbortSignal.timeout(5000)
         });
         const data = await res.json();
-        if (data.ok && data.database === "connected") {
+        if (data.ok) {
           setBackendStatus("ready");
         } else {
           setBackendStatus("starting");
