@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, ChevronRight, Phone, Lock, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, ChevronRight, Phone, Lock, AlertCircle, Loader2 } from "lucide-react";
 
 interface FormErrors {
   email?: string;
@@ -19,11 +19,38 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingBackend, setIsCheckingBackend] = useState(false);
+  const [backendStatus, setBackendStatus] = useState<"unknown" | "ready" | "starting" | "error">("unknown");
   const [errors, setErrors] = useState<FormErrors>({});
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
+
+  // Check backend health on mount
+  useEffect(() => {
+    const checkBackend = async () => {
+      setIsCheckingBackend(true);
+      try {
+        const res = await fetch("/api/health", { 
+          method: "GET",
+          signal: AbortSignal.timeout(5000)
+        });
+        const data = await res.json();
+        if (data.ok && data.database === "connected") {
+          setBackendStatus("ready");
+        } else {
+          setBackendStatus("starting");
+        }
+      } catch {
+        setBackendStatus("starting");
+      } finally {
+        setIsCheckingBackend(false);
+      }
+    };
+
+    checkBackend();
+  }, []);
 
   const validatePasswordForm = () => {
     const newErrors: FormErrors = {};
@@ -51,6 +78,15 @@ export default function LoginPage() {
     e.preventDefault();
     if (loginType === "password" && !validatePasswordForm()) return;
     if (loginType === "otp" && !validatePhoneForm()) return;
+
+    // Check backend status before attempting login
+    if (backendStatus === "starting" || backendStatus === "error") {
+      setErrors({ 
+        password: loginType === "password" ? "Backend is starting up - please wait" : undefined,
+        phone: loginType === "otp" ? "Backend is starting up - please wait" : undefined
+      });
+      return;
+    }
 
     setIsLoading(true);
 
@@ -140,6 +176,32 @@ export default function LoginPage() {
           <p className="text-sm text-ink-secondary mb-6">
             Welcome back! Please enter your details.
           </p>
+
+          {/* Backend Status Indicator */}
+          {(isCheckingBackend || backendStatus !== "ready") && (
+            <div className={`mb-4 p-3 rounded-lg flex items-center gap-2 text-sm ${
+              backendStatus === "ready" 
+                ? "bg-positive/10 text-positive" 
+                : "bg-warning/10 text-warning"
+            }`}>
+              {isCheckingBackend ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Checking backend status...</span>
+                </>
+              ) : backendStatus === "starting" ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Backend is starting up - please wait</span>
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="w-4 h-4" />
+                  <span>Backend unavailable - please refresh</span>
+                </>
+              )}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {loginType === "password" ? (

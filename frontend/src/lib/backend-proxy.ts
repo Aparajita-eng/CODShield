@@ -1,9 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME, REFRESH_COOKIE_NAME, verifySessionToken, sessionCookieOptions, refreshCookieOptions } from "@/lib/auth";
-import { BACKEND_BASE_URL } from "@/lib/config";
-
-const BACKEND_URL = BACKEND_BASE_URL;
+import { apiFetch, getUserFriendlyError, ApiError } from "@/lib/api-client";
 
 type AuthResult =
   | { ok: true; token: string }
@@ -24,9 +22,8 @@ export async function requireProxySession(): Promise<AuthResult> {
   const refreshToken = cookieStore.get(REFRESH_COOKIE_NAME)?.value;
   if (refreshToken) {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/auth/refresh`, {
+      const res = await apiFetch("/api/auth/refresh", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken }),
       });
 
@@ -64,21 +61,43 @@ export async function proxyBackend(
   if (!auth.ok) return auth.response;
 
   try {
-    const res = await fetch(`${BACKEND_URL}${path}`, {
+    const res = await apiFetch(path, {
       ...init,
       headers: {
         ...init?.headers,
         Authorization: `Bearer ${auth.token}`,
       },
-      cache: "no-store",
     });
 
     const data = await res.json();
     return NextResponse.json(data, { status: res.status });
-  } catch {
+  } catch (error: any) {
+    console.error("Proxy backend error:", error);
+    
+    let errorMessage = "Failed to reach backend";
+    let statusCode = 500;
+
+    if (error instanceof ApiError) {
+      errorMessage = getUserFriendlyError(error);
+      statusCode = error.status || 500;
+    } else if (error instanceof Error) {
+      if (error.message.includes("Network error") || error.message.includes("backend unreachable")) {
+        errorMessage = "Backend is starting up - please wait a moment and try again";
+        statusCode = 503;
+      } else if (error.message.includes("timeout")) {
+        errorMessage = "Request timed out - please try again";
+        statusCode = 504;
+      } else if (error.message.includes("Database")) {
+        errorMessage = "Database temporarily unavailable - please try again";
+        statusCode = 503;
+      } else {
+        errorMessage = error.message || "An error occurred";
+      }
+    }
+
     return NextResponse.json(
-      { success: false, message: "Failed to reach backend" },
-      { status: 500 }
+      { success: false, message: errorMessage },
+      { status: statusCode }
     );
   }
 }

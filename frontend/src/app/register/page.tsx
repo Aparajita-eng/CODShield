@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Eye, EyeOff, ChevronRight, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, ChevronRight, AlertCircle, Loader2 } from "lucide-react";
 
 interface FormErrors {
   fullName?: string;
@@ -23,6 +23,8 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingBackend, setIsCheckingBackend] = useState(false);
+  const [backendStatus, setBackendStatus] = useState<"unknown" | "ready" | "starting" | "error">("unknown");
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -32,6 +34,31 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Check backend health on mount
+  useEffect(() => {
+    const checkBackend = async () => {
+      setIsCheckingBackend(true);
+      try {
+        const res = await fetch("/api/health", { 
+          method: "GET",
+          signal: AbortSignal.timeout(5000)
+        });
+        const data = await res.json();
+        if (data.ok && data.database === "connected") {
+          setBackendStatus("ready");
+        } else {
+          setBackendStatus("starting");
+        }
+      } catch {
+        setBackendStatus("starting");
+      } finally {
+        setIsCheckingBackend(false);
+      }
+    };
+
+    checkBackend();
+  }, []);
 
   const passwordStrength = useMemo((): PasswordStrength => {
     if (!password) return null;
@@ -90,6 +117,12 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
+
+    // Check backend status before attempting registration
+    if (backendStatus === "starting" || backendStatus === "error") {
+      setErrors({ email: "Backend is starting up - please wait" });
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -155,6 +188,32 @@ export default function RegisterPage() {
           <p className="text-sm text-ink-secondary mb-6">
             Start your free trial with CODShield today.
           </p>
+
+          {/* Backend Status Indicator */}
+          {(isCheckingBackend || backendStatus !== "ready") && (
+            <div className={`mb-4 p-3 rounded-lg flex items-center gap-2 text-sm ${
+              backendStatus === "ready" 
+                ? "bg-positive/10 text-positive" 
+                : "bg-warning/10 text-warning"
+            }`}>
+              {isCheckingBackend ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Checking backend status...</span>
+                </>
+              ) : backendStatus === "starting" ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Backend is starting up - please wait</span>
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="w-4 h-4" />
+                  <span>Backend unavailable - please refresh</span>
+                </>
+              )}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Full Name */}
