@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { SESSION_COOKIE_NAME, sessionCookieOptions } from "@/lib/auth";
+import { SESSION_COOKIE_NAME, REFRESH_COOKIE_NAME, sessionCookieOptions, refreshCookieOptions } from "@/lib/auth";
 
 import { BACKEND_BASE_URL } from "@/lib/config";
 const BACKEND_URL = BACKEND_BASE_URL;
@@ -48,6 +48,14 @@ export async function POST(request: Request) {
       sessionData.token,
       sessionCookieOptions(body.rememberMe ?? true)
     );
+
+    if (sessionData.refreshToken) {
+      response.cookies.set(
+        REFRESH_COOKIE_NAME,
+        sessionData.refreshToken,
+        refreshCookieOptions()
+      );
+    }
     return response;
   } catch {
     return NextResponse.json(

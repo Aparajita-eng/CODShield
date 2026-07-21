@@ -31,8 +31,8 @@ export async function POST() {
     if (!data.success || !data.token) {
       // Refresh failed — clear both cookies and force re-login
       const response = NextResponse.json({ success: false, message: "Session expired" }, { status: 401 });
-      response.cookies.delete(SESSION_COOKIE_NAME);
-      response.cookies.delete(REFRESH_COOKIE_NAME);
+      response.cookies.set(SESSION_COOKIE_NAME, "", { ...sessionCookieOptions(), maxAge: 0 });
+      response.cookies.set(REFRESH_COOKIE_NAME, "", { ...refreshCookieOptions(), maxAge: 0 });
       return response;
     }
 

@@ -9,7 +9,11 @@ const BACKEND_URL = (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isPublicOnly = pathname === "/login" || pathname === "/register";
+  const isPublicOnly =
+    pathname === "/login" ||
+    pathname === "/register" ||
+    pathname === "/verify-otp" ||
+    pathname === "/forgot-password";
   
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
 
@@ -71,8 +75,8 @@ export async function middleware(request: NextRequest) {
   const loginUrl = new URL("/login", request.url);
   loginUrl.searchParams.set("from", request.nextUrl.pathname);
   const response = NextResponse.redirect(loginUrl);
-  response.cookies.delete(SESSION_COOKIE_NAME);
-  response.cookies.delete(REFRESH_COOKIE_NAME);
+  response.cookies.set(SESSION_COOKIE_NAME, "", { ...sessionCookieOptions(), maxAge: 0 });
+  response.cookies.set(REFRESH_COOKIE_NAME, "", { ...refreshCookieOptions(), maxAge: 0 });
   return response;
 }
 
@@ -81,5 +85,7 @@ export const config = {
     "/dashboard/:path*",  // Protect dashboard routes
     "/login",             // Public-only - redirect authenticated users
     "/register",          // Public-only - redirect authenticated users
+    "/verify-otp",        // Public-only - redirect authenticated users
+    "/forgot-password",   // Public-only - redirect authenticated users
   ],
 };
