@@ -1,18 +1,26 @@
 import { Module } from '@nestjs/common';
 import { RiskEngineService } from './risk.service';
-import { PincodeStrategy } from './strategies/pincode.strategy';
-import { PhoneStrategy } from './strategies/phone.strategy';
-import { ValueStrategy } from './strategies/value.strategy';
+import { RiskPluginRegistry } from './risk-plugin.registry';
+import { PincodePlugin } from './plugins/pincode.plugin';
+import { FraudPlugin } from './plugins/fraud.plugin';
+import { BuyerPlugin } from './plugins/buyer.plugin';
+import { VelocityPlugin } from './plugins/velocity.plugin';
+import { DevicePlugin } from './plugins/device.plugin';
 import { TrustGraphService } from './graph.service';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
+  imports: [PrismaModule],
   providers: [
     RiskEngineService,
-    PincodeStrategy,
-    PhoneStrategy,
-    ValueStrategy,
+    RiskPluginRegistry,
+    PincodePlugin,
+    FraudPlugin,
+    BuyerPlugin,
+    VelocityPlugin,
+    DevicePlugin,
     TrustGraphService,
   ],
-  exports: [RiskEngineService, TrustGraphService],
+  exports: [RiskEngineService, TrustGraphService, RiskPluginRegistry],
 })
 export class RiskModule {}

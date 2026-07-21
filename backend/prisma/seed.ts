@@ -25,6 +25,13 @@ async function main() {
   await prisma.integration.deleteMany();
   await prisma.apiKey.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.webhookReplay.deleteMany();
+  await prisma.auditLog.deleteMany();
+  await prisma.logisticsRecommendation.deleteMany();
+  await prisma.shipment.deleteMany();
+  await prisma.rule.deleteMany();
+  await prisma.merchantSettings.deleteMany();
+  await prisma.serviceIntegration.deleteMany();
   await prisma.merchant.deleteMany();
   await prisma.buyer.deleteMany();
   await prisma.pincodeRisk.deleteMany();
@@ -404,6 +411,96 @@ async function main() {
       },
     });
   }
+
+  // 6. Seed MerchantSettings for Acme and Beta
+  await prisma.merchantSettings.create({
+    data: {
+      merchantId: acmeId,
+      autoDispatch: false,
+      enableCourierRecommendation: true,
+      enableAIConfirmation: true,
+      defaultCourier: "SHIPROCKET",
+      fallbackVerification: true,
+      analyticsRealtime: true,
+    },
+  });
+
+  await prisma.merchantSettings.create({
+    data: {
+      merchantId: betaId,
+      autoDispatch: true,
+      enableCourierRecommendation: true,
+      enableAIConfirmation: false,
+      defaultCourier: "DELHIVERY",
+      fallbackVerification: true,
+      analyticsRealtime: false,
+    },
+  });
+  console.log("Seeded merchant settings for Acme and Beta.");
+
+  // 7. Seed Rules for Acme and Beta
+  await prisma.rule.create({
+    data: {
+      merchantId: acmeId,
+      priority: 100,
+      conditions: {
+        riskScore: { gt: 80 }
+      },
+      action: {
+        type: "BLOCK_ORDER",
+        reason: "Auto-blocked: Risk score exceeds 80"
+      },
+      enabled: true,
+    },
+  });
+
+  await prisma.rule.create({
+    data: {
+      merchantId: acmeId,
+      priority: 50,
+      conditions: {
+        value: { lt: 500 }
+      },
+      action: {
+        type: "SKIP_VERIFICATION",
+        reason: "Auto-approved: Low value order under 500"
+      },
+      enabled: true,
+    },
+  });
+  console.log("Seeded rules for Acme Apparel.");
+
+  // 8. Seed ServiceIntegrations
+  await prisma.serviceIntegration.create({
+    data: {
+      merchantId: acmeId,
+      type: "LOGISTICS",
+      provider: "SHIPROCKET",
+      encryptedConfig: JSON.stringify({ token: "sr_demo_token_123" }),
+      status: "CONNECTED",
+    },
+  });
+
+  await prisma.serviceIntegration.create({
+    data: {
+      merchantId: acmeId,
+      type: "WHATSAPP",
+      provider: "META",
+      encryptedConfig: JSON.stringify({ token: "meta_demo_token_456" }),
+      status: "CONNECTED",
+    },
+  });
+
+  await prisma.serviceIntegration.create({
+    data: {
+      merchantId: acmeId,
+      type: "AI_VOICE",
+      provider: "TWILIO",
+      encryptedConfig: JSON.stringify({ accountSid: "AC_demo_789", token: "twilio_demo_tok" }),
+      status: "CONNECTED",
+    },
+  });
+  console.log("Seeded service integrations for Acme Apparel.");
 
   console.log("Database seeded successfully.");
 }

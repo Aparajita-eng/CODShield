@@ -35,6 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${inter.variable} ${lora.variable} ${jetbrainsMono.variable} scroll-smooth h-full`}
     >
       <body className="font-sans antialiased bg-bg-base text-ink-primary min-h-full flex flex-col selection:bg-accent selection:text-bg-base relative">

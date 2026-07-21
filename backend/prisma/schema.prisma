@@ -93,19 +93,23 @@ model User {
 }
 
 model Merchant {
-  id         String   @id @default(uuid())
-  name       String
-  apiKeyHash String   @unique
-  apiKeyMask String
-  tier       String   // Starter, Growth, Enterprise
-  claimRatio Float    @default(0.0)
-  orders     Order[]
-  users      User[]
-  createdAt  DateTime @default(now())
+  id                  String               @id @default(uuid())
+  name                String
+  apiKeyHash          String               @unique
+  apiKeyMask          String
+  tier                String               // Starter, Growth, Enterprise
+  claimRatio          Float                @default(0.0)
+  orders              Order[]
+  users               User[]
+  createdAt           DateTime             @default(now())
 
   // New Integration Scoping
-  integrations Integration[]
-  apiKeys      ApiKey[]
+  integrations        Integration[]
+  apiKeys             ApiKey[]
+  serviceIntegrations ServiceIntegration[]
+  settings            MerchantSettings?
+  rules               Rule[]
+  auditLogs           AuditLog[]
 }
 
 // Normalized Buyer
@@ -167,6 +171,8 @@ model Order {
   shippingAddress    ShippingAddress?
   decisions          MerchantDecision[]
   notifications      NotificationLog[]
+  recommendations    LogisticsRecommendation[]
+  shipment           Shipment?
 }
 
 // Shipping Address Table
@@ -385,4 +391,137 @@ model DemoBooking {
   @@index([email])
   @@index([status])
   @@index([createdAt])
+}
+
+enum ServiceType {
+  LOGISTICS
+  WHATSAPP
+  AI_VOICE
+  SMS
+  EMAIL
+  PAYMENT
+}
+
+enum LogisticsProvider {
+  SHIPROCKET
+  DELHIVERY
+  BLUEDART
+  DTDC
+  XPRESSBEES
+  SHADOWFAX
+  AMAZON_SHIPPING
+  NIMBUSPOST
+  CUSTOM
+}
+
+enum VerificationProvider {
+  META
+  TWILIO
+  EXOTEL
+  MERCHANT
+  CODSHIELD
+}
+
+enum NotificationProvider {
+  EMAIL
+  SMS
+  PUSH
+  WHATSAPP
+}
+
+model ServiceIntegration {
+  id              String               @id @default(uuid())
+  merchantId      String
+  merchant        Merchant             @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  type            ServiceType
+  provider        String
+  encryptedConfig String               @db.Text
+  configVersion   Int                  @default(1)
+  validatedAt     DateTime?
+  lastHealthCheck DateTime?
+  lastError       String?
+  status          IntegrationStatus    @default(DISCONNECTED)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([merchantId])
+}
+
+model MerchantSettings {
+  merchantId                  String    @id
+  merchant                    Merchant  @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  autoDispatch                Boolean   @default(false)
+  enableCourierRecommendation Boolean   @default(true)
+  enableAIConfirmation        Boolean   @default(true)
+  defaultCourier              String?
+  fallbackVerification        Boolean   @default(true)
+  analyticsRealtime           Boolean   @default(true)
+  createdAt                   DateTime  @default(now())
+  updatedAt                   DateTime  @updatedAt
+}
+
+model Rule {
+  id          String   @id @default(uuid())
+  merchantId  String
+  merchant    Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  priority    Int      @default(0)
+  conditions  Json
+  action      Json
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([merchantId])
+}
+
+model LogisticsRecommendation {
+  id          String   @id @default(uuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  courier     String
+  score       Float
+  rank        Int
+  reason      String
+  createdAt   DateTime @default(now())
+
+  @@index([orderId])
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  merchantId    String
+  merchant      Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  correlationId String
+  action        String
+  details       String   @db.Text
+  entityType    String   // e.g. "ORDER", "RULE", "INTEGRATION"
+  entityId      String
+  version       Int      @default(1)
+  performedBy   String   // e.g. user ID or "SYSTEM"
+  source        String   // e.g. "WORKFLOW_ENGINE", "MANUAL_DECISION"
+  createdAt     DateTime @default(now())
+
+  @@index([merchantId])
+  @@index([correlationId])
+}
+
+model WebhookReplay {
+  id            String   @id @default(uuid())
+  provider      String
+  webhookId     String   @unique
+  signature     String?
+  processedAt   DateTime @default(now())
+}
+
+model Shipment {
+  id              String   @id @default(uuid())
+  orderId         String   @unique
+  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  courier         String
+  trackingId      String?
+  labelUrl        String?
+  status          String   // PENDING, DISPATCHED, IN_TRANSIT, DELIVERED, RETURNED, FAILED
+  trackingUpdates Json?    // JSON array of updates
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }

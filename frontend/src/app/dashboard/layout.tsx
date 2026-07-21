@@ -15,6 +15,7 @@ import {
   BarChart3,
   Settings,
   Plug,
+  Truck,
   Menu,
   X,
   Search,
@@ -27,6 +28,8 @@ import {
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/dashboard/decisions", label: "Decision Queue", icon: ShieldAlert },
+  { href: "/dashboard/shipments", label: "Shipments", icon: Truck },
   { href: "/dashboard/integrations", label: "Integrations", icon: Plug },
   { href: "/dashboard/customers", label: "Customers", icon: Users },
   { href: "/dashboard/pincode-intelligence", label: "Pincode Intelligence", icon: MapPin },
