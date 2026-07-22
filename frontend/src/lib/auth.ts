@@ -10,7 +10,13 @@ function getSecret(): Uint8Array {
   if (typeof window !== "undefined") {
     throw new Error("Security Error: JWT secret retrieval attempted on client-side.");
   }
-  const secret = process.env.SESSION_SECRET || "81e9d25d967e6e542f359925d20025b07cbec07aab2cccf2d6643448080fe6e10387515a420d4a48ce8e015beef9b6a3a52e1f32c3d61230f76aa910c35aef57";
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    throw new Error(
+      "SESSION_SECRET environment variable is not set. " +
+      "Set it to the same value on both the frontend and backend Render services."
+    );
+  }
   return new TextEncoder().encode(secret);
 }
 
@@ -27,7 +33,9 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
     const { payload } = await jwtVerify(token, getSecret());
     if (!payload.sub || !payload.authType) return null;
     return payload as unknown as SessionPayload;
-  } catch {
+  } catch (err) {
+    // Log so a secret mismatch surfaces in Render logs as repeated failures
+    console.warn("Session token verification failed:", err instanceof Error ? err.message : String(err));
     return null;
   }
 }
