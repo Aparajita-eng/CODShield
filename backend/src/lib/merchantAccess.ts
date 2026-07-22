@@ -32,6 +32,7 @@ export async function getMerchantIdsForSession(session: SessionPayload): Promise
         companyName: 'Simulated Company',
         passwordHash: '',
         role: 'Owner',
+        merchantId: DEMO_MERCHANT_ACME_ID,
       };
       demoUsers.set(email, user);
     }

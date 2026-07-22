@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { hashPassword, verifyPassword, signSessionToken, signRefreshToken, hashApiKey, maskApiKey } from '../../lib/auth';
-import { isDemoDataMode } from '../../lib/demoData';
+import { isDemoDataMode, demoMerchants, DEMO_MERCHANT_ACME_ID } from '../../lib/demoData';
 
 // Structured logging utility
 function log(level: 'INFO' | 'ERROR' | 'WARN', message: string, meta?: any) {
@@ -13,7 +13,7 @@ function log(level: 'INFO' | 'ERROR' | 'WARN', message: string, meta?: any) {
 const DEMO_EMAIL = (process.env.DEMO_USER_EMAIL || "demo@codshield.com").toLowerCase();
 const DEMO_PASSWORD = process.env.DEMO_USER_PASSWORD || "Demo@1234";
 
-interface DemoUser {
+export interface DemoUser {
   id: string;
   email: string;
   name: string;
@@ -21,6 +21,7 @@ interface DemoUser {
   passwordHash: string;
   phone?: string;
   role: string;
+  merchantId?: string;
 }
 
 export const demoUsers = new Map<string, DemoUser>();
@@ -32,12 +33,75 @@ demoUsers.set(DEMO_EMAIL, {
   name: 'Demo Merchant',
   companyName: 'FastCommerce Inc.',
   passwordHash: hashPassword(DEMO_PASSWORD),
-  role: 'Owner'
+  role: 'Owner',
+  merchantId: DEMO_MERCHANT_ACME_ID,
 });
 
 @Injectable()
 export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
+
+  private async repairLegacyUser(userId: string, companyName?: string | null, userName?: string) {
+    return await this.prisma.$transaction(async (tx) => {
+      // Row lock FOR UPDATE to prevent race conditions across concurrent login attempts
+      try {
+        await tx.$queryRaw`
+          SELECT id, "merchantId"
+          FROM "User"
+          WHERE id = ${userId}
+          FOR UPDATE
+        `;
+      } catch (err) {
+        log('WARN', 'Row lock query error during legacy user repair (proceeding with select)', { error: err instanceof Error ? err.message : String(err) });
+      }
+
+      const lockedUser = await tx.user.findUnique({ where: { id: userId } });
+      if (!lockedUser) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      if (lockedUser.merchantId) {
+        return lockedUser;
+      }
+
+      const company = companyName?.trim() || `${userName || 'User'}'s Store`;
+      const slug = company.toLowerCase().replace(/[^a-z0-9]+/g, '_').slice(0, 12);
+      const suffix = Math.floor(1000 + Math.random() * 9000);
+      const rawApiKey = `codshield_live_${slug}_${suffix}`;
+      const apiKeyHash = hashApiKey(rawApiKey);
+      const apiKeyMask = maskApiKey(rawApiKey);
+
+      const merchant = await tx.merchant.create({
+        data: {
+          name: company,
+          apiKeyHash,
+          apiKeyMask,
+          tier: 'Starter',
+          claimRatio: 0,
+        }
+      });
+
+      await tx.merchantSettings.create({
+        data: {
+          merchantId: merchant.id,
+          autoDispatch: false,
+          enableCourierRecommendation: true,
+          enableAIConfirmation: true,
+          defaultCourier: 'SHIPROCKET',
+          fallbackVerification: true,
+          analyticsRealtime: true,
+        }
+      });
+
+      const updatedUser = await tx.user.update({
+        where: { id: userId },
+        data: { merchantId: merchant.id }
+      });
+
+      log('INFO', 'Successfully repaired legacy user with new merchant', { userId, merchantId: merchant.id });
+      return updatedUser;
+    });
+  }
 
   async login(body: any) {
     const { email, password, rememberMe = false } = body;
@@ -54,6 +118,9 @@ export class AuthService {
       log('INFO', 'Using demo mode for login', { email: normalizedEmail });
       const demoUser = demoUsers.get(normalizedEmail);
       if (demoUser && verifyPassword(password, demoUser.passwordHash)) {
+        if (!demoUser.merchantId) {
+          demoUser.merchantId = DEMO_MERCHANT_ACME_ID;
+        }
         const sessionPayload = { sub: demoUser.id, email: demoUser.email, name: demoUser.name, authType: 'password' as const, sessionKeyVerified: true };
         const token = await signSessionToken(sessionPayload);
         const refreshToken = await signRefreshToken(sessionPayload);
@@ -70,8 +137,14 @@ export class AuthService {
     }
 
     try {
-      const user = await this.prisma.user.findUnique({ where: { email: normalizedEmail } });
+      let user = await this.prisma.user.findUnique({ where: { email: normalizedEmail } });
       if (user && verifyPassword(password, user.passwordHash)) {
+        // Auto-repair legacy user if merchantId is null
+        if (!user.merchantId) {
+          log('INFO', 'Legacy user missing merchantId - repairing account on login', { userId: user.id });
+          user = await this.repairLegacyUser(user.id, user.companyName, user.name);
+        }
+
         const sessionPayload = { sub: user.id, email: user.email, name: user.name, authType: 'password' as const };
         const token = await signSessionToken(sessionPayload);
         const refreshToken = await signRefreshToken(sessionPayload);
@@ -132,17 +205,26 @@ export class AuthService {
         throw new ConflictException('A user with this email address is already registered.');
       }
 
-      const companyExists = Array.from(demoUsers.values()).some(
-        (u) => u.companyName.toLowerCase() === trimmedCompany.toLowerCase()
-      );
-      if (companyExists) {
-        log('WARN', 'Demo registration failed - company already exists', { companyName: trimmedCompany });
-        throw new ConflictException('A merchant account with this company name already exists.');
-      }
-
       const mockUserId = `demo_user_${Date.now()}`;
+      const mockMerchantId = `demo_merchant_${Date.now()}`;
       const validRoles = ['Owner', 'Administrator', 'Viewer'];
       const userRole = validRoles.includes(role) ? role : 'Owner';
+
+      const slug = trimmedCompany.toLowerCase().replace(/[^a-z0-9]+/g, '_').slice(0, 12);
+      const suffix = Math.floor(1000 + Math.random() * 9000);
+      const rawApiKey = `codshield_live_${slug}_${suffix}`;
+      const apiKeyHash = hashApiKey(rawApiKey);
+      const apiKeyMask = maskApiKey(rawApiKey);
+
+      demoMerchants.push({
+        id: mockMerchantId,
+        name: trimmedCompany,
+        apiKeyHash,
+        apiKeyMask,
+        tier: 'Starter',
+        claimRatio: 0,
+        createdAt: new Date(),
+      });
 
       demoUsers.set(normalizedEmail, {
         id: mockUserId,
@@ -151,7 +233,8 @@ export class AuthService {
         companyName: trimmedCompany,
         passwordHash: hashPassword(password),
         phone: formattedPhone,
-        role: userRole
+        role: userRole,
+        merchantId: mockMerchantId,
       });
 
       const token = await signSessionToken(
@@ -175,15 +258,6 @@ export class AuthService {
         throw new ConflictException('A user with this email address is already registered.');
       }
 
-      const existingMerchant = await this.prisma.merchant.findFirst({
-        where: { name: trimmedCompany },
-        include: { users: { take: 1 } }
-      });
-      if (existingMerchant && existingMerchant.users.length > 0) {
-        log('WARN', 'Registration failed - company already exists', { companyName: trimmedCompany });
-        throw new ConflictException('A merchant account with this company name already exists.');
-      }
-
       // Generate API key details
       const slug = trimmedCompany.toLowerCase().replace(/[^a-z0-9]+/g, '_').slice(0, 12);
       const suffix = Math.floor(1000 + Math.random() * 9000);
@@ -195,12 +269,29 @@ export class AuthService {
       const validRoles = ['Owner', 'Administrator', 'Viewer'];
       const userRole = validRoles.includes(role) ? role : 'Owner';
 
+      // Atomic Prisma Transaction: Merchant -> MerchantSettings -> User
       const { user } = await this.prisma.$transaction(async (tx) => {
-        const merchant = existingMerchant
-          ? existingMerchant
-          : await tx.merchant.create({
-              data: { name: trimmedCompany, apiKeyHash, apiKeyMask, tier: 'Starter', claimRatio: 0 }
-            });
+        const merchant = await tx.merchant.create({
+          data: {
+            name: trimmedCompany,
+            apiKeyHash,
+            apiKeyMask,
+            tier: 'Starter',
+            claimRatio: 0,
+          }
+        });
+
+        await tx.merchantSettings.create({
+          data: {
+            merchantId: merchant.id,
+            autoDispatch: false,
+            enableCourierRecommendation: true,
+            enableAIConfirmation: true,
+            defaultCourier: 'SHIPROCKET',
+            fallbackVerification: true,
+            analyticsRealtime: true,
+          }
+        });
 
         const user = await tx.user.create({
           data: {
@@ -213,7 +304,7 @@ export class AuthService {
             role: userRole
           }
         });
-        return { user };
+        return { user, merchant };
       });
 
       const token = await signSessionToken(
